@@ -1,535 +1,374 @@
-#' \code{succeed} is based on the empty string symbol in the BNF notation The 
-#' \code{succeed} parser always succeeds, without actually consuming any input 
-#' string. Since the outcome of succeed does not depend on its input, its result
-#' value must be pre-detemined, so it is included as an extra parameter.
-#' 
-#' @param string the result value of succeed parser
+# Closely following Graham Hutton's paper https://doi.org/10.1017/S0956796800000411
+
+## Primitive parsers
+# The primitive parsers are the building blocks of combinator parsing.
+
+#' The parser that always succeeds
+#'
+#' @description
+#' `succeed` parser always succeeds, without actually consuming any
+#' input string. Since the outcome of succeed does not depend on its input, its
+#' result value must be pre-determined, so it is included as an extra parameter.
+#'
+#' @section Formal description:
+#'
+#' `succeed v inp = [(v, inp)].`
+#'
+#' @param left The part to be added on the L-side of a parsed list
 #' @export
-#' @examples 
-#' succeed("1") ("abc")
-succeed <- function(string) {
-  function(nextString) {
-    list(result=string,
-         leftover=nextString)
+#' @examples
+#' succeed(letters[1:5]) (letters[10:15])
+succeed <- function(left) {
+  function(right) list(L=left, R=right)
+}
+
+#' The parser that always fails
+#'
+#' @description
+#' While \code{succeed} parser never fails, \code{fail} always does, regardless
+#' of the input vector. It, therefore, returns the empty list.
+#'
+#' @section Formal description:
+#'
+#' `fail inp = [].`
+#'
+#' @export
+#' @examples
+#' fail()(letters[1:5])
+#'
+fail <- function() {
+  function(cv) list()
+}
+
+#' The parser that matches an element using a predicate
+#'
+#' @description
+#' `satisfy` turns a predicate function into a parser that recognizes single
+#' elements.
+#'
+#' @section Formal description:
+#'
+#' `satisfy b []     = fail []`
+#'
+#' `satisfy b (x:xs) = succeed x xs , when b x`
+#'
+#' `                 = fail xs , when not b x`
+#'
+#' @param b A boolean function to determine if the element is accepted.
+#' @export
+#' @examples
+#'
+#' # define a predicate function that tests whether the next element starts
+#' # with an 'a'
+#' starts_with_a <- function(x) grepl("^a",x[1])
+#' # Use it in the satisfy parser
+#' satisfy(starts_with_a)(c("abc","def")) # success
+#' satisfy(starts_with_a)(c("bca","def")) # failure
+satisfy <- function(b) {
+  return(
+    function(cv) {
+      r <- list(L=cv[1], R=cv[-1])
+      if (b(r$L)) succeed(r$L)(r$R)
+      else fail()(cv)
+    })
+}
+
+#' The parser that matches an element using a literal string
+#'
+#' @description
+#' `literal` is a parser for single elements. It tests whether the first
+#' element in the vector is equal to a given element.
+#'
+#' @section Formal description:
+#'
+#' `literal x = satisfy (= x)`
+#'
+#' where `= x` is to be understood as a function which tests its argument for
+#' equality with `x`
+#'
+#' @param element A single-element (character) vector to be matched with the
+#' first element of the right hand side
+#' @export
+#' @examples
+#' literal("ab") (c("ab", "cdef")) # success
+#' literal("ab") (c("abc", "cdef")) # failure
+literal <- function(element) {satisfy(function(x) return(x[1]==element))}
+
+## Combinators
+# Now that we have the basic building blocks, we consider how they should be put
+# together to form useful parsers.
+
+#' The alternation combinator
+#'
+#' @description
+#' The `%or%` combinator `(p1 %or% p2)` returns the result of `p1` if `p1` is
+#' successful or, if `p1` fails that of `p2` if `p2` parses successfully,
+#' otherwise it returns a `fail`.
+#'
+#' @param p1,p2 Two parsers
+#' @returns A list of parser results
+#' @export
+#' @examples
+#' (literal("A") %or% literal("a"))(LETTERS[1:5]) # success on first parser
+#' (literal("A") %or% literal("a"))(letters[1:5]) # success on second parser
+#' (literal("A") %or% literal("a"))(LETTERS[2:6]) # failure
+#' starts_with_a <- function(x) grepl("^a",x[1])
+#' # success on both parsers, but returns result of p1 only
+#' (literal("a") %or% satisfy(starts_with_a)) (letters[1:5])
+`%or%` <- function(p1, p2) {
+  function(cv) {
+    r1 <- p1(cv)
+    r2 <- p2(cv)
+    if (!is.empty(r1)) r1 else {if (!is.empty(r2)) r2 else fail()(cv)}
   }
 }
 
-#' \code{item} is a parser that consumes the first character of the string and
-#' returns the rest. If it cannot consume a single character from the string, it
-#' will emit the empty list, indicating the parser has failed.
-#' 
-#' @param ... additional arguments for the parser
+#' The sequence parser
+#'
+#' @description
+#'
+#' `(p1 %then% p2)` recognizes anything that `p1` and `p2` would if placed in
+#' succession.
+#'
+#' @section Formal description:
+#'
+#' `(p1 %then% p2) inp = [((v1,v2),out2) | (v1,outl) <- p1 inp;`
+#' `                                       (v2,out2) <- p2 out1]`
+#'
+#' @details
+#' For example, applying the parser `(literal 'a' %then% literal 'b')` to the
+#' input `'abcd'` gives the result `[(('a','b'),'cd')]`. Then then combinator
+#' is an excellent example of list comprehension notation, analogous to set
+#' comprehension in mathematics (e.g.
+#' \eqn{\{x^2 | x \in \mathbb{N} \land x \leq 10\}} defines the first ten
+#' squares), except that lists replace sets, and elements are drawn in a
+#' determined order. Much of the elegance of the then combinator would be lost
+#' if this notation were not available.
+#'
+#' @inheritParams %or%
+#' @returns A parser
 #' @export
+#' @seealso The element-discarding versions [%xthen%] and [%thenx%]
 #' @examples
-#' item() ("abc")
-#' item() ("")
-item <- function(...){
-  return(function(string){
-    if(length(string)==0){
-      return(NULL)
-    }
-    if(string=="") {
-      list()
-    } else {
-      list(result=substr(string, 1, 1),
-           leftover=substring(string, 2))
-    }
-  })
-}
-
-#' \code{satisfy} is a function which allows us to make parsers that recognise single symbols. 
-#' 
-#' @param p is the predicate to determine if the arbitrary symbol is a member.
-#' @export
-satisfy <- function(p) {
-  return(function(string) {
-    if (length(string) == 0) {
-      return(list())
-    }
-    else if (string == "") {
-      return(list())
-    }
+#' starts_with_a <- function(x) grepl("^a",x[1])
+#' starts_with_b <- function(x) grepl("^b",x[1])
+#' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("ab", "bc", "de")) # success
+#' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("bb", "bc", "de")) # failure
+#' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("ab", "ac", "de")) # failure
+`%then%` <- function(p1, p2) {
+  function(cv) {
+    r1 <- p1(cv)
+    # the right side must be be non-empty
+    if (is.empty(r1) || is.empty(r1$R)) fail()(cv)
     else {
-      result_ <- list(result=substr(string, 1, 1),
-                      leftover=substring(string, 2))
-      if (p(result_$result)) {
-        return(succeed(result_$result)(result_$leftover))
-      } else {
-        return(list())
-      }
-    }    
-  })
+      r2 <- p2(r1$R)
+      if (is.empty(r2)) fail()(cv) else
+      return(list(L=c(r1$L, r2$L), R=r2$R))
+    }
+  }
 }
 
-#' \code{literal} is a parser for single symbols. It will attempt to match the
-#' single symbol with the first character in the string.
-#' 
-#' @param char is the character to be matched
+#' Manipulate results from a parser by applying a function
+#'
+#' @description
+#' The `%using%` combinator allows us to manipulate results from a parser, for
+#' example building a parse tree. The parser `(p %using% f)` has the same
+#' behavior as the parser `p`, except that the function `f` is applied to each
+#' of its result values.
+#'
+#' @section Formal description:
+#'
+#' `(p %using$% f) inp = [(fv, out) | (v, out) <- p inp]`
+#'
+# TODO how to interpret the above code
+#'
+#' @inheritParams zero.or.more
+#' @param f A function to be applied to the result of a succesful `p`
+#' @returns A parser
 #' @export
 #' @examples
-#' literal("a") ("abc")
-literal <- function(char) {
-  satisfy(function(x){
-    return(x==char)
+#' (literal('ab') %using% toupper) (c("ab","cdef")) # success
+#' (literal('ab') %using% toupper) (c("bb","cdef")) # failure
+`%using%` <- function(p, f) {
+  return(function(cv) {
+    r <- p(cv)
+    if(length(r) == 0) fail()(cv) else return(list(L=f(r$L), R=r$R))
   })
 }
 
-## Building Combinators ##
-
-#' \code{alt} combinator is similar to alternation in BNF. the parser 
-#' \code{(alt(p1, p2))} recognises anything that \code{p1} or \code{p2} would. 
-#' The approach taken in this parser follows (Fairbairn86), in which either is 
-#' interpretted in a sequential (or exclusive) manner, returning the result of
-#' the first parser to succeed, and failure if neither does.
-#' 
-#' \code{\%alt\%} is the infix notation for the \code{alt} function, and it is the
-#' preferred way to use the \code{alt} operator.
-#' 
-#' @param p1 the first parser
-#' @param p2 the second parser
-#' @return Returns the first parser if it suceeds otherwise the second parser
+#' Only yield the first or second element when the sequence successfully parses
+#'
+#' @details
+#' Recall that two parsers composed in sequence produce a pair of results.
+#' Sometimes we are only interested in one component of the pair. For example,
+#' it is common to throw away reserved words such as 'begin' and 'where' during
+#' parsing. In such cases, two special versions of the `%then%` combinator are
+#' useful, which throw away either the left or right result values, as reflected
+#' by the position of the letter 'x' in their names:
+#'
+#' @inheritParams %or%
+#'
+#' @return A parser
+#' @export
+#'
 #' @examples
-#' (item() %alt% succeed("2")) ("abcdef")
-#' @seealso \code{\link{then}}
-alt <- function(p1, p2) {
-  function(string){
-    result <- p1(string)
-    if(!is.null(result$leftover)) {
-      result
+#' is_number <- function(x) grepl("\\d+",x[1])
+#' # Numbers are preceded by ">" symbols, but we only need the number itself
+#' (literal(">") %thenx% satisfy(is_number)) (c(">", "12"))
+#' # Temperatures are followed by the unit 'C', but we only need the number
+#' (satisfy(is_number) %xthen% literal("C")) (c("21", "C"))
+`%xthen%` <- function(p1, p2) {
+  (p1 %then% p2) %using% function(x) {return(x[1])}
+}
+
+#' @rdname grapes-xthen-grapes
+#' @export
+#' @seealso [%then%]
+`%thenx%` <- function(p1, p2) {
+  (p1 %then% p2) %using% function(x) {return(x[2])}
+}
+
+#' Return a given value upon successful parsing
+#'
+#' @description
+#' Sometimes we are not interested in the result from a parser at all, only
+#' that the parser succeeds. For example, if we find a reserved word during
+#' lexical analysis, it may be convenient to return some short representation
+#' rather than the string itself. The `%ret%` combinator is useful in such
+#' cases. The parser `(p %ret% v)` has the same behavior as `p`, except that it
+#' returns the value `v` if successful
+#'
+#' This parser is identical to `p %using% (function(x) {return(c)})`. You may
+#' sometimes want to use [%using%] itself for more flexibility.
+#'
+#' @inheritParams zero.or.more
+#' @param c A pre-determined value
+#'
+#' @returns A parser
+#' @export
+#'
+#' @seealso [%using%]
+#' @examples
+#' (literal("A") %ret% ("We have an A!")) (LETTERS[1:5])
+`%ret%` <- function(p, c) {
+  p %using% (function(x) {return(c)})
+}
+
+## Quantifying parsers
+
+#' Quantifying parsers for p
+#'
+#' @param p A parser
+#'
+#' @section Formal description:
+#'
+#' `zero.or.more p = ((p %then% zero.or.more p) %using% cons) %alt% (succeed [])`
+#'
+#' where `cons` is the list constructor: `cons (x,xs) = x:xs`
+#'
+#' `one.or.more p = (p %then% zero.or.more p) %using% cons.`
+#'
+#' Note that these parsers correspond to the `many` (`zero.or.more`) and
+#' `some` (`one.or,more`) parsers described in Hutton. The names used here are
+#' more clear about what we expect.
+#'
+#' @returns A parser
+#' @export
+#' @examples
+#' zero.or.more(literal("A")) (c("A",LETTERS[1:5]))
+#' zero.or.more(literal("A")) (LETTERS[2:5])
+zero.or.more <- function(p) {
+  # notice: c used below is the concatenation function from R
+  (p %then% zero.or.more(p)) %or% succeed(character(0))
+}
+
+#' @rdname zero.or.more
+#' @export
+#' @examples
+#' one.or.more(literal("A")) (c("A",LETTERS[1:5])) # success
+#' one.or.more(literal("A")) (LETTERS[2:5]) # failure
+#'
+one.or.more <- function(p) {
+  p %then% zero.or.more(p)
+}
+
+#' @rdname zero.or.more
+#' @param n An integer
+#' @export
+#' @examples
+#' exactly(2,literal("A")) (c("A", LETTERS[1:5])) # success
+#' exactly(2,literal("A")) (c(rep("A",2), LETTERS[1:5])) # failure: too many "A"
+#'
+exactly <- function(n, p) {
+  # notice that this is a greedy parser due to zero.or.more's greediness
+  # The non-greedy version is match.n
+  function(x) {
+    r <- zero.or.more(p)(x)
+    if (length(r$L) == n) {
+      return(r)
     } else {
-      p2(string)
+      return(fail()(x))
     }
   }
 }
 
-#' \code{\%alt\%} is the infix notation for the \code{alt} function. 
-#' 
-#' @param p1 the first parser
-#' @param p2 the second parser 
-#' @return Returns the first parser if it suceeds otherwise the second parser
+#' @rdname zero.or.more
+#' @param n An integer
 #' @export
 #' @examples
-#' (item() %alt% succeed("2")) ("abcdef")
-`%alt%` <- alt
-
-#' \code{then} combinator corresponds to sequencing in BNF. The parser 
-#' \code{(then(p1, p2))} recognises anything that \code{p1} and \code{p2} would 
-#' if placed in succession.
-#' 
-#' \code{\%then\%} is the infix operator for the then combinator, and it is the
-#' preferred way to use the \code{then} operator.
-#' 
-#' @param p1 the first parser
-#' @param p2 the second parser
-#' @return recognises anything that \code{p1} and \code{p2} would if placed in 
-#'   succession.
-#' @examples
-#' (item() %then% succeed("123")) ("abc")
-#' @seealso \code{\link{alt}}, \code{\link{thentree}}
-then <- function(p1, p2) {
-  function(string) {
-    result <- p1(string)
-    if (length(result) == 0) {
-      list()
-    } else {
-      result_ <- p2(result$leftover)
-      if (length(result_$leftover) == 0 ||
-          is.null(result_$leftover)) {
-        list()
-      } else {
-        list(result=Unlist(append(list(result$result),
-                                  list(result_$result))),
-             leftover=result_$leftover)
-      }
-    }
-  }
-}
-
-#' \code{\%then\%} is the infix operator for the then combinator.
-#' 
-#' @param p1 the first parser
-#' @param p2 the second parser 
-#' @return recognises anything that \code{p1} and \code{p2} would if placed in succession.
-#' @export
-#' @examples
-#' (item() %then% succeed("123")) ("abc")
-`%then%` <- then
-
-#' \code{thentree} keeps the full tree representation of the results of parsing.
-#' Otherwise, it is identical to \code{then}.
-#' 
-#' @param p1 the first parser
-#' @param p2 the second parser
-#' @return recognises anything that \code{p1} and \code{p2} would if placed in 
-#'   succession.
-#' @export
-#' @examples
-#' (item() %thentree% succeed("123")) ("abc")
-#' 
-#' @seealso \code{\link{alt}}, \code{\link{thentree}}
-thentree <- function(p1, p2) {
-  function(string) {
-    result <- p1(string)
-    if (length(result) == 0) {
-      list()
-    } else {
-      result_ <- p2(result$leftover)
-      if (length(result_$leftover) == 0 ||
-          is.null(result_$leftover)) {
-        list()
-      } else {
-        list(result=list(result$result,
-                         result_$result),
-             leftover=result_$leftover)
-      }
-    }
-  }
-}
-
-#' \code{\%thentree\%} is the infix operator for the then combinator, and it is
-#' the preferred way to use the \code{thentree} operator.
-#' @export
-#' @param p1 the first parser
-#' @param p2 the second parser
-#' @return recognises anything that \code{p1} and \code{p2} would if placed in 
-#'   succession.
-#' @examples
-#' (item() %thentree% succeed("123")) ("abc")
-#' @seealso \code{\link{alt}}, \code{\link{thentree}}
-`%thentree%` <- thentree
-
-#' \code{using} combinator allows us to manipulate results from a parser, for 
-#' example building a parse tree. The parser \code{(p \%using\% f)} has the same 
-#' behaviour as the parser \code{p}, except that the function \code{f} is
-#' applied to each of its result values.
-#' 
-#' \code{\%using\%} is the infix operator for \code{using}, and it is the
-#' preferred way to use the \code{using} operator.
-#' 
-#' @param p is the parser to be applied
-#' @param f is the function to be applied to each result of \code{p}.
-#' @return The parser \code{(p \%using\% f)} has the same behaviour as the
-#'   parser \code{p}, except that the function \code{f} is applied to each of
-#'   its result values.
-#' @examples
-#' (item() %using% as.numeric) ("1abc")
-using <- function(p, f) {
-  return(function(string) {
-    result <- p (string) 
-    if(length(result) == 0) {
-      return(list())
-    }
-    list(result=f(result$result),
-         leftover=result$leftover)
-  })
-}
-
-#' \code{\%using\%} is the infix operator for using
-#' 
-#' @param p is the parser to be applied
-#' @param f is the function to be applied to each result of \code{p}.
-#' @export
-#' @examples
-#' (item() %using% as.numeric) ("1abc")
-`%using%` <- using
-
-#' \code{maybe} matches 0 or 1 of pattern \code{p}.  In EBNF notation, this
-#' corresponds to a question mark ('?').
-#' 
-#' @param p is the parser to be matched 0 or 1 times.
-#' @export
-#' @examples
-#' maybe(Digit())("123abc")
-#' maybe(Digit())("abc123")
-#' @seealso \code{\link{many}}, \code{\link{some}}
-maybe <- function(p) {
-  function(string) {
-    (p %alt% succeed(NULL))(string)
-  }
-}
-
-#' \code{many} matches 0 or more of pattern \code{p}. In BNF notation, 
-#' repetition occurs often enough to merit its own abbreviation. When zero or 
-#' more repetitions of a phrase \code{p} are admissible, we simply write 
-#' \code{p*}. The \code{many} combinator corresponds directly to this operator, 
-#' and is defined in much the same way.
-#' 
-#' This implementation of \code{many} differs from (Hutton92) due to the nature 
-#' of R's data structures. Since R does not support the concept of a list of
-#' tuples, we must revert to using a list rather than a vector, since all values
-#' in an R vector must be the same datatype.
-#' 
-#' @param p is the parser to match 0 or more times.
-#' @export
-#' @examples
-#' Digit <- function(...) {satisfy(function(x) {return(grepl("[0-9]", x))})}
-#' many(Digit()) ("123abc")
-#' many(Digit()) ("abc")
-#' @seealso \code{\link{maybe}}, \code{\link{some}}
-many <- function(p) {
-  function(string) {
-    ((p %then% many(p)) %alt% succeed(NULL))(string)
-  }
-}
-
-#' \code{some} matches 1 or more of pattern \code{p}. in BNF notation, repetition occurs often enough to merit its own abbreviation. When zero or 
-#' more repetitions of a phrase \code{p} are admissible, we simply write 
-#' \code{p+}. The \code{some} combinator corresponds directly to this operator,
-#' and is defined in much the same way.
-#' 
-#' @param p is the parser to match 1 or more times.
-#' @export
-#' @examples
-#' Digit <- function(...) {satisfy(function(x) {return(grepl("[0-9]", x))})}
-#' some(Digit()) ("123abc")
-#' @seealso \code{\link{maybe}}, \code{\link{many}}
-some <- function(p) {
-  function(string) {
-    (p %then% many(p))(string)
-  }
-}
-
-## Define the derived primitives ##
-
-#' Digit checks for single digit
-#' 
-#' @param ... additional arguments for the primitives to be parsed
-#' @export
-#' @examples
-#' Digit()("123")
-#' @seealso \code{\link{Lower}}, \code{\link{Upper}}, 
-#'   \code{\link{Alpha}}, \code{\link{AlphaNum}}, \code{\link{SpaceCheck}}, 
-#'   \code{\link{String}}, \code{\link{ident}}, \code{\link{nat}}, 
-#'   \code{\link{space}}, \code{\link{token}}, \code{\link{identifier}},
-#'   \code{\link{natural}}, \code{\link{symbol}}
-Digit <- function(...) {
-  satisfy(function(x) {
-    grepl("[0-9]", x)
-  })
-}
-
-#' Lower checks for single lower case character
-#' 
-#' @param ... additional arguments for the primitives to be parsed
-#' @export
-#' @examples
-#' Lower() ("abc")
-#' @seealso \code{\link{Digit}}, \code{\link{Upper}}, 
-#'   \code{\link{Alpha}}, \code{\link{AlphaNum}}, \code{\link{SpaceCheck}}, 
-#'   \code{\link{String}}, \code{\link{ident}}, \code{\link{nat}}, 
-#'   \code{\link{space}}, \code{\link{token}}, \code{\link{identifier}},
-#'   \code{\link{natural}}, \code{\link{symbol}}
-Lower <- function(...) {
-  satisfy(function(x) {
-    grepl("[a-z]", x)
-  })
-}
-
-#' Upper checks for a single upper case character
-#' 
-#' @param ... additional arguments for the primitives to be parsed
-#' @export
-#' @examples
-#' Upper()("Abc")
-#' @seealso \code{\link{Digit}}, \code{\link{Lower}}, 
-#'   \code{\link{Alpha}}, \code{\link{AlphaNum}}, \code{\link{SpaceCheck}}, 
-#'   \code{\link{String}}, \code{\link{ident}}, \code{\link{nat}}, 
-#'   \code{\link{space}}, \code{\link{token}}, \code{\link{identifier}},
-#'   \code{\link{natural}}, \code{\link{symbol}}
-Upper <- function(...) {
-  satisfy(function(x) {
-    grepl("[A-Z]", x)
-  })
-}
-
-#' Alpha checks for single alphabet character
-#' 
-#' @param ... additional arguments for the primitives to be parsed
-#' @export
-#' @examples
-#' Alpha()("abc")
-#' @seealso \code{\link{Digit}}, \code{\link{Lower}}, \code{\link{Upper}}, 
-#'   \code{\link{AlphaNum}}, \code{\link{SpaceCheck}}, 
-#'   \code{\link{String}}, \code{\link{ident}}, \code{\link{nat}}, 
-#'   \code{\link{space}}, \code{\link{token}}, \code{\link{identifier}},
-#'   \code{\link{natural}}, \code{\link{symbol}}
-Alpha <- function(...) {
-  satisfy(function(x) {
-    grepl("[A-Za-z]", x)
-  })
-}
-
-#' AlphaNum checks for a single alphanumeric character
-#' 
-#' @param ... additional arguments for the primitives to be parsed
-#' @export
-#' @examples
-#' AlphaNum()("123")
-#' AlphaNum()("abc123")
-#' @seealso \code{\link{Digit}}, \code{\link{Lower}}, \code{\link{Upper}}, 
-#'   \code{\link{Alpha}}, \code{\link{SpaceCheck}}, 
-#'   \code{\link{String}}, \code{\link{ident}}, \code{\link{nat}}, 
-#'   \code{\link{space}}, \code{\link{token}}, \code{\link{identifier}},
-#'   \code{\link{natural}}, \code{\link{symbol}}
-AlphaNum <- function(...) {
-  satisfy(function(x) {
-    grepl("[A-Za-z0-9]", x)
-  })
-}
-
-#' SpaceCheck checks for a single space character
-#' 
-#' @param ... additional arguments for the primitives to be parsed
-#' @export
-#' @examples
-#' SpaceCheck()(" 123")
-#' @seealso \code{\link{Digit}}, \code{\link{Lower}}, \code{\link{Upper}}, 
-#'   \code{\link{Alpha}}, \code{\link{AlphaNum}},
-#'   \code{\link{String}}, \code{\link{ident}}, \code{\link{nat}}, 
-#'   \code{\link{space}}, \code{\link{token}}, \code{\link{identifier}},
-#'   \code{\link{natural}}, \code{\link{symbol}}
-SpaceCheck <- function(...) {
-  satisfy(function(x) {
-    grepl("\\s", x)
-  })
-}
-
-#' \code{String} is a combinator which allows us to build parsers which
-#' recognise strings of symbols, rather than just single symbols
-#' 
-#' @param string is the string to be matched
-#' @export
-#' @examples
-#' String("123")("123 abc")
-#' @seealso \code{\link{Digit}}, \code{\link{Lower}}, \code{\link{Upper}}, 
-#'   \code{\link{Alpha}}, \code{\link{AlphaNum}}, \code{\link{SpaceCheck}}, 
-#'   \code{\link{ident}}, \code{\link{nat}}, 
-#'   \code{\link{space}}, \code{\link{token}}, \code{\link{identifier}},
-#'   \code{\link{natural}}, \code{\link{symbol}}
-String <- function(string) {
-  if (string=="") {
-    succeed(NULL)
+#' match.n(2,literal("A")) (c("A", LETTERS[1:5])) # success
+#' match.n(2,literal("A")) (c(rep("A",2), LETTERS[1:5])) # success
+#'
+match.n <- function(n, p) {
+  # non-greedy version of 'exactly'
+  if (n == 1) {
+    return(p)
   } else {
-    result_ <- substr(string, 1, 1)
-    leftover_ <- substring(string, 2)
-    (literal(result_) %then% 
-      String(leftover_)) %using% 
-      function(x) {
-        paste(unlist(c(x)), collapse="")
-      }
+    return((p %then% match.n(n - 1, p)))
   }
 }
 
-#' \code{ident} is a parser which matches zero or more alphanumeric
-#' characters. 
-#' 
+## Some common elements
+
+#' @title Recognize an empty line
+#'
+#' @description
+#'
+#' An empty line is a line that consists entirely of space-like characters.
+#' `Empty.line` is a parser that recognizes one empty line and `Spacer`
+#' recognizes one or more empty lines.
+#'
+#' @param cv A character vector
+#' @importFrom stringr str_replace_all
+#' @export
+#'
+#' @examples
+#' Empty.line (c(' \t  ')) # success
+#' Empty.line (c('    .')) # failure
+Empty.line <- satisfy(function(x) {stringr::str_replace_all(x, "\\s+", "") == ""})
+
+#' @rdname Empty.line
 #' @export
 #' @examples
-#' ident() ("variable1 = 123")
-#' @seealso \code{\link{Digit}}, \code{\link{Lower}}, \code{\link{Upper}}, 
-#'   \code{\link{Alpha}}, \code{\link{AlphaNum}}, \code{\link{SpaceCheck}}, 
-#'   \code{\link{String}}, \code{\link{nat}}, 
-#'   \code{\link{space}}, \code{\link{token}}, \code{\link{identifier}},
-#'   \code{\link{natural}}, \code{\link{symbol}}
-ident <- function() {
-  (many(AlphaNum()) %using%
-     function(x) paste0(unlist(c(x)), collapse=""))
-}
+#' Spacer (c("   \t  ", "    ", "abc"))
+#'
+#Spacer <- one.or.more(satisfy(function(x) {stringr::str_replace_all(x, "\\s+", "") == ""}))
+Spacer <- one.or.more(Empty.line)
 
-#' \code{nat} is a parser which matches one or more numeric characters.
-#' 
+#' Recognize and discard an element with disposable content
+#'
+#' Disposable lines are those that are empty lines, as defined by [Spacer]
+#' or lines that satisfy an is.comment() test, which is to be specified. By
+#' default is.comment returns FALSE.
+#'
+#' @param is.comment A boolean function that recognizes a comment
 #' @export
+#'
 #' @examples
-#' nat() ("123 + 456")
-#' @seealso \code{\link{Digit}}, \code{\link{Lower}}, \code{\link{Upper}}, 
-#'   \code{\link{Alpha}}, \code{\link{AlphaNum}}, \code{\link{SpaceCheck}}, 
-#'   \code{\link{String}}, \code{\link{ident}},
-#'   \code{\link{space}}, \code{\link{token}}, \code{\link{identifier}},
-#'   \code{\link{natural}}, \code{\link{symbol}}
-nat <- function() {
-  some(Digit()) %using%
-    function(x) {
-      paste(unlist(c(x)), collapse="")
-    }
-}
-
-#' \code{space} matches zero or more space characters.
-#' 
-#' @export
-#' @examples
-#' space() ("  abc")
-#' @seealso \code{\link{Digit}}, \code{\link{Lower}}, \code{\link{Upper}}, 
-#'   \code{\link{Alpha}}, \code{\link{AlphaNum}}, \code{\link{SpaceCheck}}, 
-#'   \code{\link{String}}, \code{\link{ident}}, \code{\link{nat}}, 
-#'   \code{\link{token}}, \code{\link{identifier}},
-#'   \code{\link{natural}}, \code{\link{symbol}}
-space <- function() {
-  many(SpaceCheck()) %using%
-    function(x) {
-      ""
-    }
-}
-
-#' \code{token} is a new primitive that ignores any space before and after
-#' applying a parser to a token.
-#' 
-#' @param p is the parser to have spaces stripped.
-#' @export
-#' @examples
-#' token(ident()) ("   variable1   ")
-#' @seealso \code{\link{Digit}}, \code{\link{Lower}}, \code{\link{Upper}}, 
-#'   \code{\link{Alpha}}, \code{\link{AlphaNum}}, \code{\link{SpaceCheck}}, 
-#'   \code{\link{String}}, \code{\link{ident}}, \code{\link{nat}}, 
-#'   \code{\link{space}}, \code{\link{identifier}},
-#'   \code{\link{natural}}, \code{\link{symbol}}
-token <- function(p) {
-  space() %then%
-    p %then%
-    space() %using%
-    function(x) {
-      x <- x[-1]
-      x <- x[-length(x)]
-      x
-    }
-}
-
-#' \code{identifier} creates an identifier
-#' 
-#' @param ... takes in token primitives
-#' @export
-#' @seealso \code{\link{Digit}}, \code{\link{Lower}}, \code{\link{Upper}}, 
-#'   \code{\link{Alpha}}, \code{\link{AlphaNum}}, \code{\link{SpaceCheck}}, 
-#'   \code{\link{String}}, \code{\link{ident}}, \code{\link{nat}}, 
-#'   \code{\link{space}}, \code{\link{token}},
-#'   \code{\link{natural}}, \code{\link{symbol}}
-identifier <- function(...) {
-  token(ident())
-}
-
-#' \code{natural} creates a token parser for natural numbers
-#' 
-#' @param ... additional arguments for the parser
-#' @export
-#' @seealso \code{\link{Digit}}, \code{\link{Lower}}, \code{\link{Upper}}, 
-#'   \code{\link{Alpha}}, \code{\link{AlphaNum}}, \code{\link{SpaceCheck}}, 
-#'   \code{\link{String}}, \code{\link{ident}}, \code{\link{nat}}, 
-#'   \code{\link{space}}, \code{\link{token}}, \code{\link{identifier}},
-#'   \code{\link{symbol}}
-natural <- function(...) {
-  token(nat())
-}
-
-#' \code{symbol} creates a token for a symbol
-#' 
-#' @param xs takes in a string to create a token
-#' @export
-#' @examples
-#' symbol("[") ("  [123]")
-#' @seealso \code{\link{Digit}}, \code{\link{Lower}}, \code{\link{Upper}}, 
-#'   \code{\link{Alpha}}, \code{\link{AlphaNum}}, \code{\link{SpaceCheck}}, 
-#'   \code{\link{String}}, \code{\link{ident}}, \code{\link{nat}}, 
-#'   \code{\link{space}}, \code{\link{token}}, \code{\link{identifier}},
-#'   \code{\link{natural}}
-symbol <- function(xs) {
-  token(String(xs))
+#' starts_with_hash <- function(x) grepl("^#",x[1])
+#' Disposable(is.comment = starts_with_hash) (c("# my comment", "Important text"))
+#' Disposable() (c("            ", "    ", "Important text"))
+#'
+Disposable <- function(is.comment = function(x) return(FALSE)) {
+  (satisfy(is.comment) %or% Spacer) %ret% as.character(NULL)
 }
