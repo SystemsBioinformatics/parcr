@@ -67,7 +67,11 @@ fail <- function() {
 satisfy <- function(b) {
   return(
     function(cv) {
-      r <- list(L=cv[1], R=cv[-1])
+      if (is.empty(cv)) {
+        r <- list(L=cv, R=cv)
+      } else {
+        r <- list(L=cv[1], R=cv[-1])
+      }
       if (b(r$L)) succeed(r$L)(r$R)
       else fail()(cv)
     })
@@ -92,7 +96,14 @@ satisfy <- function(b) {
 #' @examples
 #' literal("ab") (c("ab", "cdef")) # success
 #' literal("ab") (c("abc", "cdef")) # failure
-literal <- function(element) {satisfy(function(x) return(x[1]==element))}
+literal <- function(element) {
+  satisfy(
+    function(x) {
+      if (is.empty(x)) {first.element <- x} else {first.element <- x[1]}
+      return(identical(first.element, element))
+    }
+  )
+}
 
 ## Combinators
 # Now that we have the basic building blocks, we consider how they should be put
@@ -119,7 +130,7 @@ literal <- function(element) {satisfy(function(x) return(x[1]==element))}
   function(cv) {
     r1 <- p1(cv)
     r2 <- p2(cv)
-    if (!is.empty(r1)) r1 else {if (!is.empty(r2)) r2 else fail()(cv)}
+    if (!failed(r1)) r1 else {if (!failed(r2)) r2 else fail()(cv)}
   }
 }
 
@@ -157,13 +168,16 @@ literal <- function(element) {satisfy(function(x) return(x[1]==element))}
 #' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("ab", "ac", "de")) # failure
 `%then%` <- function(p1, p2) {
   function(cv) {
-    r1 <- p1(cv)
-    # the right side must be be non-empty
-    if (is.empty(r1) || is.empty(r1$R)) fail()(cv)
+    # Fail on character(0) input, otherwise we we create an endless loop
+    if (is.empty(cv)) fail()(cv)
     else {
-      r2 <- p2(r1$R)
-      if (is.empty(r2)) fail()(cv) else
-      return(list(L=c(r1$L, r2$L), R=r2$R))
+      r1 <- p1(cv)
+      if (failed(r1)) fail()(cv)
+      else {
+        r2 <- p2(r1$R)
+        if (failed(r2)) fail()(cv) else
+        return(list(L=c(r1$L, r2$L), R=r2$R))
+      }
     }
   }
 }
@@ -190,10 +204,10 @@ literal <- function(element) {satisfy(function(x) return(x[1]==element))}
 #' (literal('ab') %using% toupper) (c("ab","cdef")) # success
 #' (literal('ab') %using% toupper) (c("bb","cdef")) # failure
 `%using%` <- function(p, f) {
-  return(function(cv) {
+  function(cv) {
     r <- p(cv)
-    if(length(r) == 0) fail()(cv) else return(list(L=f(r$L), R=r$R))
-  })
+    if(failed(r)) fail()(cv) else return(list(L=f(r$L), R=r$R))
+  }
 }
 
 #' Only yield the first or second element when the sequence successfully parses
@@ -218,14 +232,14 @@ literal <- function(element) {satisfy(function(x) return(x[1]==element))}
 #' # Temperatures are followed by the unit 'C', but we only need the number
 #' (satisfy(is_number) %xthen% literal("C")) (c("21", "C"))
 `%xthen%` <- function(p1, p2) {
-  (p1 %then% p2) %using% function(x) {return(x[1])}
+  (p1 %then% p2) %using% fst
 }
 
 #' @rdname grapes-xthen-grapes
 #' @export
 #' @seealso [%then%]
 `%thenx%` <- function(p1, p2) {
-  (p1 %then% p2) %using% function(x) {return(x[2])}
+  (p1 %then% p2) %using% snd
 }
 
 #' Return a given value upon successful parsing
@@ -370,5 +384,5 @@ Spacer <- one.or.more(Empty.line)
 #' Disposable() (c("            ", "    ", "Important text"))
 #'
 Disposable <- function(is.comment = function(x) return(FALSE)) {
-  (satisfy(is.comment) %or% Spacer) %ret% as.character(NULL)
+  (satisfy(is.comment) %or% Spacer) %ret% character(0)
 }
