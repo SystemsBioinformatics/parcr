@@ -1,0 +1,192 @@
+---
+title: "Creating parser combinators"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Creating_parser_combinators}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(parcr)
+```
+
+## Example: parsing fasta sequence files
+
+As an example of a real application let's try to write a parser for fasta file.
+
+The fasta format looks like
+
+```
+> sequence1
+TACGTTGTTTTT
+CGG
+
+> sequence2
+TGGGTTAAATTT
+CTTGGCTTTATT
+CCGGA
+```
+
+When reading a fasta file using `readLines`, the result would be a character 
+vector as the one below:
+
+```{r}
+file <- c(
+  "> sequence1", "TACGTTGTTTTT", "CGG",
+  "", "> sequence2", "TGGGTTAAATTT", "CTTGGCTTTATT", "CCGGA"
+)
+```
+
+
+It consists of one or more sequence blocks, each with a title and a sequence, 
+and each sequence consists of one or more lines of consecutive letters 
+representing the nucleotides. A sequence block could be preceeded by one or more
+empty lines, but doesn't have to be. This description already allows us to 
+create a few elements of the `fasta` parser that we want to make:
+
+```{r}
+SequenceBlock <- function() {
+  MaybeEmpty() %then% 
+    Title() %then% 
+    Sequence()
+}
+
+Sequence <- function() {
+  one.or.more(SequenceLine())
+}
+
+Fastafile <- function() {
+  one.or.more(SequenceBlock())
+}
+```
+
+Now we need line-parsers `Title()` and `SequenceLine()` that recognize and 
+process these elements. We use functions from `stringr` to do this work for us,
+and first define a few helper functions.
+
+```{r}
+is.title <- function(line) {
+  stringr::str_detect(line, "^>[ \\t]?(\\w+)")
+}
+
+parse.title <- function(line) {
+  stringr::str_match(line, "^>[ \\t]?(\\w+)")
+}
+
+is.sequence.line <- function(line) {
+  stringr::str_detect(line, "[GATC]+")
+}
+
+parse.sequence.line <- function(line) {
+  stringr::str_match(line, "([GATC]+)")
+}
+```
+
+Then we define the parsers.
+
+```{r}
+Title <- function() {
+  satisfy(is.title) %using% 
+    function(line) {
+      matches <- parse.title(line)
+      return(matches[2])
+    }
+}
+
+SequenceLine <- function() {
+  satisfy(is.sequence.line) %using% 
+    function(line) {
+      matches <- parse.sequence.line(line)
+      return(matches[2])
+    }
+}
+```
+
+Now we use the output
+
+```{r}
+Fastafile() (file)
+```
+
+The problem with this output is that is not structured, and it is difficult to
+extract the individual sequences and titles from it. We can structure this 
+output by letting every sequence block be returned as an element of a list. We
+extend the `SequenceBlock` parser by changing its output with a function using 
+the `%using%` operator:
+
+```{r}
+SequenceBlock <- function() {
+  MaybeEmpty() %then% 
+    Title() %then% 
+    Sequence() %using%
+    function(x) list(x)
+}
+```
+
+Now the result is
+
+```{r}
+Fastafile() (file)[["L"]]
+```
+
+which looks easier to extract information from, but we can improve this. First,
+we want the sequences to appear as one long string, not as a character vector
+with multiple elements. So we extend the `Sequence` parser by collapsing its
+output:
+
+```{r}
+Sequence <- function() {
+  one.or.more(SequenceLine()) %using% 
+    function(x) {
+      paste(x, collapse="")
+    }
+}
+```
+
+Then we get
+
+```{r}
+Fastafile() (file)[["L"]]
+```
+
+We know that the first element in each of these list elements is the title, and 
+the second element is the complete sequence. Why not just make names lists out 
+of these elements? this makes extracting the information even easier:  
+
+```{r}
+Title <- function() {
+  satisfy(is.title) %using% 
+    function(line) {
+      matches <- parse.title(line)
+      list(title = matches[2])
+    }
+}
+
+Sequence <- function() {
+  one.or.more(SequenceLine()) %using% 
+    function(x) {
+      list(sequence = paste(x, collapse=""))
+    }
+}
+```
+
+Finally, we have our desired output.
+
+```{r}
+d <- Fastafile() (file)[["L"]]
+d
+```
+
+Let's present it more nicely.
+
+```{r}
+invisible(lapply(d, function(x) {cat(x$title, x$sequence, "\n")}))
+```
