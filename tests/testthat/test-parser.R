@@ -2,6 +2,7 @@
 starts_with_a <- function(x) grepl("^a",x[1])
 starts_with_b <- function(x) grepl("^b",x[1])
 length_zero <- function(x) length(x)==0
+starts_with_hash <- function(x) grepl("^#",x[1])
 
 test_that("'succeed' works in standard cases", {
   expect_equal(succeed("abc")(c("xyz","def")), list(L="abc", R=c("xyz","def")))
@@ -14,7 +15,7 @@ test_that("'fail' works in standard cases", {
 test_that("'satisfy' works in standard cases", {
   expect_equal(satisfy(starts_with_a)(c("abc","def")), list(L="abc", R="def"))
   expect_equal(satisfy(starts_with_a)(c("bca","def")), list())
-  expect_equal(satisfy(starts_with_a)(as.character(NULL)), list())
+  expect_equal(satisfy(starts_with_a)(character(0)), list())
 })
 
 test_that("'literal' works in standard cases", {
@@ -50,7 +51,7 @@ test_that("We can create a composite parser", {
 
 test_that("'zero.or.more' works in standard cases", {
   expect_equal(zero.or.more(literal("A")) (LETTERS[1:5]), list(L="A", R=LETTERS[2:5]))
-  expect_equal(zero.or.more(literal("A")) (LETTERS[2:5]), list(L=as.character(NULL), R=LETTERS[2:5]))
+  expect_equal(zero.or.more(literal("A")) (LETTERS[2:5]), list(L=character(0), R=LETTERS[2:5]))
 })
 
 test_that("'one.or.more' works in standard cases", {
@@ -70,15 +71,26 @@ test_that("'match.n' works in standard cases", {
 })
 
 test_that("'Empty.line' works in standard cases", {
-  expect_equal(Empty.line (c("   \t  ", 'abc')), list(L="   \t  ", R='abc'))
+  expect_equal(Empty.line() (c("   \t  ", 'abc')), list(L="   \t  ", R='abc'))
 })
 
 test_that("'Spacer' works in standard cases", {
-  expect_equal(Spacer (c("   \t  ", "    ", "abc")), list(L=c("   \t  ", "    ") , R="abc"))
+  expect_equal(Spacer() (c("   \t  ", "    ", "abc")), list(L=character(0) , R="abc"))
 })
 
-test_that("'Disposable' works in standard cases", {
-  expect_equal(Disposable() (c("   \t  ", "    ", "abc")), list(L=as.character(NULL) , R="abc"))
+test_that("'MaybeEmpty' works in standard cases", {
+  expect_equal(MaybeEmpty() (c("   \t  ", "    ", "abc")), list(L=character(0) , R="abc"))
+  expect_equal(MaybeEmpty() ("abc"), list(L=character(0) , R="abc"))
+})
+
+test_that("'Numbers' works in standard cases", {
+  expect_equal(Numbers(3) ('1  2  3'), list(L=list(1:3), R=character(0)))
+  expect_equal(Numbers(3) ('10\t20\t30'), list(L=list(c(10,20,30)), R=character(0)))
+  expect_equal(Numbers(4) ('10\t20\t30'), list())
+  expect_equal(Numbers(0) (" "), list(L=list(numeric(0)), R=character(0)))
+  expect_equal(Numbers(6) (paste(as.character(1:6),collapse="\t")), list(L=list(1:6), R=character(0)))
+  expect_equal(Numbers(6) (rep(paste(as.character(1:6),collapse="\t"), 2)), list(L=list(1:6), R=paste(as.character(1:6),collapse="\t")))
+  expect_equal(exactly(2, Numbers(6)) (rep(paste(as.character(1:6),collapse="\t"), 2)), list(L=list(1:6,1:6), R=character(0)))
 })
 
 test_that("All parsers accept character(0) input", {
@@ -91,6 +103,7 @@ test_that("All parsers accept character(0) input", {
   expect_equal((literal(character(0)) %xthen% literal(character(0))) (character(0)), list())
   expect_equal((literal("A") %thenx% literal(character(0))) ("A"), list(L=character(0), R=character(0)))
   expect_equal((literal(character(0)) %thenx% literal(character(0))) (character(0)), list())
+  expect_equal(Numbers(1) (character(0)), list())
 })
 
 test_that("Parsers can consume the input up to the end", {
@@ -106,7 +119,6 @@ test_that("Parsers can consume the input up to the end", {
   expect_equal((one.or.more(literal("A"))) (c("A")), list(L="A", R=character(0)))
   expect_equal((exactly(2,literal("A"))) (c("A","A")), list(L=c("A","A"), R=character(0)))
   expect_equal((match.n(2,literal("A"))) (c("A","A")), list(L=c("A","A"), R=character(0)))
-  expect_equal(Empty.line (c(" ")), list(L=" ", R=character(0)))
-  expect_equal(Spacer (c(" "," ")), list(L=c(" "," "), R=character(0)))
-  expect_equal(Disposable() (c(" "," ")), list(L=character(0), R=character(0)))
+  expect_equal(Empty.line() (c(" ")), list(L=" ", R=character(0)))
+  expect_equal(Spacer() (c(" "," ")), list(L=character(0), R=character(0)))
 })

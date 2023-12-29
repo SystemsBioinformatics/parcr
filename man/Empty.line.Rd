@@ -3,23 +3,27 @@
 \name{Empty.line}
 \alias{Empty.line}
 \alias{Spacer}
+\alias{MaybeEmpty}
 \title{Recognize an empty line}
 \usage{
-Empty.line(cv)
+Empty.line()
 
-Spacer(cv)
-}
-\arguments{
-\item{cv}{A character vector}
+Spacer()
+
+MaybeEmpty()
 }
 \description{
 An empty line is a line that consists entirely of space-like characters.
 \code{Empty.line} is a parser that recognizes one empty line and \code{Spacer}
-recognizes one or more empty lines.
+recognizes one or more empty lines and \code{MaybeEmpty} recognizes zero or more
+empty lines. \code{Empty.line} actually returns the empty line but \code{Spacer} and
+\code{MaybeEmpty} discard the empty lines.
 }
 \examples{
-Empty.line (c(' \t  ')) # success
-Empty.line (c('    .')) # failure
-Spacer (c("   \t  ", "    ", "abc"))
-
+Empty.line() (c(' \t  ')) # success
+Empty.line() (c('    .')) # failure
+Spacer() (c("   \t  ", "    ", "abc"))
+Spacer() (c("            ", "    ", "Important text"))
+MaybeEmpty() (c("   \t  ", "    ", "abc"))
+MaybeEmpty() (c("            ", "    ", "Important text"))
 }

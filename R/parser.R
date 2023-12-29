@@ -256,7 +256,7 @@ literal <- function(element) {
 #' sometimes want to use [%using%] itself for more flexibility.
 #'
 #' @inheritParams zero.or.more
-#' @param c A pre-determined value
+#' @param c A single-element character value. Character values are enforced
 #'
 #' @returns A parser
 #' @export
@@ -265,7 +265,7 @@ literal <- function(element) {
 #' @examples
 #' (literal("A") %ret% ("We have an A!")) (LETTERS[1:5])
 `%ret%` <- function(p, c) {
-  p %using% (function(x) {return(c)})
+  p %using% function(x) {return(as.character(c))}
 }
 
 ## Quantifying parsers
@@ -350,39 +350,58 @@ match.n <- function(n, p) {
 #'
 #' An empty line is a line that consists entirely of space-like characters.
 #' `Empty.line` is a parser that recognizes one empty line and `Spacer`
-#' recognizes one or more empty lines.
+#' recognizes one or more empty lines and `MaybeEmpty` recognizes zero or more
+#' empty lines. `Empty.line` actually returns the empty line but `Spacer` and
+#' `MaybeEmpty` discard the empty lines.
 #'
-#' @param cv A character vector
 #' @importFrom stringr str_replace_all
 #' @export
 #'
 #' @examples
-#' Empty.line (c(' \t  ')) # success
-#' Empty.line (c('    .')) # failure
-Empty.line <- satisfy(function(x) {stringr::str_replace_all(x, "\\s+", "") == ""})
+#' Empty.line() (c(' \t  ')) # success
+#' Empty.line() (c('    .')) # failure
+Empty.line <- function() {
+  satisfy(function(x) {stringr::str_replace_all(x, "\\s+", "") == ""})
+}
 
 #' @rdname Empty.line
 #' @export
 #' @examples
-#' Spacer (c("   \t  ", "    ", "abc"))
-#'
-#Spacer <- one.or.more(satisfy(function(x) {stringr::str_replace_all(x, "\\s+", "") == ""}))
-Spacer <- one.or.more(Empty.line)
-
-#' Recognize and discard an element with disposable content
-#'
-#' Disposable lines are those that are empty lines, as defined by [Spacer]
-#' or lines that satisfy an is.comment() test, which is to be specified. By
-#' default is.comment returns FALSE.
-#'
-#' @param is.comment A boolean function that recognizes a comment
-#' @export
-#'
-#' @examples
-#' starts_with_hash <- function(x) grepl("^#",x[1])
-#' Disposable(is.comment = starts_with_hash) (c("# my comment", "Important text"))
-#' Disposable() (c("            ", "    ", "Important text"))
-#'
-Disposable <- function(is.comment = function(x) return(FALSE)) {
-  (satisfy(is.comment) %or% Spacer) %ret% character(0)
+#' Spacer() (c("   \t  ", "    ", "abc"))
+#' Spacer() (c("            ", "    ", "Important text"))
+Spacer <- function() {
+  (one.or.more(Empty.line())) %ret% NULL
 }
+
+#' @rdname Empty.line
+#' @export
+#' @examples
+#' MaybeEmpty() (c("   \t  ", "    ", "abc"))
+#' MaybeEmpty() (c("            ", "    ", "Important text"))
+MaybeEmpty <- function() {
+  (zero.or.more(Empty.line())) %ret% NULL
+}
+
+#' Extracts all integer and floating point numbers from a line
+#'
+#' Ignores any other symbols. It tests whether exactly n numbers are found.
+#'
+#' @param n An integer.
+#'
+#' @return A parser.
+#' @export
+#' @examples
+#' Numbers(3) ('1  2  3')
+#' Numbers(3) ('1101\t201\t33')
+#'
+Numbers <- function(n) {
+    (satisfy( function(x) {
+      (stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE) |>
+        as.vector() |> length()) == n
+      })) %using%
+    function(x) {
+      list(stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE) |>
+        as.vector() |> as.numeric())
+    }
+}
+

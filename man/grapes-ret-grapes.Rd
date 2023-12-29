@@ -9,7 +9,7 @@ p \%ret\% c
 \arguments{
 \item{p}{A parser}
 
-\item{c}{A pre-determined value}
+\item{c}{A single-element character value. Character values are enforced}
 }
 \value{
 A parser
