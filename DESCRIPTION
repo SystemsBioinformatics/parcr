@@ -1,5 +1,5 @@
 Package: parcr
-Title: Parser combinator functions for parsing character vectors
+Title: Construct parser combinator functions for parsing character vectors
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Douwe",
