@@ -18,7 +18,7 @@ failed <- function(l) {
   is.list(l) && length(l) == 0
 }
 
-#' Selecting an element from parser output$L
+#' Selecting only left or right part from a `%then%` sequence
 #'
 #' Used by %xthen% and %thenx%
 #'
@@ -30,7 +30,7 @@ fst <- function(x) {
   if (is.empty(x)) character(0) else x[1]
 }
 
-#' @rdname first.element
+#' @rdname fst
 snd <- function(x) {
   if (length(x)==1) character(0) else x[2]
 }

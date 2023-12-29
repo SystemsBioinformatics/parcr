@@ -210,7 +210,7 @@ literal <- function(element) {
   }
 }
 
-#' Only yield the first or second element when the sequence successfully parses
+#' Selecting only left or right part from a `%then%` sequence
 #'
 #' @details
 #' Recall that two parsers composed in sequence produce a pair of results.
@@ -218,12 +218,19 @@ literal <- function(element) {
 #' it is common to throw away reserved words such as 'begin' and 'where' during
 #' parsing. In such cases, two special versions of the `%then%` combinator are
 #' useful, which throw away either the left or right result values, as reflected
-#' by the position of the letter 'x' in their names:
+#' by the position of the letter 'x' in their names.
+#'
+#' @section Definitions:
+#'
+#' `%xthen% <- function(p1, p2) {(p1 %then% p2) %using% fst}`
+#'
+#' `%thenx% <- function(p1, p2) {(p1 %then% p2) %using% snd}``
 #'
 #' @inheritParams %or%
 #'
 #' @return A parser
 #' @export
+#' @seealso [fst()]
 #'
 #' @examples
 #' is_number <- function(x) grepl("\\d+",x[1])
@@ -254,6 +261,10 @@ literal <- function(element) {
 #'
 #' This parser is identical to `p %using% (function(x) {return(c)})`. You may
 #' sometimes want to use [%using%] itself for more flexibility.
+#'
+#' @section Definition:
+#'
+#' `%ret% <- function(p, c) {p %using% function(x) as.character(c))}`
 #'
 #' @inheritParams zero.or.more
 #' @param c A single-element character value. Character values are enforced

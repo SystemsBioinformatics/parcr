@@ -25,6 +25,12 @@ returns the value \code{v} if successful
 This parser is identical to \code{p \%using\% (function(x) {return(c)})}. You may
 sometimes want to use \link{\%using\%} itself for more flexibility.
 }
+\section{Definition}{
+
+
+\verb{\%ret\% <- function(p, c) \{p \%using\% function(x) as.character(c))\}}
+}
+
 \examples{
 (literal("A") \%ret\% ("We have an A!")) (LETTERS[1:5])
 }

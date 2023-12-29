@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(parsercombinator)
+library(parcr)
 
-test_check("parsercombinator")
+test_check("parcr")

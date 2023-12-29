@@ -3,7 +3,7 @@
 \name{\%xthen\%}
 \alias{\%xthen\%}
 \alias{\%thenx\%}
-\title{Only yield the first or second element when the sequence successfully parses}
+\title{Selecting only left or right part from a \verb{\%then\%} sequence}
 \usage{
 p1 \%xthen\% p2
 
@@ -16,7 +16,7 @@ p1 \%thenx\% p2
 A parser
 }
 \description{
-Only yield the first or second element when the sequence successfully parses
+Selecting only left or right part from a \verb{\%then\%} sequence
 }
 \details{
 Recall that two parsers composed in sequence produce a pair of results.
@@ -24,8 +24,16 @@ Sometimes we are only interested in one component of the pair. For example,
 it is common to throw away reserved words such as 'begin' and 'where' during
 parsing. In such cases, two special versions of the \verb{\%then\%} combinator are
 useful, which throw away either the left or right result values, as reflected
-by the position of the letter 'x' in their names:
+by the position of the letter 'x' in their names.
 }
+\section{Definitions}{
+
+
+\verb{\%xthen\% <- function(p1, p2) \{(p1 \%then\% p2) \%using\% fst\}}
+
+`\%thenx\% <- function(p1, p2) {(p1 \%then\% p2) \%using\% snd}``
+}
+
 \examples{
 is_number <- function(x) grepl("\\\\d+",x[1])
 # Numbers are preceded by ">" symbols, but we only need the number itself
@@ -34,5 +42,7 @@ is_number <- function(x) grepl("\\\\d+",x[1])
 (satisfy(is_number) \%xthen\% literal("C")) (c("21", "C"))
 }
 \seealso{
+\code{\link[=fst]{fst()}}
+
 \link{\%then\%}
 }

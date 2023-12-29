@@ -2,9 +2,12 @@
 % Please edit documentation in R/utils.R
 \name{fst}
 \alias{fst}
-\title{Selecting an element from parser output$L}
+\alias{snd}
+\title{Selecting only left or right part from a \verb{\%then\%} sequence}
 \usage{
 fst(x)
+
+snd(x)
 }
 \arguments{
 \item{x}{A vector}
