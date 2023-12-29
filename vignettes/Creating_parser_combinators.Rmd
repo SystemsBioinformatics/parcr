@@ -22,14 +22,14 @@ library(parcr)
 
 As an example of a real application let's try to write a parser for fasta file.
 
-The fasta format looks like
+A fasta file could look as follows
 
 ```
-> sequence1
+>sequence1
 TACGTTGTTTTT
 CGG
 
-> sequence2
+>sequence2
 TGGGTTAAATTT
 CTTGGCTTTATT
 CCGGA
@@ -40,22 +40,24 @@ vector as the one below:
 
 ```{r}
 file <- c(
-  "> sequence1", "TACGTTGTTTTT", "CGG",
-  "", "> sequence2", "TGGGTTAAATTT", "CTTGGCTTTATT", "CCGGA"
+  ">sequence1", "TACGTTGTTTTT", "CGG",
+  "",
+  ">sequence2", "TGGGTTAAATTT", "CTTGGCTTTATT", "CCGGA"
 )
 ```
 
+It consists of one or more sequence blocks, each with a header[^1] and a 
+sequence, and each sequence consists of one or more lines of consecutive symbols
+without spaces, representing the nucleotides. A sequence block could be preceded
+by one or more empty lines, but doesn't have to be. This description already 
+allows us to create a few elements of the `fasta` parser that we want to make:
 
-It consists of one or more sequence blocks, each with a title and a sequence, 
-and each sequence consists of one or more lines of consecutive letters 
-representing the nucleotides. A sequence block could be preceeded by one or more
-empty lines, but doesn't have to be. This description already allows us to 
-create a few elements of the `fasta` parser that we want to make:
+[^1]: Note that fasta headers can be much more complicated than we pretend here.
 
 ```{r}
 SequenceBlock <- function() {
   MaybeEmpty() %then% 
-    Title() %then% 
+    Header() %then% 
     Sequence()
 }
 
@@ -68,16 +70,16 @@ Fastafile <- function() {
 }
 ```
 
-Now we need line-parsers `Title()` and `SequenceLine()` that recognize and 
+Now we need line-parsers `Header()` and `SequenceLine()` that recognize and 
 process these elements. We use functions from `stringr` to do this work for us,
 and first define a few helper functions.
 
 ```{r}
-is.title <- function(line) {
+is.header <- function(line) {
   stringr::str_detect(line, "^>[ \\t]?(\\w+)")
 }
 
-parse.title <- function(line) {
+parse.header <- function(line) {
   stringr::str_match(line, "^>[ \\t]?(\\w+)")
 }
 
@@ -93,10 +95,10 @@ parse.sequence.line <- function(line) {
 Then we define the parsers.
 
 ```{r}
-Title <- function() {
-  satisfy(is.title) %using% 
+Header <- function() {
+  satisfy(is.header) %using% 
     function(line) {
-      matches <- parse.title(line)
+      matches <- parse.header(line)
       return(matches[2])
     }
 }
@@ -117,7 +119,7 @@ Fastafile() (file)
 ```
 
 The problem with this output is that is not structured, and it is difficult to
-extract the individual sequences and titles from it. We can structure this 
+extract the individual sequences and headers from it. We can structure this 
 output by letting every sequence block be returned as an element of a list. We
 extend the `SequenceBlock` parser by changing its output with a function using 
 the `%using%` operator:
@@ -125,7 +127,7 @@ the `%using%` operator:
 ```{r}
 SequenceBlock <- function() {
   MaybeEmpty() %then% 
-    Title() %then% 
+    Header() %then% 
     Sequence() %using%
     function(x) list(x)
 }
@@ -157,16 +159,16 @@ Then we get
 Fastafile() (file)[["L"]]
 ```
 
-We know that the first element in each of these list elements is the title, and 
+We know that the first element in each of these list elements is the header, and 
 the second element is the complete sequence. Why not just make names lists out 
-of these elements? this makes extracting the information even easier:  
+of these elements? this makes extracting the information even easier:
 
 ```{r}
-Title <- function() {
-  satisfy(is.title) %using% 
+Header <- function() {
+  satisfy(is.header) %using% 
     function(line) {
-      matches <- parse.title(line)
-      list(title = matches[2])
+      matches <- parse.header(line)
+      list(header = matches[2])
     }
 }
 
@@ -188,5 +190,5 @@ d
 Let's present it more nicely.
 
 ```{r}
-invisible(lapply(d, function(x) {cat(x$title, x$sequence, "\n")}))
+invisible(lapply(d, function(x) {cat(x$header, x$sequence, "\n")}))
 ```
