@@ -15,9 +15,7 @@
 #' `succeed v inp = [(v, inp)].`
 #'
 #' @param left The part to be added on the L-side of a parsed list
-#' @export
-#' @examples
-#' succeed(letters[1:5]) (letters[10:15])
+#' @keywords internal
 succeed <- function(left) {
   function(right) list(L=ensure.list(left), R=right)
 }
@@ -32,10 +30,7 @@ succeed <- function(left) {
 #'
 #' `fail inp = [].`
 #'
-#' @export
-#' @examples
-#' fail()(letters[1:5])
-#'
+#' @keywords internal
 fail <- function() {
   function(cv) list()
 }

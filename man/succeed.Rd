@@ -20,6 +20,4 @@ result value must be pre-determined, so it is included as an extra parameter.
 \verb{succeed v inp = [(v, inp)].}
 }
 
-\examples{
-succeed(letters[1:5]) (letters[10:15])
-}
+\keyword{internal}

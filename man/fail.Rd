@@ -16,7 +16,4 @@ of the input vector. It, therefore, returns the empty list.
 \verb{fail inp = [].}
 }
 
-\examples{
-fail()(letters[1:5])
-
-}
+\keyword{internal}
