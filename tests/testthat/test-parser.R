@@ -95,6 +95,7 @@ test_that("'Numbers' works in standard cases", {
 
 test_that("All parsers accept character(0) input", {
   expect_equal(satisfy(length_zero) (character(0)), list(L=list(), R=character(0)))
+  expect_equal(satisfy(is.empty) (character(0)), list(L=list(), R=character(0)))
   expect_equal(literal(character(0)) (character(0)), list(L=list(), R=character(0)))
   expect_equal((literal(character(0)) %or% literal(character(0))) (character(0)), list(L=list(), R=character(0)))
   expect_equal((literal("A") %then% literal(character(0))) ("A"), list(L=list("A"), R=character(0)))
