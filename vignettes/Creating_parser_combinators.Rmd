@@ -123,8 +123,8 @@ Now we use the output
 Fastafile() (file)
 ```
 
-The problem with this output is that is not structured, and it is difficult to
-extract the individual sequences and headers from it. We can structure this 
+The problem with this output is that is not well-structured, and it is difficult
+to extract the individual sequences and headers from it. We can structure this 
 output by letting every sequence block be returned as an element of a list. We
 extend the `SequenceBlock` parser by changing its output with a function using 
 the `%using%` operator:
@@ -138,16 +138,16 @@ SequenceBlock <- function() {
 }
 ```
 
-Now the result is
+Now the result is a list of two lists, one for each sequence.
 
 ```{r}
 Fastafile() (file)[["L"]]
 ```
 
-which looks easier to extract information from, but we can improve this. First,
-we want the sequences to appear as one long string, not as a character vector
-with multiple elements. So we extend the `Sequence` parser by collapsing its
-output:
+In principle, this is which looks easier to extract information from, but we can
+improve this. First, we want the sequences to appear as one long string, not as
+separate character vectors. To attain this goal we extend the `Sequence` parser
+by collapsing its output:
 
 ```{r}
 Sequence <- function() {
@@ -164,9 +164,10 @@ Then we get
 Fastafile() (file)[["L"]]
 ```
 
-We know that the first element in each of these list elements is the header, and 
-the second element is the complete sequence. Why not just make named lists out 
-of these elements? this makes extracting the information even easier:
+We know that the first element in each of these lists elements is the header, 
+and the second element is the complete sequence. Why not just attach a name 
+to each element in these lists? This would make extracting the information even
+easier:
 
 ```{r}
 Header <- function() {
@@ -192,7 +193,7 @@ d <- Fastafile() (file)[["L"]]
 d
 ```
 
-Let's present it more concisely.
+Let's present the result more concisely:
 
 ```{r}
 invisible(lapply(d, function(x) {cat(x$header, x$sequence, "\n")}))
