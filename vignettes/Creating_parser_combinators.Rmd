@@ -2,7 +2,7 @@
 title: "Creating parser combinators"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Creating_parser_combinators}
+  %\VignetteIndexEntry{Creating parser combinators}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -22,7 +22,7 @@ library(parcr)
 
 As an example of a real application let's try to write a parser for fasta file.
 
-A fasta file could look as follows
+A nucleotide fasta file could look like the example below 
 
 ```
 >sequence1
@@ -35,8 +35,9 @@ CTTGGCTTTATT
 CCGGA
 ```
 
-When reading a fasta file using `readLines`, the result would be a character 
-vector as the one below:
+Since fasta files are text files we could read such a file using `readLines()`.
+Below we simulate the result of reading the file above by constructing a 
+character vector called `file` that we will try to parse in this document.
 
 ```{r}
 file <- c(
@@ -46,11 +47,11 @@ file <- c(
 )
 ```
 
-It consists of one or more sequence blocks, each with a header[^1] and a 
-sequence, and each sequence consists of one or more lines of consecutive symbols
-without spaces, representing the nucleotides. A sequence block could be preceded
-by one or more empty lines, but doesn't have to be. This description already 
-allows us to create a few elements of the `fasta` parser that we want to make:
+A faste file consists of one or more sequence blocks, each with a header[^1] 
+and a sequence, and each sequence consists of one or more lines of consecutive
+symbols without spaces, representing the nucleotides. A sequence block could be
+preceded by zero or more empty lines. This description already allows us to 
+create a few elements of the `fasta` parser that we want to make:
 
 [^1]: Note that fasta headers can be much more complicated than we pretend here.
 
@@ -71,22 +72,26 @@ Fastafile <- function() {
 ```
 
 Now we need line-parsers `Header()` and `SequenceLine()` that recognize and 
-process these elements. We use functions from `stringr` to do this work for us,
-and first define a few helper functions.
+process these elements in the character vector `file`. We use functions from
+`stringr` to do this in a few helper functions.
 
 ```{r}
+# returns TRUE/FALSE
 is.header <- function(line) {
   stringr::str_detect(line, "^>[ \\t]?(\\w+)")
 }
 
+# returns the title after the ">"
 parse.header <- function(line) {
   stringr::str_match(line, "^>[ \\t]?(\\w+)")
 }
 
+# returns TRUE/FALSE
 is.sequence.line <- function(line) {
   stringr::str_detect(line, "[GATC]+")
 }
 
+# returns the nucleotide string
 parse.sequence.line <- function(line) {
   stringr::str_match(line, "([GATC]+)")
 }
@@ -160,7 +165,7 @@ Fastafile() (file)[["L"]]
 ```
 
 We know that the first element in each of these list elements is the header, and 
-the second element is the complete sequence. Why not just make names lists out 
+the second element is the complete sequence. Why not just make named lists out 
 of these elements? this makes extracting the information even easier:
 
 ```{r}
@@ -187,7 +192,7 @@ d <- Fastafile() (file)[["L"]]
 d
 ```
 
-Let's present it more nicely.
+Let's present it more concisely.
 
 ```{r}
 invisible(lapply(d, function(x) {cat(x$header, x$sequence, "\n")}))
