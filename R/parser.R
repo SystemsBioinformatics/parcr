@@ -260,7 +260,7 @@ literal <- function(element) {
 #'
 #' @section Definition:
 #'
-#' `%ret% <- function(p, c) {p %using% function(x) as.character(c))}`
+#' `%ret% <- function(p, c) {p %using% function(x) c}`
 #'
 #' @inheritParams zero.or.more
 #' @param c A single-element character value. Character values are enforced
@@ -272,7 +272,7 @@ literal <- function(element) {
 #' @examples
 #' (literal("A") %ret% ("We have an A!")) (LETTERS[1:5])
 `%ret%` <- function(p, c) {
-  p %using% function(x) {return(as.character(c))}
+  p %using% function(x) {return(c)}
 }
 
 ## Quantifying parsers
@@ -378,7 +378,7 @@ Empty.line <- function() {
 #' Spacer() (c("            ", "    ", "Important text"))
 #' Spacer() (c("Important text")) # failure
 Spacer <- function() {
-  (one.or.more(Empty.line())) %ret% NULL
+  (one.or.more(Empty.line())) %ret% character(0)
 }
 
 #' @rdname Empty.line
@@ -387,7 +387,7 @@ Spacer <- function() {
 #' MaybeEmpty() (c("            ", "    ", "Important text"))
 #' MaybeEmpty() (c("Important text")) # success, in contrast to Spacer()
 MaybeEmpty <- function() {
-  (zero.or.more(Empty.line())) %ret% NULL
+  (zero.or.more(Empty.line())) %ret% character(0)
 }
 
 #' Extracts all integer and floating point numbers from a line

@@ -28,7 +28,7 @@ sometimes want to use \link{\%using\%} itself for more flexibility.
 \section{Definition}{
 
 
-\verb{\%ret\% <- function(p, c) \{p \%using\% function(x) as.character(c))\}}
+\verb{\%ret\% <- function(p, c) \{p \%using\% function(x) c\}}
 }
 
 \examples{
