@@ -19,7 +19,7 @@
 #' @examples
 #' succeed(letters[1:5]) (letters[10:15])
 succeed <- function(left) {
-  function(right) list(L=left, R=right)
+  function(right) list(L=ensure.list(left), R=right)
 }
 
 #' The parser that always fails
@@ -206,7 +206,8 @@ literal <- function(element) {
 `%using%` <- function(p, f) {
   function(cv) {
     r <- p(cv)
-    if(failed(r)) fail()(cv) else return(list(L=f(r$L), R=r$R))
+    if (failed(r)) fail()(cv)
+    else return(list(L = ensure.list(f(r$L)), R=r$R))
   }
 }
 
@@ -411,8 +412,8 @@ Numbers <- function(n) {
         as.vector() |> length()) == n
       })) %using%
     function(x) {
-      list(stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE) |>
-        as.vector() |> as.numeric())
+      stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE) |>
+        as.vector() |> as.numeric()
     }
 }
 

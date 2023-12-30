@@ -2,17 +2,17 @@
 % Please edit documentation in R/utils.R
 \name{is.empty}
 \alias{is.empty}
-\title{Testing for empty atomic vector}
+\title{Testing for empty atomic vector.}
 \usage{
 is.empty(l)
 }
 \arguments{
-\item{l}{An object}
+\item{l}{An object.}
 }
 \value{
-TRUE or FALSE
+TRUE or FALSE.
 }
 \description{
-Testing for empty atomic vector
+Testing for empty atomic vector.
 }
 \keyword{internal}

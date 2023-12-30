@@ -10,10 +10,10 @@ fst(x)
 snd(x)
 }
 \arguments{
-\item{x}{A vector}
+\item{x}{A vector.}
 }
 \value{
-A vector
+A vector.
 }
 \description{
 Used by \%xthen\% and \%thenx\%

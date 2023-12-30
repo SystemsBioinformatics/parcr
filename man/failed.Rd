@@ -2,17 +2,17 @@
 % Please edit documentation in R/utils.R
 \name{failed}
 \alias{failed}
-\title{Testing for empty list}
+\title{Testing for empty list.}
 \usage{
 failed(l)
 }
 \arguments{
-\item{l}{An object}
+\item{l}{An object.}
 }
 \value{
-TRUE or FALSE
+TRUE or FALSE.
 }
 \description{
-Testing for empty list
+Testing for empty list.
 }
 \keyword{internal}
