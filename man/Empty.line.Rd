@@ -4,7 +4,7 @@
 \alias{Empty.line}
 \alias{Spacer}
 \alias{MaybeEmpty}
-\title{Recognize an empty line}
+\title{Recognize empty lines}
 \usage{
 Empty.line()
 
@@ -24,6 +24,7 @@ Empty.line() (c(' \t  ')) # success
 Empty.line() (c('    .')) # failure
 Spacer() (c("   \t  ", "    ", "abc"))
 Spacer() (c("            ", "    ", "Important text"))
-MaybeEmpty() (c("   \t  ", "    ", "abc"))
+Spacer() (c("Important text")) # failure
 MaybeEmpty() (c("            ", "    ", "Important text"))
+MaybeEmpty() (c("Important text")) # success, in contrast to Spacer()
 }

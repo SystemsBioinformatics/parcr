@@ -351,7 +351,7 @@ match.n <- function(n, p) {
 
 ## Some common elements
 
-#' @title Recognize an empty line
+#' @title Recognize empty lines
 #'
 #' @description
 #'
@@ -376,6 +376,7 @@ Empty.line <- function() {
 #' @examples
 #' Spacer() (c("   \t  ", "    ", "abc"))
 #' Spacer() (c("            ", "    ", "Important text"))
+#' Spacer() (c("Important text")) # failure
 Spacer <- function() {
   (one.or.more(Empty.line())) %ret% NULL
 }
@@ -383,8 +384,8 @@ Spacer <- function() {
 #' @rdname Empty.line
 #' @export
 #' @examples
-#' MaybeEmpty() (c("   \t  ", "    ", "abc"))
 #' MaybeEmpty() (c("            ", "    ", "Important text"))
+#' MaybeEmpty() (c("Important text")) # success, in contrast to Spacer()
 MaybeEmpty <- function() {
   (zero.or.more(Empty.line())) %ret% NULL
 }
