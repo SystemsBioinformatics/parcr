@@ -10,7 +10,7 @@ succeed(left)
 fail()
 }
 \arguments{
-\item{left}{Any object, the part to be added on the L-side of a parsed list.}
+\item{left}{Any R-object constructed from a parsed vector.}
 }
 \description{
 These are the most basic constructors of a parser. The \code{succeed} parser
@@ -27,9 +27,14 @@ be pre-determined, so it is included as an extra parameter.
 While \code{succeed} never fails, \code{fail} always does, regardless of the input
 vector. It returns the empty list \code{list()} to signal this fact.
 }
+\section{Note}{
+
+You will probably never have to use these functions when constructing parsers.
+}
+
 \examples{
 succeed("A")("abc")
-succeed(data.frame(title="The beginning", author="J. Doe"))(c("Unconsumed","text"))
+succeed(data.frame(title="Keisri hull", author="Jaan Kross"))(c("Unconsumed","text"))
 fail()("abc")
 
 }
