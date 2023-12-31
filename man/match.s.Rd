@@ -20,9 +20,9 @@ the output you should realize that the function will be given a single-
 element character vector (a string). This often simplifies further
 processing.
 
-This parser short-cuts the pattern \code{satisfy(b) \%using\% f}. With this parser
-You do not have to write separate predicate and processing functions \code{b} and
-\code{f}. Identification and parsing can often be done with a single string
+This parser short-cuts the pattern \code{satisfy(b) \%using\% f}. With \code{match.s}
+you do not have to write separate predicate and processing functions \code{b} and
+\code{f} when identification and parsing can be done with a single string
 parsing function \code{s}.
 }
 \examples{
