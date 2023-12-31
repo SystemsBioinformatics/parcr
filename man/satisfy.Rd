@@ -2,7 +2,7 @@
 % Please edit documentation in R/parser.R
 \name{satisfy}
 \alias{satisfy}
-\title{The parser that matches an element using a predicate}
+\title{The parser that matches an element using a predicate function.}
 \usage{
 satisfy(b)
 }
@@ -13,21 +13,21 @@ satisfy(b)
 \code{satisfy} turns a predicate function into a parser that recognizes single
 elements.
 }
-\section{Formal description}{
+\section{Definition}{
 
 
-\verb{satisfy b []     = fail []}
+\verb{satisfy(b)(x): fail()(x)             when x == list()}
 
-\verb{satisfy b (x:xs) = succeed x xs , when b x}
+\verb{             : succeed(x[1]) (x[-1]) when b(x[1])}
 
-\verb{                 = fail xs , when not b x}
+\verb{             : fail()(x)             when !b(x[1])}
 }
 
 \examples{
 
 # define a predicate function that tests whether the next element starts
 # with an 'a'
-starts_with_a <- function(x) grepl("^a",x[1])
+starts_with_a <- function(x) grepl("^a",x)
 # Use it in the satisfy parser
 satisfy(starts_with_a)(c("abc","def")) # success
 satisfy(starts_with_a)(c("bca","def")) # failure

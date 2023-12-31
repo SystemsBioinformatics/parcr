@@ -2,7 +2,7 @@
 % Please edit documentation in R/parser.R
 \name{\%then\%}
 \alias{\%then\%}
-\title{The sequence parser}
+\title{The parser of sequences of parsers.}
 \usage{
 p1 \%then\% p2
 }
@@ -26,11 +26,16 @@ squares), except that lists replace sets, and elements are drawn in a
 determined order. Much of the elegance of the then combinator would be lost
 if this notation were not available.
 }
-\section{Formal description}{
+\section{Definition}{
 
 
-\verb{(p1 \%then\% p2) inp = [((v1,v2),out2) | (v1,outl) <- p1 inp;}
+\verb{(p1 \%then\% p2) (x) = [((v1,v2),out2) | (v1,outl) <- p1 inp;}
+
 \verb{                                       (v2,out2) <- p2 out1]}
+
+[((v1,v2),out2) | (v1,outl) <- p1 inp;`
+
+`                                       (v2,out2) <- p2 out1]: R:((v1,v2),out2)\%20\%7C\%20(v1,outl)\%20\%3C-\%20p1\%20inp;\%60\%0A\%0A\%60\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20(v2,out2)\%20\%3C-\%20p2\%20out1
 }
 
 \examples{

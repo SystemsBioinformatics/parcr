@@ -44,19 +44,19 @@ fail <- function() {
   function(cv) list()
 }
 
-#' The parser that matches an element using a predicate
+#' The parser that matches an element using a predicate function.
 #'
 #' @description
 #' `satisfy` turns a predicate function into a parser that recognizes single
 #' elements.
 #'
-#' @section Formal description:
+#' @section Definition:
 #'
-#' `satisfy b []     = fail []`
+#' `satisfy(b)(x): fail()(x)             when x == list()`
 #'
-#' `satisfy b (x:xs) = succeed x xs , when b x`
+#' `             : succeed(x[1]) (x[-1]) when b(x[1])`
 #'
-#' `                 = fail xs , when not b x`
+#' `             : fail()(x)             when !b(x[1])`
 #'
 #' @param b A boolean function to determine if the element is accepted.
 #' @export
@@ -64,7 +64,7 @@ fail <- function() {
 #'
 #' # define a predicate function that tests whether the next element starts
 #' # with an 'a'
-#' starts_with_a <- function(x) grepl("^a",x[1])
+#' starts_with_a <- function(x) grepl("^a",x)
 #' # Use it in the satisfy parser
 #' satisfy(starts_with_a)(c("abc","def")) # success
 #' satisfy(starts_with_a)(c("bca","def")) # failure
@@ -81,15 +81,15 @@ satisfy <- function(b) {
   }
 }
 
-#' The parser that matches an element using a literal string
+#' The parser that matches an element using a literal string.
 #'
 #' @description
 #' `literal` is a parser for single elements. It tests whether the first
 #' element in the vector is equal to a given element.
 #'
-#' @section Formal description:
+#' @section Definition:
 #'
-#' `literal x = satisfy (= x)`
+#' `literal(a)(x) <- satisfy(function(y) {identical(y,a)}) (x)`
 #'
 #' where `= x` is to be understood as a function which tests its argument for
 #' equality with `x`
@@ -105,6 +105,7 @@ literal <- function(element) {
     function(x) {
       if (is.empty(x)) {first.element <- x} else {first.element <- x[1]}
       return(identical(first.element, element))
+      #return(first.element==element)
     }
   )
 }
@@ -113,7 +114,7 @@ literal <- function(element) {
 # Now that we have the basic building blocks, we consider how they should be put
 # together to form useful parsers.
 
-#' The alternation combinator
+#' The parser of alternative parsers.
 #'
 #' @description
 #' The `%or%` combinator `(p1 %or% p2)` returns the result of `p1` if `p1` is
@@ -138,16 +139,17 @@ literal <- function(element) {
   }
 }
 
-#' The sequence parser
+#' The parser of sequences of parsers.
 #'
 #' @description
 #'
 #' `(p1 %then% p2)` recognizes anything that `p1` and `p2` would if placed in
 #' succession.
 #'
-#' @section Formal description:
+#' @section Definition:
 #'
-#' `(p1 %then% p2) inp = [((v1,v2),out2) | (v1,outl) <- p1 inp;`
+#' `(p1 %then% p2) (x) = [((v1,v2),out2) | (v1,outl) <- p1 inp;`
+#'
 #' `                                       (v2,out2) <- p2 out1]`
 #'
 #' @details
@@ -186,7 +188,7 @@ literal <- function(element) {
   }
 }
 
-#' Manipulate results from a parser by applying a function
+#' Manipulate results from a parser by applying a function.
 #'
 #' @description
 #' The `%using%` combinator allows us to manipulate results from a parser, for
@@ -215,7 +217,7 @@ literal <- function(element) {
   }
 }
 
-#' Selecting only left or right part from a `%then%` sequence
+#' Keeping only the left or right result from a `%then%` sequence.
 #'
 #' @details
 #' Recall that two parsers composed in sequence produce a pair of results.
@@ -254,7 +256,7 @@ literal <- function(element) {
   (p1 %then% p2) %using% snd
 }
 
-#' Return a given value upon successful parsing
+#' Return a fixed value upon successful parsing.
 #'
 #' @description
 #' Sometimes we are not interested in the result from a parser at all, only
@@ -284,9 +286,9 @@ literal <- function(element) {
   p %using% function(x) {return(c)}
 }
 
-## Quantifying parsers
+## Parsers that quantify a parser.
 
-#' Quantifying parsers for p
+#' Parsers that quantify a parser.
 #'
 #' @param p A parser
 #'
@@ -369,17 +371,23 @@ match.n <- function(n, p) {
   }
 }
 
-#' The parser that matches an element using a predicate
+#' The parser that identifies a string and produces custom output.
 #'
 #' @description
-#' `match.s` matches a line using a function and returns a desired object type.
+#' `match.s` matches a string using a function and returns a desired object type.
 #'
 #' @details
 #' The function `s` should take a character vector as its single argument. It
 #' can return any object when succeeding, but to signal to the parser that it
 #' has failed it must return `list()` as output when failing. When constructing
 #' the output you should realize that the function will be given a single-
-#' element character vector (a string).
+#' element character vector (a string). This often simplifies further
+#' processing.
+#'
+#' This parser short-cuts the pattern `satisfy(b) %using% f`. With `match.s`
+#' you do not have to write separate predicate and processing functions `b` and
+#' `f` when identification and parsing can be done with a single string
+#' parsing function `s`.
 #'
 #' @param s A string-parsing function.
 #' @export

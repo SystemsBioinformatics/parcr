@@ -6,7 +6,7 @@
 \alias{exactly}
 \alias{zero.or.one}
 \alias{match.n}
-\title{Quantifying parsers for p}
+\title{Parsers that quantify a parser.}
 \usage{
 zero.or.more(p)
 
@@ -27,7 +27,7 @@ match.n(n, p)
 A parser
 }
 \description{
-Quantifying parsers for p
+Parsers that quantify a parser.
 }
 \section{Formal description}{
 

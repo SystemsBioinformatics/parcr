@@ -2,7 +2,7 @@
 % Please edit documentation in R/parser.R
 \name{\%ret\%}
 \alias{\%ret\%}
-\title{Return a given value upon successful parsing}
+\title{Return a fixed value upon successful parsing.}
 \usage{
 p \%ret\% c
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/parser.R
 \name{match.s}
 \alias{match.s}
-\title{The parser that matches an element using a predicate}
+\title{The parser that identifies a string and produces custom output.}
 \usage{
 match.s(s)
 }
@@ -10,14 +10,20 @@ match.s(s)
 \item{s}{A string-parsing function.}
 }
 \description{
-\code{match.s} matches a line using a function and returns a desired object type.
+\code{match.s} matches a string using a function and returns a desired object type.
 }
 \details{
 The function \code{s} should take a character vector as its single argument. It
 can return any object when succeeding, but to signal to the parser that it
 has failed it must return \code{list()} as output when failing. When constructing
 the output you should realize that the function will be given a single-
-element character vector (a string).
+element character vector (a string). This often simplifies further
+processing.
+
+This parser short-cuts the pattern \code{satisfy(b) \%using\% f}. With this parser
+You do not have to write separate predicate and processing functions \code{b} and
+\code{f}. Identification and parsing can often be done with a single string
+parsing function \code{s}.
 }
 \examples{
 want_integers <- function(x) {

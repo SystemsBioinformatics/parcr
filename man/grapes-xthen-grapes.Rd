@@ -3,7 +3,7 @@
 \name{\%xthen\%}
 \alias{\%xthen\%}
 \alias{\%thenx\%}
-\title{Selecting only left or right part from a \verb{\%then\%} sequence}
+\title{Keeping only the left or right result from a \verb{\%then\%} sequence.}
 \usage{
 p1 \%xthen\% p2
 
@@ -16,7 +16,7 @@ p1 \%thenx\% p2
 A parser
 }
 \description{
-Selecting only left or right part from a \verb{\%then\%} sequence
+Keeping only the left or right result from a \verb{\%then\%} sequence.
 }
 \details{
 Recall that two parsers composed in sequence produce a pair of results.

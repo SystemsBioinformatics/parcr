@@ -2,7 +2,7 @@
 % Please edit documentation in R/parser.R
 \name{\%using\%}
 \alias{\%using\%}
-\title{Manipulate results from a parser by applying a function}
+\title{Manipulate results from a parser by applying a function.}
 \usage{
 p \%using\% f
 }

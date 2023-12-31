@@ -2,7 +2,7 @@
 % Please edit documentation in R/parser.R
 \name{literal}
 \alias{literal}
-\title{The parser that matches an element using a literal string}
+\title{The parser that matches an element using a literal string.}
 \usage{
 literal(element)
 }
@@ -14,10 +14,10 @@ first element of the right hand side}
 \code{literal} is a parser for single elements. It tests whether the first
 element in the vector is equal to a given element.
 }
-\section{Formal description}{
+\section{Definition}{
 
 
-\verb{literal x = satisfy (= x)}
+\code{literal(a)(x) <- satisfy(function(y) {identical(y,a)}) (x)}
 
 where \verb{= x} is to be understood as a function which tests its argument for
 equality with \code{x}
