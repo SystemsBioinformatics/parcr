@@ -1,36 +1,42 @@
-# Closely following Graham Hutton's paper https://doi.org/10.1017/S0956796800000411
+# More or less following Graham Hutton's paper
+# https://doi.org/10.1017/S0956796800000411
 
 ## Primitive parsers
 # The primitive parsers are the building blocks of combinator parsing.
 
-#' The parser that always succeeds
+#' The beginning and the end.
 #'
 #' @description
-#' `succeed` parser always succeeds, without actually consuming any
-#' input string. Since the outcome of succeed does not depend on its input, its
-#' result value must be pre-determined, so it is included as an extra parameter.
 #'
-#' @section Formal description:
+#' These are the most basic constructors of a parser. The `succeed` parser
+#' always succeeds, without consuming any input, whereas the `fail` parser
+#' always fails.
 #'
-#' `succeed v inp = [(v, inp)].`
+#' @details
+#' The `succeed` parser constructs a `list` object with a 'left' or L-part
+#' that contains the parser result of the consumed part of the input vector and
+#' the 'right' or R-part that contains the unconsumed part of the vector. Since
+#' the outcome of succeed does not depend on its input, its result value must
+#' be pre-determined, so it is included as an extra parameter.
 #'
-#' @param left The part to be added on the L-side of a parsed list
-#' @keywords internal
+#' While `succeed` never fails, `fail` always does, regardless of the input
+#' vector. It returns the empty list `list()` to signal this fact.
+#'
+#' @param left Any object, the part to be added on the L-side of a parsed list.
+#' @export
+#' @examples
+#' succeed("A")("abc")
+#' succeed(data.frame(title="The beginning", author="J. Doe"))(c("Unconsumed","text"))
 succeed <- function(left) {
   function(right) list(L=ensure.list(left), R=right)
 }
 
-#' The parser that always fails
+# The parser that always fails
+#' @rdname succeed
+#' @export
+#' @examples
+#' fail()("abc")
 #'
-#' @description
-#' While \code{succeed} parser never fails, \code{fail} always does, regardless
-#' of the input vector. It, therefore, returns the empty list.
-#'
-#' @section Formal description:
-#'
-#' `fail inp = [].`
-#'
-#' @keywords internal
 fail <- function() {
   function(cv) list()
 }
@@ -399,88 +405,3 @@ match.s <- function(s) {
     if (failed(l)) fail()(cv) else succeed(l)(r)
   }
 }
-
-## Some common elements
-
-#' @title Recognize empty lines
-#'
-#' @description
-#'
-#' An empty line is a line that consists entirely of space-like characters.
-#' `Empty.line` is a parser that recognizes one empty line and `Spacer`
-#' recognizes one or more empty lines and `MaybeEmpty` recognizes zero or more
-#' empty lines. `Empty.line` actually returns the empty line but `Spacer` and
-#' `MaybeEmpty` discard the empty lines.
-#'
-#' @importFrom stringr str_replace_all
-#' @export
-#'
-#' @examples
-#' Empty.line() (c(' \t  ')) # success
-#' Empty.line() (c('    .')) # failure
-Empty.line <- function() {
-  satisfy(function(x) {stringr::str_replace_all(x, "\\s+", "") == ""})
-}
-
-#' @rdname Empty.line
-#' @export
-#' @examples
-#' Spacer() (c("   \t  ", "    ", "abc"))
-#' Spacer() (c("            ", "    ", "Important text"))
-#' Spacer() (c("Important text")) # failure
-Spacer <- function() {
-  (one.or.more(Empty.line())) %ret% character(0)
-}
-
-#' @rdname Empty.line
-#' @export
-#' @examples
-#' MaybeEmpty() (c("            ", "    ", "Important text"))
-#' MaybeEmpty() (c("Important text")) # success, in contrast to Spacer()
-MaybeEmpty <- function() {
-  (zero.or.more(Empty.line())) %ret% character(0)
-}
-
-#' Extracts all integer and floating point numbers from a line
-#'
-#' Ignores any other symbols. It tests whether exactly n numbers are found.
-#'
-#' @param n An integer.
-#'
-#' @return A parser.
-#' @export
-#' @examples
-#' Numbers(3) ('1  2  3')
-#' Numbers(3) ('1101\t201\t33')
-#'
-Numbers <- function(n) {
-    (satisfy( function(x) {
-      (stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE) |>
-        as.vector() |> length()) == n
-      })) %using%
-    function(x) {
-      stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE) |>
-        as.vector() |> as.numeric()
-    }
-}
-
-# Numbers <- function(n) {
-#   extract_fpnumbers <- function(x) {
-#     matches <- stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE)
-#     if (length(matches)!=n) list()
-#     else matches |> as.vector() |> as.numeric()
-#   }
-#   function(cv) {
-#     if (is.empty(cv)) {
-#       if (n > 0) l <- list()
-#       else {
-#         l <- cv
-#         r <- cv
-#       }
-#     } else {
-#       l <- extract_fpnumbers(cv[1])
-#       r <- cv[-1]
-#     }
-#     if (failed(l)) fail()(cv) else succeed(l)(r)
-#   }
-# }
