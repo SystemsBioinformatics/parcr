@@ -4,6 +4,12 @@ starts_with_b <- function(x) grepl("^b",x[1])
 length_zero <- function(x) length(x)==0
 starts_with_hash <- function(x) grepl("^#",x[1])
 
+get_numbers <- function(x) {
+  m <- gregexpr("[[:digit:]]+", x)
+  matches <- as.numeric(regmatches(x,m)[[1]])
+  if (length(matches)==0) list() else matches
+}
+
 test_that("'succeed' works in standard cases", {
   expect_equal(succeed("abc")(c("xyz","def")), list(L=list("abc"), R=c("xyz","def")))
 })
@@ -62,12 +68,24 @@ test_that("'one.or.more' works in standard cases", {
 test_that("'exactly' works in standard cases", {
   expect_equal(exactly(2,literal("A")) (c("A", LETTERS[1:5])), list(L=c(list("A"),list("A")), R=LETTERS[2:5]))
   expect_equal(exactly(2,literal("A")) (c(rep("A",2), LETTERS[1:5])), list())
+  expect_equal(exactly(0,literal("A")) (LETTERS[2:5]), list(L=list(), R=LETTERS[2:5]))
+})
+
+test_that("'zero.or.one' works in standard cases", {
+  expect_equal(zero.or.one(literal("A")) (LETTERS[2:5]), list(L=list(), R=LETTERS[2:5]))
+  expect_equal(zero.or.one(literal("A")) (LETTERS[1:5]), list(L=list("A"), R=LETTERS[2:5]))
+  expect_equal(zero.or.one(literal("A")) (c("A",LETTERS[1:5])), list())
 })
 
 test_that("'match.n' works in standard cases", {
   expect_equal(match.n(2,literal("A")) (c("A", LETTERS[1:5])), list(L=c(list("A"),list("A")), R=LETTERS[2:5]))
   expect_equal(match.n(2,literal("A")) (c(rep("A",2), LETTERS[1:5])), list(L=c(list("A"),list("A")), R=LETTERS[1:5]))
   expect_equal(match.n(2,literal("A")) (LETTERS[1:5]), list())
+})
+
+test_that("'match.s' works in standard cases", {
+  expect_equal(match.s(get_numbers) ("12 13 14"), list(L=list(c(12,13,14)), R=character(0)))
+  expect_equal(match.s(get_numbers) ("ab cd ef"), list())
 })
 
 test_that("'Empty.line' works in standard cases", {
@@ -105,6 +123,7 @@ test_that("All parsers accept character(0) input", {
   expect_equal((literal("A") %thenx% literal(character(0))) ("A"), list(L=list(), R=character(0)))
   expect_equal((literal(character(0)) %thenx% literal(character(0))) (character(0)), list())
   expect_equal(Numbers(1) (character(0)), list())
+  expect_equal(match.s(get_numbers) (character(0)), list(L=list(), R=character(0)))
 })
 
 test_that("Parsers can consume the input up to the end", {

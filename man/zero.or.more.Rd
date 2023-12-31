@@ -4,6 +4,7 @@
 \alias{zero.or.more}
 \alias{one.or.more}
 \alias{exactly}
+\alias{zero.or.one}
 \alias{match.n}
 \title{Quantifying parsers for p}
 \usage{
@@ -12,6 +13,8 @@ zero.or.more(p)
 one.or.more(p)
 
 exactly(n, p)
+
+zero.or.one(p)
 
 match.n(n, p)
 }
@@ -48,6 +51,10 @@ one.or.more(literal("A")) (LETTERS[2:5]) # failure
 
 exactly(2,literal("A")) (c("A", LETTERS[1:5])) # success
 exactly(2,literal("A")) (c(rep("A",2), LETTERS[1:5])) # failure: too many "A"
+
+zero.or.one(literal("A")) (LETTERS[2:5]) # success
+zero.or.one(literal("A")) (LETTERS[1:5]) # success
+zero.or.one(literal("A")) (c("A",LETTERS[1:5])) # failure
 
 match.n(2,literal("A")) (c("A", LETTERS[1:5])) # success
 match.n(2,literal("A")) (c(rep("A",2), LETTERS[1:5])) # success

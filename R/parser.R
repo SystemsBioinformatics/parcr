@@ -60,16 +60,16 @@ fail <- function() {
 #' satisfy(starts_with_a)(c("abc","def")) # success
 #' satisfy(starts_with_a)(c("bca","def")) # failure
 satisfy <- function(b) {
-  return(
-    function(cv) {
-      if (is.empty(cv)) {
-        r <- list(L=cv, R=cv)
-      } else {
-        r <- list(L=cv[1], R=cv[-1])
-      }
-      if (b(r$L)) succeed(r$L)(r$R)
-      else fail()(cv)
-    })
+  function(cv) {
+    if (is.empty(cv)) {
+      l <- cv
+      r <- cv
+    } else {
+      l <- cv[1]
+      r <- cv[-1]
+    }
+    if (b(l)) succeed(l)(r) else fail()(cv)
+  }
 }
 
 #' The parser that matches an element using a literal string
@@ -334,6 +334,17 @@ exactly <- function(n, p) {
 }
 
 #' @rdname zero.or.more
+#' @export
+#' @examples
+#' zero.or.one(literal("A")) (LETTERS[2:5]) # success
+#' zero.or.one(literal("A")) (LETTERS[1:5]) # success
+#' zero.or.one(literal("A")) (c("A",LETTERS[1:5])) # failure
+#'
+zero.or.one <- function(p) {
+  exactly(1,p) %or% exactly(0,p)
+}
+
+#' @rdname zero.or.more
 #' @param n An integer
 #' @export
 #' @examples
@@ -346,6 +357,46 @@ match.n <- function(n, p) {
     return(p)
   } else {
     return((p %then% match.n(n - 1, p)))
+  }
+}
+
+#' The parser that matches an element using a predicate
+#'
+#' @description
+#' `match.s` matches a line using a function and returns a desired object type.
+#'
+#' @details
+#' The function `s` should take a character vector as its single argument. It
+#' can return any object when succeeding, but to signal to the parser that it
+#' has failed it must return `list()` as output when failing. When constructing
+#' the output you should realize that the function will be given a single-
+#' element character vector (a string).
+#'
+#' @param s A string-parsing function.
+#' @export
+#' @examples
+#' want_integers <- function(x) {
+#'   m <- gregexpr("[[:digit:]]+", x)
+#'   matches <- as.numeric(regmatches(x,m)[[1]])
+#'   if (length(matches)==0) {
+#'     return(list())
+#'   } else {
+#'     return(matches)
+#'   }
+#' }
+#' match.s(want_integers) ("12 15 16 and some text") # success
+#' match.s(want_integers) ("some text") # failure
+#'
+match.s <- function(s) {
+  function(cv) {
+    if (is.empty(cv)) {
+      l <- cv
+      r <- cv
+    } else {
+      l <- s(cv[1])
+      r <- cv[-1]
+    }
+    if (failed(l)) fail()(cv) else succeed(l)(r)
   }
 }
 
@@ -413,3 +464,23 @@ Numbers <- function(n) {
     }
 }
 
+# Numbers <- function(n) {
+#   extract_fpnumbers <- function(x) {
+#     matches <- stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE)
+#     if (length(matches)!=n) list()
+#     else matches |> as.vector() |> as.numeric()
+#   }
+#   function(cv) {
+#     if (is.empty(cv)) {
+#       if (n > 0) l <- list()
+#       else {
+#         l <- cv
+#         r <- cv
+#       }
+#     } else {
+#       l <- extract_fpnumbers(cv[1])
+#       r <- cv[-1]
+#     }
+#     if (failed(l)) fail()(cv) else succeed(l)(r)
+#   }
+# }
