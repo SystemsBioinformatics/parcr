@@ -15,3 +15,7 @@ test_that("'fst' and 'snd' work", {
   expect_equal(fst(c('a')), 'a')
   expect_equal(snd(c('a')), character(0))
 })
+
+test_that("'ensure.list' works", {
+  expect_equal(ensure.list(data.frame(a='a')), list(data.frame(a='a')))
+})

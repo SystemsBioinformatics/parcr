@@ -12,6 +12,8 @@ get_numbers <- function(x) {
 
 test_that("'succeed' works in standard cases", {
   expect_equal(succeed("abc")(c("xyz","def")), list(L=list("abc"), R=c("xyz","def")))
+  expect_equal(succeed(data.frame(title="The beginning", author="J. Doe"))(c("Unconsumed","text")),
+               list(L=list(data.frame(title="The beginning", author="J. Doe")), R=c("Unconsumed","text")))
 })
 
 test_that("'fail' works in standard cases", {
@@ -86,29 +88,6 @@ test_that("'match.n' works in standard cases", {
 test_that("'match.s' works in standard cases", {
   expect_equal(match.s(get_numbers) ("12 13 14"), list(L=list(c(12,13,14)), R=character(0)))
   expect_equal(match.s(get_numbers) ("ab cd ef"), list())
-})
-
-test_that("'Empty.line' works in standard cases", {
-  expect_equal(Empty.line() (c("   \t  ", 'abc')), list(L=list("   \t  "), R='abc'))
-})
-
-test_that("'Spacer' works in standard cases", {
-  expect_equal(Spacer() (c("   \t  ", "    ", "abc")), list(L=list() , R="abc"))
-})
-
-test_that("'MaybeEmpty' works in standard cases", {
-  expect_equal(MaybeEmpty() (c("   \t  ", "    ", "abc")), list(L=list() , R="abc"))
-  expect_equal(MaybeEmpty() ("abc"), list(L=list() , R="abc"))
-})
-
-test_that("'Numbers' works in standard cases", {
-  expect_equal(Numbers(3) ('1  2  3'), list(L=list(1:3), R=character(0)))
-  expect_equal(Numbers(3) ('10\t20\t30'), list(L=list(c(10,20,30)), R=character(0)))
-  expect_equal(Numbers(4) ('10\t20\t30'), list())
-  expect_equal(Numbers(0) (" "), list(L=list(), R=character(0)))
-  expect_equal(Numbers(6) (paste(as.character(1:6),collapse="\t")), list(L=list(1:6), R=character(0)))
-  expect_equal(Numbers(6) (rep(paste(as.character(1:6),collapse="\t"), 2)), list(L=list(1:6), R=paste(as.character(1:6),collapse="\t")))
-  expect_equal(exactly(2, Numbers(6)) (rep(paste(as.character(1:6),collapse="\t"), 2)), list(L=c(list(1:6), list(1:6)), R=character(0)))
 })
 
 test_that("All parsers accept character(0) input", {

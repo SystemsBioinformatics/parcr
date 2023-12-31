@@ -47,7 +47,7 @@ snd <- function(x) {
 ensure.list <- function(x)  {
   if (is.empty(x)) list()
   else {
-    # if (!methods::is(x,'list')) list(x) else x
-    if (!is.list(x)) list(x) else x
+    if (!methods::is(x,'list')) list(x) else x
+    # if (!is.list(x)) list(x) else x
   }
 }

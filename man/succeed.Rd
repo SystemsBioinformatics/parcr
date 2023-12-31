@@ -2,22 +2,34 @@
 % Please edit documentation in R/parser.R
 \name{succeed}
 \alias{succeed}
-\title{The parser that always succeeds}
+\alias{fail}
+\title{The beginning and the end.}
 \usage{
 succeed(left)
+
+fail()
 }
 \arguments{
-\item{left}{The part to be added on the L-side of a parsed list}
+\item{left}{Any object, the part to be added on the L-side of a parsed list.}
 }
 \description{
-\code{succeed} parser always succeeds, without actually consuming any
-input string. Since the outcome of succeed does not depend on its input, its
-result value must be pre-determined, so it is included as an extra parameter.
+These are the most basic constructors of a parser. The \code{succeed} parser
+always succeeds, without consuming any input, whereas the \code{fail} parser
+always fails.
 }
-\section{Formal description}{
+\details{
+The \code{succeed} parser constructs a \code{list} object with a 'left' or L-part
+that contains the parser result of the consumed part of the input vector and
+the 'right' or R-part that contains the unconsumed part of the vector. Since
+the outcome of succeed does not depend on its input, its result value must
+be pre-determined, so it is included as an extra parameter.
 
-
-\verb{succeed v inp = [(v, inp)].}
+While \code{succeed} never fails, \code{fail} always does, regardless of the input
+vector. It returns the empty list \code{list()} to signal this fact.
 }
+\examples{
+succeed("A")("abc")
+succeed(data.frame(title="The beginning", author="J. Doe"))(c("Unconsumed","text"))
+fail()("abc")
 
-\keyword{internal}
+}
