@@ -41,10 +41,10 @@ Wickham's book [**Advanced R**](https://adv-r.hadley.nz).
 ## Creating parser combinators in R to parse text files
 
 The `parcr` package contains a set of functions that allow you to create simple
-parsers with so-called Combinators, Functions that take two or more functions to
-create new functions. The philosophy behind the package is described in a paper
-by @Hutton1992. The functions described in this paper are implemented with 
-modifications in the current package. 
+parsers with so-called Combinators, Functions that take other functions as 
+arguments to create new functions. The philosophy behind the package is 
+described in a paper by @Hutton1992. A number of the functions described in 
+this paper are implemented with modifications in the current package. 
 
 ### The output of the parsers
 
@@ -58,8 +58,46 @@ When the parser fails the output will be the empty list `list()`.
 
 ### The functions
 
-```{r setup}
+Please realize that every function described below is a higher order function:
+its output is a function. For example, `literal('a')` yields a function. To
+use that function you have to provide it with a character vector, the object
+that needs to be parsed, as input:
+
+`literal('a') (c('a','att'))`
+
+#### The beginning and the end
+
+```{r setup, echo=FALSE}
 library(parcr)
+```
+
+- `succeed(o)`: where `o` is any kind of R-object
+- `fail()`
+
+The `succeed` and `fail` parsers are the most basic constructors of a parser. 
+The `succeed` parser always succeeds, without consuming any input, whereas the
+`fail` parser always fails.
+
+The `succeed` parser constructs a `list` object with a 'left' or L-part
+that contains the parser result of the consumed part of the input vector and
+the 'right' or R-part that contains the unconsumed part of the vector. The
+left part can be any R-object.
+
+While `succeed` never fails, `fail` always does, regardless of the input
+vector. It returns the empty list `list()` to signal this fact.
+
+In practice, you will not use these two functions to construct parsers. They 
+are the cogs of the other functions.
+
+**Examples**
+
+```{r}
+succeed("A")("abc")
+succeed(data.frame(title="Keisri hull", author="Jaan Kross"))(c("Unconsumed","text"))
+```
+
+```{r}
+fail()("abc")
 ```
 
 #### Recognizing an element
@@ -130,22 +168,29 @@ would in principle succeed then only the result of `p1` is returned.
 
 #### Qantifying combinators
 
+- `zero.or.one(p)`: where `p` is a parser.
 - `zero.or.more(p)`: where `p` is a parser.
 - `one.or.more(p)`: where `p` is a parser.
 - `exactly(n,p)`: where `n` is an integer and `p` is a parser.
 - `match.n(n,p)`: where `n` is an integer and `p` is a parser.
 
-`zero.or.more` and `one.or.more` do exactly what their names suggest. You 
-should realize that these are greedy parsers: they consume as many as possible
-strings that can be successfully parsed by `p`. Similarly, `exactly` is a 
-greedy parser, and it fails when there are less or more than `n` consecutive
-strings that can be successfully parsed by `p`. On the other hand `match.n`
-is not greedy. It consumes `n` but no more strings that can be successfully
-parsed with `p`.
+`zero.or.one`, `zero.or.more` and `one.or.more` do exactly what their names 
+suggest. You should realize that these are greedy parsers: they consume as many
+as possible strings that can be successfully parsed by `p`. Similarly, 
+`exactly` is a greedy parser, and it fails when there are less or more than `n`
+consecutive strings that can be successfully parsed by `p`. On the other hand
+`match.n` is not greedy. It consumes `n` but no more strings that can be 
+successfully parsed with `p`.
 
 **Examples**
 
-The following is a successful parser. Note that its result is not merely
+This parser will fail on its input, too many strings starting with "a":
+```{r}
+zero.or.one(satisfy(starts_with_a)) (c('acc','aat','cgg'))
+```
+
+
+The following is a successful parsing. Note that its result is not merely
 `list()`. However it does return an empty list in the `L`-side of the result.
 ```{r}
 zero.or.more(satisfy(starts_with_a)) (c('cat','gac','cct'))
@@ -344,3 +389,5 @@ Let's present the result more concisely:
 ```{r}
 invisible(lapply(d, function(x) {cat(x$header, x$sequence, "\n")}))
 ```
+
+## Literature
