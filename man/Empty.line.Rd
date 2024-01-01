@@ -28,9 +28,9 @@ empty lines. \code{Empty.line} actually returns the empty line but \code{Spacer}
 
 \verb{\}}
 
-\code{Spacer <- function() {one.or.more(Empty.line()) \%ret\% character(0)}}
+\code{Spacer <- function() {one.or.more(Empty.line()) \%ret\% NULL}}
 
-\code{MaybeEmpty <- function() {(zero.or.more(Empty.line())) \%ret\% character(0)}}
+\code{MaybeEmpty <- function() {(zero.or.more(Empty.line())) \%ret\% NULL}}
 }
 
 \examples{

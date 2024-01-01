@@ -41,7 +41,7 @@ succeed <- function(left) {
 #' fail()("abc")
 #'
 fail <- function() {
-  function(cv) list()
+  function(x) list()
 }
 
 #' The parser that matches an element using a predicate function.
@@ -52,11 +52,11 @@ fail <- function() {
 #'
 #' @section Definition:
 #'
-#' `satisfy(b)(x): fail()(x)             when x == list()`
-#'
-#' `             : succeed(x[1]) (x[-1]) when b(x[1])`
-#'
-#' `             : fail()(x)             when !b(x[1])`
+#' ```
+#' satisfy(b)(x): fail()(x)             when x = NULL
+#'              : succeed(x[1]) (x[-1]) when b(x[1]])
+#'              : fail()(x)             otherwise
+#' ```
 #'
 #' @param b A boolean function to determine if the element is accepted.
 #' @export
@@ -69,13 +69,13 @@ fail <- function() {
 #' satisfy(starts_with_a)(c("abc","def")) # success
 #' satisfy(starts_with_a)(c("bca","def")) # failure
 satisfy <- function(b) {
-  function(cv) {
-    if (is.empty(cv)) {
-      l <- cv
-      r <- cv
+  function(x) {
+    if (is.empty(x)) {
+      l <- x
+      r <- x
     } else {
-      l <- cv[1]
-      r <- cv[-1]
+      l <- x[1]
+      r <- x[-1]
     }
     if (b(l)) succeed(l)(r) else fail()(cv)
   }
@@ -89,7 +89,9 @@ satisfy <- function(b) {
 #'
 #' @section Definition:
 #'
-#' `literal(a)(x) <- satisfy(function(y) {identical(y,a)}) (x)`
+#' ```
+#' literal(a)(x) <- satisfy(function(y) {identical(y,a)}) (x)
+#' ```
 #'
 #' where `= x` is to be understood as a function which tests its argument for
 #' equality with `x`
@@ -132,10 +134,10 @@ literal <- function(element) {
 #' # success on both parsers, but returns result of p1 only
 #' (literal("a") %or% satisfy(starts_with_a)) (letters[1:5])
 `%or%` <- function(p1, p2) {
-  function(cv) {
-    r1 <- p1(cv)
-    r2 <- p2(cv)
-    if (!failed(r1)) r1 else {if (!failed(r2)) r2 else fail()(cv)}
+  function(x) {
+    r1 <- p1(x)
+    r2 <- p2(x)
+    if (!failed(r1)) r1 else {if (!failed(r2)) r2 else fail()(x)}
   }
 }
 
@@ -148,9 +150,15 @@ literal <- function(element) {
 #'
 #' @section Definition:
 #'
-#' `(p1 %then% p2) (x) = [((v1,v2),out2) | (v1,outl) <- p1 inp;`
-#'
-#' `                                       (v2,out2) <- p2 out1]`
+#'  ```
+#' (p1 %then% p2) (x) = [((v1,v2),out2) | (v1,outl) <- p1 inp;`
+#'                                       (v2,out2) <- p2 out1]`
+#' ```
+#' ```
+#' (p1 %then% p2) (x): fail()(x)             when x = NULL
+#'                   : succeed(x[1]) (x[-1]) when b(x[1]])
+#'              : fail()(x)             otherwise
+#' ```
 #'
 #' @details
 #' For example, applying the parser `(literal 'a' %then% literal 'b')` to the
@@ -173,16 +181,15 @@ literal <- function(element) {
 #' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("bb", "bc", "de")) # failure
 #' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("ab", "ac", "de")) # failure
 `%then%` <- function(p1, p2) {
-  function(cv) {
-    # Fail on NULL input, otherwise we we create an endless loop
-    if (is.empty(cv)) fail()(cv)
+  function(x) {
+    # Fail on NULL input, otherwise we create endless loops
+    if (is.empty(x)) fail()(x)
     else {
-      r1 <- p1(cv)
-      if (failed(r1)) fail()(cv)
+      r1 <- p1(x)
+      if (failed(r1)) fail()(x)
       else {
         r2 <- p2(r1$R)
-        if (failed(r2)) fail()(cv) else
-        return(list(L=c(r1$L, r2$L), R=r2$R))
+        if (failed(r2)) fail()(x) else succeed(c(r1$L, r2$L)) (r2$R)
       }
     }
   }
@@ -210,10 +217,9 @@ literal <- function(element) {
 #' (literal('ab') %using% toupper) (c("ab","cdef")) # success
 #' (literal('ab') %using% toupper) (c("bb","cdef")) # failure
 `%using%` <- function(p, f) {
-  function(cv) {
-    r <- p(cv)
-    if (failed(r)) fail()(cv)
-    else return(list(L = ensure.list(f(r$L)), R=r$R))
+  function(x) {
+    r <- p(x)
+    if (failed(r)) fail()(x) else succeed(f(r$L))(r$R)
   }
 }
 
@@ -310,7 +316,6 @@ literal <- function(element) {
 #' zero.or.more(literal("A")) (c("A",LETTERS[1:5]))
 #' zero.or.more(literal("A")) (LETTERS[2:5])
 zero.or.more <- function(p) {
-  # notice: c used below is the concatenation function from R
   (p %then% zero.or.more(p)) %or% succeed(NULL)
 }
 
@@ -336,11 +341,7 @@ exactly <- function(n, p) {
   # The non-greedy version is match.n
   function(x) {
     r <- zero.or.more(p)(x)
-    if (length(r$L) == n) {
-      return(r)
-    } else {
-      return(fail()(x))
-    }
+    if (length(r$L) == n) r else fail()(x)
   }
 }
 
@@ -364,11 +365,7 @@ zero.or.one <- function(p) {
 #'
 match.n <- function(n, p) {
   # non-greedy version of 'exactly'
-  if (n == 1) {
-    return(p)
-  } else {
-    return((p %then% match.n(n - 1, p)))
-  }
+  if (n == 1) p else (p %then% match.n(n - 1, p))
 }
 
 #' The parser that identifies a string and produces custom output.
@@ -405,14 +402,14 @@ match.n <- function(n, p) {
 #' match.s(want_integers) ("some text") # failure
 #'
 match.s <- function(s) {
-  function(cv) {
-    if (is.empty(cv)) {
-      l <- cv
-      r <- cv
+  function(x) {
+    if (is.empty(x)) {
+      l <- x
+      r <- x
     } else {
-      l <- s(cv[1])
-      r <- cv[-1]
+      l <- s(x[1])
+      r <- x[-1]
     }
-    if (failed(l)) fail()(cv) else succeed(l)(r)
+    if (failed(l)) fail()(x) else succeed(l)(r)
   }
 }
