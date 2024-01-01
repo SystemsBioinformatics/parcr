@@ -8,9 +8,9 @@
 #'
 #' @description
 #'
-#' These are the most basic constructors of a parser. The `succeed` parser
-#' always succeeds, without consuming any input, whereas the `fail` parser
-#' always fails.
+#' These are the most banal constructors of a parser, but they are important
+#' cogs in the machinery. The `succeed` parser always succeeds, without
+#' consuming any input, whereas the `fail` parser always fails.
 #'
 #' @details
 #' The `succeed` parser constructs a `list` object with a 'left' or L-part
@@ -174,7 +174,7 @@ literal <- function(element) {
 #' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("ab", "ac", "de")) # failure
 `%then%` <- function(p1, p2) {
   function(cv) {
-    # Fail on character(0) input, otherwise we we create an endless loop
+    # Fail on NULL input, otherwise we we create an endless loop
     if (is.empty(cv)) fail()(cv)
     else {
       r1 <- p1(cv)
@@ -311,7 +311,7 @@ literal <- function(element) {
 #' zero.or.more(literal("A")) (LETTERS[2:5])
 zero.or.more <- function(p) {
   # notice: c used below is the concatenation function from R
-  (p %then% zero.or.more(p)) %or% succeed(character(0))
+  (p %then% zero.or.more(p)) %or% succeed(NULL)
 }
 
 #' @rdname zero.or.more
