@@ -27,12 +27,12 @@ failed <- function(l) {
 #' @return A vector.
 #' @keywords internal
 fst <- function(x) {
-  if (is.empty(x)) character(0) else x[1]
+  if (is.empty(x)) NULL else x[1]
 }
 
 #' @rdname fst
 snd <- function(x) {
-  if (length(x)==1) character(0) else x[2]
+  if (length(x)==1) NULL else x[2]
 }
 
 #' Ensure that the structure of objects is preserved.

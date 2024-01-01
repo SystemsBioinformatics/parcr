@@ -10,9 +10,20 @@
 #' empty lines. `Empty.line` actually returns the empty line but `Spacer` and
 #' `MaybeEmpty` discard the empty lines.
 #'
+#' @section Definitions:
+#'
+#' `Empty.line <- function() {`
+#'
+#' `satisfy(function(x) {stringr::str_replace_all(x, "\\s+", "") == ""})`
+#'
+#' `}`
+#'
+#' `Spacer <- function() {one.or.more(Empty.line()) %ret% NULL}`
+#'
+#' `MaybeEmpty <- function() {(zero.or.more(Empty.line())) %ret% NULL}`
+#'
 #' @importFrom stringr str_replace_all
 #' @export
-#'
 #' @examples
 #' Empty.line() (c(' \t  ')) # success
 #' Empty.line() (c('    .')) # failure
@@ -27,7 +38,7 @@ Empty.line <- function() {
 #' Spacer() (c("            ", "    ", "Important text"))
 #' Spacer() (c("Important text")) # failure
 Spacer <- function() {
-  (one.or.more(Empty.line())) %ret% character(0)
+  one.or.more(Empty.line()) %ret% NULL
 }
 
 #' @rdname Empty.line
@@ -36,7 +47,7 @@ Spacer <- function() {
 #' MaybeEmpty() (c("            ", "    ", "Important text"))
 #' MaybeEmpty() (c("Important text")) # success, in contrast to Spacer()
 MaybeEmpty <- function() {
-  (zero.or.more(Empty.line())) %ret% character(0)
+  (zero.or.more(Empty.line())) %ret% NULL
 }
 
 #' Extracts all integer and floating point numbers from a line
@@ -61,24 +72,3 @@ Numbers <- function(n) {
         as.vector() |> as.numeric()
     }
 }
-
-# Numbers <- function(n) {
-#   extract_fpnumbers <- function(x) {
-#     matches <- stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE)
-#     if (length(matches)!=n) list()
-#     else matches |> as.vector() |> as.numeric()
-#   }
-#   function(cv) {
-#     if (is.empty(cv)) {
-#       if (n > 0) l <- list()
-#       else {
-#         l <- cv
-#         r <- cv
-#       }
-#     } else {
-#       l <- extract_fpnumbers(cv[1])
-#       r <- cv[-1]
-#     }
-#     if (failed(l)) fail()(cv) else succeed(l)(r)
-#   }
-# }

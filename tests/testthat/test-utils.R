@@ -13,7 +13,7 @@ test_that("'fst' and 'snd' work", {
   expect_equal(fst(c('a','b')), 'a')
   expect_equal(snd(c('a','b')), 'b')
   expect_equal(fst(c('a')), 'a')
-  expect_equal(snd(c('a')), character(0))
+  expect_equal(snd(c('a')), NULL)
 })
 
 test_that("'ensure.list' works", {

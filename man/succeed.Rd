@@ -13,9 +13,9 @@ fail()
 \item{left}{Any R-object constructed from a parsed vector.}
 }
 \description{
-These are the most basic constructors of a parser. The \code{succeed} parser
-always succeeds, without consuming any input, whereas the \code{fail} parser
-always fails.
+These are the most banal constructors of a parser, but they are important
+cogs in the machinery. The \code{succeed} parser always succeeds, without
+consuming any input, whereas the \code{fail} parser always fails.
 }
 \details{
 The \code{succeed} parser constructs a \code{list} object with a 'left' or L-part

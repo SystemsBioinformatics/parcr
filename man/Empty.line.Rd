@@ -19,6 +19,20 @@ recognizes one or more empty lines and \code{MaybeEmpty} recognizes zero or more
 empty lines. \code{Empty.line} actually returns the empty line but \code{Spacer} and
 \code{MaybeEmpty} discard the empty lines.
 }
+\section{Definitions}{
+
+
+\verb{Empty.line <- function() \{}
+
+\code{satisfy(function(x) {stringr::str_replace_all(x, "\\\\s+", "") == ""})}
+
+\verb{\}}
+
+\code{Spacer <- function() {one.or.more(Empty.line()) \%ret\% character(0)}}
+
+\code{MaybeEmpty <- function() {(zero.or.more(Empty.line())) \%ret\% character(0)}}
+}
+
 \examples{
 Empty.line() (c(' \t  ')) # success
 Empty.line() (c('    .')) # failure
