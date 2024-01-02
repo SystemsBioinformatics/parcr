@@ -21,6 +21,7 @@
 #'
 # @examples
 split_by <- function(p, split, finish=TRUE, fixed=FALSE, perl=FALSE) {
+  # if (!(length(split)==1)) stop("Argument 'split' should be a vector of length 1")
   function(x) {
     if (is.empty(x)) fail()(x)
     else {
