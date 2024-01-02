@@ -22,15 +22,14 @@ empty lines. \code{Empty.line} actually returns the empty line but \code{Spacer}
 \section{Definitions}{
 
 
-\verb{Empty.line <- function() \{}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{Empty.line <- function() \{
+  satisfy(function(x) \{stringr::str_replace_all(x, "\\\\s+", "") == ""\})
+\}
 
-\code{satisfy(function(x) {stringr::str_replace_all(x, "\\\\s+", "") == ""})}
+Spacer <- function() \{one.or.more(Empty.line()) \%ret\% NULL\}
 
-\verb{\}}
-
-\code{Spacer <- function() {one.or.more(Empty.line()) \%ret\% NULL}}
-
-\code{MaybeEmpty <- function() {(zero.or.more(Empty.line())) \%ret\% NULL}}
+MaybeEmpty <- function() \{(zero.or.more(Empty.line())) \%ret\% NULL\}
+}\if{html}{\out{</div>}}
 }
 
 \examples{

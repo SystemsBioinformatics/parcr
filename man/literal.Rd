@@ -17,7 +17,8 @@ element in the vector is equal to a given element.
 \section{Definition}{
 
 
-\code{literal(a)(x) <- satisfy(function(y) {identical(y,a)}) (x)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{literal(a)(x) <- satisfy(function(y) \{identical(y,a)\}) (x)
+}\if{html}{\out{</div>}}
 
 where \verb{= x} is to be understood as a function which tests its argument for
 equality with \code{x}

@@ -17,7 +17,7 @@ elements.
 
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{satisfy(b)(x): fail()(x)             when x = NULL
-             : succeed(x[1]) (x[-1]) when b(x[1])
+             : succeed(x[1]) (x[-1]) when b(x[1]])
              : fail()(x)             otherwise
 }\if{html}{\out{</div>}}
 }

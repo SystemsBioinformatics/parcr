@@ -16,7 +16,9 @@ A parser.
 Ignores any other symbols. It tests whether exactly n numbers are found.
 }
 \examples{
-Numbers(3) ('1  2  3')
-Numbers(3) ('1101\t201\t33')
+Numbers(3) ('1  2  3') #success
+Numbers(3) ('1101\t201.5\t33') # success
+Numbers(2) ('1101\t201.5\t33') # failure
+Numbers(4) ('1101\t201.5\t33') # failure
 
 }

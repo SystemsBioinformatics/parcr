@@ -29,13 +29,14 @@ if this notation were not available.
 \section{Definition}{
 
 
-\verb{(p1 \%then\% p2) (x) = [((v1,v2),out2) | (v1,outl) <- p1 inp;}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{(p1 \%then\% p2) (x) = [((v1,v2),out2) | (v1,outl) <- p1 inp;`
+                                     (v2,out2) <- p2 out1]`
+}\if{html}{\out{</div>}}
 
-\verb{                                       (v2,out2) <- p2 out1]}
-
-[((v1,v2),out2) | (v1,outl) <- p1 inp;`
-
-`                                       (v2,out2) <- p2 out1]: R:((v1,v2),out2)\%20\%7C\%20(v1,outl)\%20\%3C-\%20p1\%20inp;\%60\%0A\%0A\%60\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20\%20(v2,out2)\%20\%3C-\%20p2\%20out1
+\if{html}{\out{<div class="sourceCode">}}\preformatted{(p1 \%then\% p2) (x): fail()(x)             when x = NULL
+                  : succeed(x[1]) (x[-1]) when b(x[1]])
+             : fail()(x)             otherwise
+}\if{html}{\out{</div>}}
 }
 
 \examples{
