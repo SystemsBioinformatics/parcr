@@ -4,15 +4,13 @@
 \alias{literal}
 \title{The parser that matches an element using a literal string.}
 \usage{
-literal(element)
+literal(string)
 }
 \arguments{
-\item{element}{A single-element (character) vector to be matched with the
-first element of the right hand side}
+\item{string}{a single element character vector.}
 }
 \description{
-\code{literal} is a parser for single elements. It tests whether the first
-element in the vector is equal to a given element.
+\code{literal} tests whether a supplied string literally equals a desired value.
 }
 \section{Definition}{
 

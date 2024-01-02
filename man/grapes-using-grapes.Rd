@@ -7,18 +7,17 @@
 p \%using\% f
 }
 \arguments{
-\item{p}{A parser}
+\item{p}{a parser.}
 
-\item{f}{A function to be applied to the result of a succesful \code{p}}
+\item{f}{a function to be applied to the result of a succesful \code{p}.}
 }
 \value{
-A parser
+A parser.
 }
 \description{
-The \verb{\%using\%} combinator allows us to manipulate results from a parser, for
-example building a parse tree. The parser \code{(p \%using\% f)} has the same
-behavior as the parser \code{p}, except that the function \code{f} is applied to each
-of its result values.
+The \verb{\%using\%} combinator allows us to manipulate results from a parser. The
+parser \code{(p \%using\% f)} has the same behavior as the parser \code{p}, except that
+the function \code{f} is applied to its result value.
 }
 \section{Formal description}{
 

@@ -28,9 +28,9 @@ string? Defaults to \code{TRUE}.}
 A parser.
 }
 \description{
-Splits a string to a character vector of using a split pattern and then
-applies the parser \code{p} to that character vector. If \code{finish = TRUE} then the
-parser should completely consume its input, otherwise the parser fails. If
+Splits a string by using a split pattern and then applies the parser \code{p}
+to the resulting character vector. If \code{finish = TRUE} then the parser should
+completely consume its input, otherwise the parser fails. If
 \code{finish = FALSE} then any remaining part of the string is discarded.
 }
 \details{

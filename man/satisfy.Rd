@@ -7,11 +7,10 @@
 satisfy(b)
 }
 \arguments{
-\item{b}{A boolean function to determine if the element is accepted.}
+\item{b}{a boolean function to determine if the string is accepted.}
 }
 \description{
-\code{satisfy} turns a predicate function into a parser that recognizes single
-elements.
+\code{satisfy} turns a predicate function into a parser that recognizes strings.
 }
 \section{Definition}{
 

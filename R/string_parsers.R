@@ -2,9 +2,9 @@
 #' Applying a parser to a split string
 #'
 #' @description
-#' Splits a string to a character vector of using a split pattern and then
-#' applies the parser `p` to that character vector. If `finish = TRUE` then the
-#' parser should completely consume its input, otherwise the parser fails. If
+#' Splits a string by using a split pattern and then applies the parser `p`
+#' to the resulting character vector. If `finish = TRUE` then the parser should
+#' completely consume its input, otherwise the parser fails. If
 #' `finish = FALSE` then any remaining part of the string is discarded.
 #'
 #' @param p A parser.
@@ -71,5 +71,5 @@ by_split <- function(p, split, finish=TRUE, fixed=FALSE, perl=FALSE) {
 #' by_symbol(exactly(3,literal("a"))) (c("aaa", "bb")) # success
 #' by_symbol(exactly(3,literal("a"))) (c("aaaa", "bb")) # failure
 by_symbol <- function(p, finish=TRUE) {
-  by_split(p, "", finish)
+  split_by(p, "", finish)
 }

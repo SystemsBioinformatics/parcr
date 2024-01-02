@@ -7,10 +7,10 @@
 p1 \%or\% p2
 }
 \arguments{
-\item{p1, p2}{Two parsers}
+\item{p1, p2}{two parsers.}
 }
 \value{
-A list of parser results
+A parser.
 }
 \description{
 The \verb{\%or\%} combinator \code{(p1 \%or\% p2)} returns the result of \code{p1} if \code{p1} is

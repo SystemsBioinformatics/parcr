@@ -7,24 +7,14 @@
 p1 \%then\% p2
 }
 \arguments{
-\item{p1, p2}{Two parsers}
+\item{p1, p2}{two parsers.}
 }
 \value{
-A parser
+A parser.
 }
 \description{
 \code{(p1 \%then\% p2)} recognizes anything that \code{p1} and \code{p2} would if placed in
 succession.
-}
-\details{
-For example, applying the parser \verb{(literal 'a' \%then\% literal 'b')} to the
-input \code{'abcd'} gives the result \verb{[(('a','b'),'cd')]}. Then then combinator
-is an excellent example of list comprehension notation, analogous to set
-comprehension in mathematics (e.g.
-\eqn{\{x^2 | x \in \mathbb{N} \land x \leq 10\}} defines the first ten
-squares), except that lists replace sets, and elements are drawn in a
-determined order. Much of the elegance of the then combinator would be lost
-if this notation were not available.
 }
 \section{Definition}{
 
@@ -47,5 +37,5 @@ starts_with_b <- function(x) grepl("^b",x[1])
 (satisfy(starts_with_a) \%then\% satisfy(starts_with_b)) (c("ab", "ac", "de")) # failure
 }
 \seealso{
-The element-discarding versions \link{\%xthen\%} and \link{\%thenx\%}
+The discarding versions \link{\%xthen\%} and \link{\%thenx\%}
 }

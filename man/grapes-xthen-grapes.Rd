@@ -10,7 +10,7 @@ p1 \%xthen\% p2
 p1 \%thenx\% p2
 }
 \arguments{
-\item{p1, p2}{Two parsers}
+\item{p1, p2}{two parsers.}
 }
 \value{
 A parser

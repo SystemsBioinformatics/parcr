@@ -4,12 +4,12 @@
 ## Primitive parsers
 # The primitive parsers are the building blocks of combinator parsing.
 
-#' The beginning and the end.
+#' The most basic parsers.
 #'
 #' @description
 #'
-#' These are the most banal constructors of a parser, but they are important
-#' cogs in the machinery. The `succeed` parser always succeeds, without
+#' These are the most basic constructors of a parser, but they are important
+#' cogs of the parser machinery. The `succeed` parser always succeeds, without
 #' consuming any input, whereas the `fail` parser always fails.
 #'
 #' @details
@@ -23,9 +23,10 @@
 #' vector. It returns the empty list `list()` to signal this fact.
 #'
 #' @section Note:
-#' You will probably never have to use these functions when constructing parsers.
+#' You will probably never have to use these functions when constructing
+#' parsers.
 #'
-#' @param left Any R-object constructed from a parsed vector.
+#' @param left any R-object constructed from a parsed vector.
 #' @export
 #' @examples
 #' succeed("A")("abc")
@@ -47,18 +48,16 @@ fail <- function() {
 #' The parser that matches an element using a predicate function.
 #'
 #' @description
-#' `satisfy` turns a predicate function into a parser that recognizes single
-#' elements.
+#' `satisfy` turns a predicate function into a parser that recognizes strings.
 #'
 #' @section Definition:
-#'
 #' ```
 #' satisfy(b)(x): fail()(x)             when x = NULL
 #'              : succeed(x[1]) (x[-1]) when b(x[1]])
 #'              : fail()(x)             otherwise
 #' ```
 #'
-#' @param b A boolean function to determine if the element is accepted.
+#' @param b a boolean function to determine if the string is accepted.
 #' @export
 #' @examples
 #'
@@ -84,8 +83,7 @@ satisfy <- function(b) {
 #' The parser that matches an element using a literal string.
 #'
 #' @description
-#' `literal` is a parser for single elements. It tests whether the first
-#' element in the vector is equal to a given element.
+#' `literal` tests whether a supplied string literally equals a desired value.
 #'
 #' @section Definition:
 #'
@@ -96,24 +94,22 @@ satisfy <- function(b) {
 #' where `= x` is to be understood as a function which tests its argument for
 #' equality with `x`
 #'
-#' @param element A single-element (character) vector to be matched with the
-#' first element of the right hand side
+#' @param string a single element character vector.
 #' @export
 #' @examples
 #' literal("ab") (c("ab", "cdef")) # success
 #' literal("ab") (c("abc", "cdef")) # failure
-literal <- function(element) {
+literal <- function(string) {
   satisfy(
     function(x) {
       if (is.empty(x)) {first.element <- x} else {first.element <- x[1]}
-      return(identical(first.element, element))
-      #return(first.element==element)
+      return(identical(first.element, string))
     }
   )
 }
 
 ## Combinators
-# Now that we have the basic building blocks, we consider how they should be put
+# Above we made the basic building blocks. We consider how they should be put
 # together to form useful parsers.
 
 #' The parser of alternative parsers.
@@ -123,8 +119,8 @@ literal <- function(element) {
 #' successful or, if `p1` fails that of `p2` if `p2` parses successfully,
 #' otherwise it returns a `fail`.
 #'
-#' @param p1,p2 Two parsers
-#' @returns A list of parser results
+#' @param p1,p2 two parsers.
+#' @returns A parser.
 #' @export
 #' @examples
 #' (literal("A") %or% literal("a"))(LETTERS[1:5]) # success on first parser
@@ -160,20 +156,10 @@ literal <- function(element) {
 #'              : fail()(x)             otherwise
 #' ```
 #'
-#' @details
-#' For example, applying the parser `(literal 'a' %then% literal 'b')` to the
-#' input `'abcd'` gives the result `[(('a','b'),'cd')]`. Then then combinator
-#' is an excellent example of list comprehension notation, analogous to set
-#' comprehension in mathematics (e.g.
-#' \eqn{\{x^2 | x \in \mathbb{N} \land x \leq 10\}} defines the first ten
-#' squares), except that lists replace sets, and elements are drawn in a
-#' determined order. Much of the elegance of the then combinator would be lost
-#' if this notation were not available.
-#'
 #' @inheritParams %or%
-#' @returns A parser
+#' @returns A parser.
 #' @export
-#' @seealso The element-discarding versions [%xthen%] and [%thenx%]
+#' @seealso The discarding versions [%xthen%] and [%thenx%]
 #' @examples
 #' starts_with_a <- function(x) grepl("^a",x[1])
 #' starts_with_b <- function(x) grepl("^b",x[1])
@@ -198,20 +184,18 @@ literal <- function(element) {
 #' Manipulate results from a parser by applying a function.
 #'
 #' @description
-#' The `%using%` combinator allows us to manipulate results from a parser, for
-#' example building a parse tree. The parser `(p %using% f)` has the same
-#' behavior as the parser `p`, except that the function `f` is applied to each
-#' of its result values.
+#' The `%using%` combinator allows us to manipulate results from a parser. The
+#' parser `(p %using% f)` has the same behavior as the parser `p`, except that
+#' the function `f` is applied to its result value.
 #'
 #' @section Formal description:
 #'
 #' `(p %using$% f) inp = [(fv, out) | (v, out) <- p inp]`
 #'
-# TODO how to interpret the above code
 #'
 #' @inheritParams zero_or_more
-#' @param f A function to be applied to the result of a succesful `p`
-#' @returns A parser
+#' @param f a function to be applied to the result of a succesful `p`.
+#' @returns A parser.
 #' @export
 #' @examples
 #' (literal('ab') %using% toupper) (c("ab","cdef")) # success
@@ -280,7 +264,8 @@ literal <- function(element) {
 #' `%ret% <- function(p, c) {p %using% function(x) c}`
 #'
 #' @inheritParams zero_or_more
-#' @param c A single-element character value. Character values are enforced
+#' @param c a single-element character value. `NULL` is coerced to
+#'  `character(0)`.
 #'
 #' @returns A parser
 #' @export
@@ -296,7 +281,7 @@ literal <- function(element) {
 
 #' Parsers that quantify a parser.
 #'
-#' @param p A parser
+#' @param p a parser.
 #'
 # @section Formal description:
 # \preformatted{zero_or_more p = ((p %then% zero_or_more p) %using% cons) %alt% (succeed [])}
@@ -324,7 +309,7 @@ one_or_more <- function(p) {
 }
 
 #' @rdname zero_or_more
-#' @param n An integer
+#' @param n a positive integer, including 0.
 #' @export
 #' @examples
 #' exactly(2,literal("A")) (c("A", LETTERS[1:5])) # success
@@ -351,7 +336,6 @@ zero_or_one <- function(p) {
 }
 
 #' @rdname zero_or_more
-#' @param n An integer
 #' @export
 #' @examples
 #' match_n(2,literal("A")) (c("A", LETTERS[1:5])) # success

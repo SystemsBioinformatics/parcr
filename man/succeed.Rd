@@ -3,18 +3,18 @@
 \name{succeed}
 \alias{succeed}
 \alias{fail}
-\title{The beginning and the end.}
+\title{The most basic parsers.}
 \usage{
 succeed(left)
 
 fail()
 }
 \arguments{
-\item{left}{Any R-object constructed from a parsed vector.}
+\item{left}{any R-object constructed from a parsed vector.}
 }
 \description{
-These are the most banal constructors of a parser, but they are important
-cogs in the machinery. The \code{succeed} parser always succeeds, without
+These are the most basic constructors of a parser, but they are important
+cogs of the parser machinery. The \code{succeed} parser always succeeds, without
 consuming any input, whereas the \code{fail} parser always fails.
 }
 \details{
@@ -29,7 +29,8 @@ vector. It returns the empty list \code{list()} to signal this fact.
 }
 \section{Note}{
 
-You will probably never have to use these functions when constructing parsers.
+You will probably never have to use these functions when constructing
+parsers.
 }
 
 \examples{

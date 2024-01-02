@@ -19,9 +19,9 @@ zero_or_one(p)
 match_n(n, p)
 }
 \arguments{
-\item{p}{A parser}
+\item{p}{a parser.}
 
-\item{n}{An integer}
+\item{n}{a positive integer, including 0.}
 }
 \value{
 A parser
