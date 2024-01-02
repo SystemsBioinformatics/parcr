@@ -105,8 +105,11 @@ satisfy <- function(b) {
 #'
 #' @section Pseudocode:
 #' \preformatted{
-#' literal(a) (x): satisfy(function(y) y==a)(x)
+#' literal(a) (x): satisfy(F(y): y==a)(x)
 #' }
+#'
+#' where `F` is equivalent to the `function` declarator in R. So, we have an
+#' anonymous function in the argument of `satisfy`.
 #'
 #' @param string a single element character vector.
 #' @export
