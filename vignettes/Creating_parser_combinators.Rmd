@@ -168,36 +168,36 @@ would in principle succeed then only the result of `p1` is returned.
 
 #### Qantifying combinators
 
-- `zero.or.one(p)`: where `p` is a parser.
-- `zero.or.more(p)`: where `p` is a parser.
-- `one.or.more(p)`: where `p` is a parser.
+- `zero_or_one(p)`: where `p` is a parser.
+- `zero_or_more(p)`: where `p` is a parser.
+- `one_or_more(p)`: where `p` is a parser.
 - `exactly(n,p)`: where `n` is an integer and `p` is a parser.
-- `match.n(n,p)`: where `n` is an integer and `p` is a parser.
+- `match_n(n,p)`: where `n` is an integer and `p` is a parser.
 
-`zero.or.one`, `zero.or.more` and `one.or.more` do exactly what their names 
+`zero_or_one`, `zero_or_more` and `one_or_more` do exactly what their names 
 suggest. You should realize that these are greedy parsers: they consume as many
 as possible strings that can be successfully parsed by `p`. Similarly, 
 `exactly` is a greedy parser, and it fails when there are less or more than `n`
 consecutive strings that can be successfully parsed by `p`. On the other hand
-`match.n` is not greedy. It consumes `n` but no more strings that can be 
+`match_n` is not greedy. It consumes `n` but no more strings that can be 
 successfully parsed with `p`.
 
 **Examples**
 
 This parser will fail on its input, too many strings starting with "a":
 ```{r}
-zero.or.one(satisfy(starts_with_a)) (c('acc','aat','cgg'))
+zero_or_one(satisfy(starts_with_a)) (c('acc','aat','cgg'))
 ```
 
 
 The following is a successful parsing. Note that its result is not merely
 `list()`. However it does return an empty list in the `L`-side of the result.
 ```{r}
-zero.or.more(satisfy(starts_with_a)) (c('cat','gac','cct'))
+zero_or_more(satisfy(starts_with_a)) (c('cat','gac','cct'))
 ```
 
 ```{r}
-one.or.more(satisfy(starts_with_a)) (c('att','aac','cct'))
+one_or_more(satisfy(starts_with_a)) (c('att','aac','cct'))
 ```
 
 ```{r}
@@ -205,7 +205,7 @@ exactly(2, satisfy(starts_with_a)) (c('att','aac','cct'))
 ```
 
 ```{r}
-match.n(1, satisfy(starts_with_a)) (c('att','aac','cct'))
+match_n(1, satisfy(starts_with_a)) (c('att','aac','cct'))
 ```
 
 
@@ -254,11 +254,11 @@ SequenceBlock <- function() {
 }
 
 Sequence <- function() {
-  one.or.more(SequenceLine())
+  one_or_more(SequenceLine())
 }
 
 Fastafile <- function() {
-  one.or.more(SequenceBlock())
+  one_or_more(SequenceBlock())
 }
 ```
 
@@ -342,7 +342,7 @@ by collapsing its output:
 
 ```{r}
 Sequence <- function() {
-  one.or.more(SequenceLine()) %using% 
+  one_or_more(SequenceLine()) %using% 
     function(x) {
       paste(x, collapse="")
     }
@@ -370,7 +370,7 @@ Header <- function() {
 }
 
 Sequence <- function() {
-  one.or.more(SequenceLine()) %using% 
+  one_or_more(SequenceLine()) %using% 
     function(x) {
       list(sequence = paste(x, collapse=""))
     }

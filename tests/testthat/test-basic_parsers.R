@@ -57,14 +57,14 @@ test_that("We can create a composite parser", {
   expect_equal(((literal("a") %or% satisfy(starts_with_a)) %then% (literal('b'))) (letters[1:5]), list(L=c(list('a'),list('b')), R=letters[3:5]))
 })
 
-test_that("'zero.or.more' works in standard cases", {
-  expect_equal(zero.or.more(literal("A")) (LETTERS[1:5]), list(L=list("A"), R=LETTERS[2:5]))
-  expect_equal(zero.or.more(literal("A")) (LETTERS[2:5]), list(L=list(), R=LETTERS[2:5]))
+test_that("'zero_or_more' works in standard cases", {
+  expect_equal(zero_or_more(literal("A")) (LETTERS[1:5]), list(L=list("A"), R=LETTERS[2:5]))
+  expect_equal(zero_or_more(literal("A")) (LETTERS[2:5]), list(L=list(), R=LETTERS[2:5]))
 })
 
-test_that("'one.or.more' works in standard cases", {
-  expect_equal(one.or.more(literal("A")) (LETTERS[1:5]), list(L=list("A"), R=LETTERS[2:5]))
-  expect_equal(one.or.more(literal("A")) (LETTERS[2:5]), list())
+test_that("'one_or_more' works in standard cases", {
+  expect_equal(one_or_more(literal("A")) (LETTERS[1:5]), list(L=list("A"), R=LETTERS[2:5]))
+  expect_equal(one_or_more(literal("A")) (LETTERS[2:5]), list())
 })
 
 test_that("'exactly' works in standard cases", {
@@ -73,21 +73,21 @@ test_that("'exactly' works in standard cases", {
   expect_equal(exactly(0,literal("A")) (LETTERS[2:5]), list(L=list(), R=LETTERS[2:5]))
 })
 
-test_that("'zero.or.one' works in standard cases", {
-  expect_equal(zero.or.one(literal("A")) (LETTERS[2:5]), list(L=list(), R=LETTERS[2:5]))
-  expect_equal(zero.or.one(literal("A")) (LETTERS[1:5]), list(L=list("A"), R=LETTERS[2:5]))
-  expect_equal(zero.or.one(literal("A")) (c("A",LETTERS[1:5])), list())
+test_that("'zero_or_one' works in standard cases", {
+  expect_equal(zero_or_one(literal("A")) (LETTERS[2:5]), list(L=list(), R=LETTERS[2:5]))
+  expect_equal(zero_or_one(literal("A")) (LETTERS[1:5]), list(L=list("A"), R=LETTERS[2:5]))
+  expect_equal(zero_or_one(literal("A")) (c("A",LETTERS[1:5])), list())
 })
 
-test_that("'match.n' works in standard cases", {
-  expect_equal(match.n(2,literal("A")) (c("A", LETTERS[1:5])), list(L=c(list("A"),list("A")), R=LETTERS[2:5]))
-  expect_equal(match.n(2,literal("A")) (c(rep("A",2), LETTERS[1:5])), list(L=c(list("A"),list("A")), R=LETTERS[1:5]))
-  expect_equal(match.n(2,literal("A")) (LETTERS[1:5]), list())
+test_that("'match_n' works in standard cases", {
+  expect_equal(match_n(2,literal("A")) (c("A", LETTERS[1:5])), list(L=c(list("A"),list("A")), R=LETTERS[2:5]))
+  expect_equal(match_n(2,literal("A")) (c(rep("A",2), LETTERS[1:5])), list(L=c(list("A"),list("A")), R=LETTERS[1:5]))
+  expect_equal(match_n(2,literal("A")) (LETTERS[1:5]), list())
 })
 
-test_that("'match.s' works in standard cases", {
-  expect_equal(match.s(get_numbers) ("12 13 14"), list(L=list(c(12,13,14)), R=character(0)))
-  expect_equal(match.s(get_numbers) ("ab cd ef"), list())
+test_that("'match_s' works in standard cases", {
+  expect_equal(match_s(get_numbers) ("12 13 14"), list(L=list(c(12,13,14)), R=character(0)))
+  expect_equal(match_s(get_numbers) ("ab cd ef"), list())
 })
 
 test_that("All parsers accept character(0) input", {
@@ -101,8 +101,7 @@ test_that("All parsers accept character(0) input", {
   expect_equal((literal(character(0)) %xthen% literal(character(0))) (character(0)), list())
   expect_equal((literal("A") %thenx% literal(character(0))) ("A"), list(L=list(), R=character(0)))
   expect_equal((literal(character(0)) %thenx% literal(character(0))) (character(0)), list())
-  expect_equal(Numbers(1) (character(0)), list())
-  expect_equal(match.s(get_numbers) (character(0)), list(L=list(), R=character(0)))
+  expect_equal(match_s(get_numbers) (character(0)), list(L=list(), R=character(0)))
 })
 
 test_that("Parsers can consume the input up to the end", {
@@ -111,13 +110,13 @@ test_that("Parsers can consume the input up to the end", {
   expect_equal((literal("A") %xthen% literal("B")) (c("A","B")), list(L=list("A"), R=character(0)))
   expect_equal((literal("A") %thenx% literal("B")) (c("A","B")), list(L=list("B"), R=character(0)))
   expect_equal((literal("A") %xthen% (literal("b") %or% literal("B"))) (c("A","b")), list(L=list("A"), R=character(0)))
-  expect_equal((zero.or.more(literal("A"))) (rep("A",5)), list(L=c(list("A"),list("A"),list("A"),list("A"),list("A")), R=character(0)))
-  expect_equal((zero.or.more(literal("A"))) (c("")), list(L=list(), R=""))
-  expect_equal((zero.or.more(literal("A"))) (character(0)), list(L=list(), R=character(0)))
-  expect_equal((one.or.more(literal("A"))) (rep("A",5)), list(L=c(list("A"),list("A"),list("A"),list("A"),list("A")), R=character(0)))
-  expect_equal((one.or.more(literal("A"))) (c("A")), list(L=list("A"), R=character(0)))
+  expect_equal((zero_or_more(literal("A"))) (rep("A",5)), list(L=c(list("A"),list("A"),list("A"),list("A"),list("A")), R=character(0)))
+  expect_equal((zero_or_more(literal("A"))) (c("")), list(L=list(), R=""))
+  expect_equal((zero_or_more(literal("A"))) (character(0)), list(L=list(), R=character(0)))
+  expect_equal((one_or_more(literal("A"))) (rep("A",5)), list(L=c(list("A"),list("A"),list("A"),list("A"),list("A")), R=character(0)))
+  expect_equal((one_or_more(literal("A"))) (c("A")), list(L=list("A"), R=character(0)))
   expect_equal((exactly(2,literal("A"))) (c("A","A")), list(L=c(list("A"),list("A")), R=character(0)))
-  expect_equal((match.n(2,literal("A"))) (c("A","A")), list(L=c(list("A"),list("A")), R=character(0)))
+  expect_equal((match_n(2,literal("A"))) (c("A","A")), list(L=c(list("A"),list("A")), R=character(0)))
   expect_equal(Empty.line() (c(" ")), list(L=list(" "), R=character(0)))
   expect_equal(Spacer() (c(" "," ")), list(L=list(), R=character(0)))
 })

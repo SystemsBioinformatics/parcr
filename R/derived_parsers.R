@@ -17,9 +17,9 @@
 #'   satisfy(function(x) {stringr::str_replace_all(x, "\\s+", "") == ""})
 #' }
 #'
-#' Spacer <- function() {one.or.more(Empty.line()) %ret% NULL}
+#' Spacer <- function() {one_or_more(Empty.line()) %ret% NULL}
 #'
-#' MaybeEmpty <- function() {(zero.or.more(Empty.line())) %ret% NULL}
+#' MaybeEmpty <- function() {(zero_or_more(Empty.line())) %ret% NULL}
 #' ```
 #'
 #' @importFrom stringr str_replace_all
@@ -38,7 +38,7 @@ Empty.line <- function() {
 #' Spacer() (c("            ", "    ", "Important text"))
 #' Spacer() (c("Important text")) # failure
 Spacer <- function() {
-  one.or.more(Empty.line()) %ret% NULL
+  one_or_more(Empty.line()) %ret% NULL
 }
 
 #' @rdname Empty.line
@@ -47,30 +47,30 @@ Spacer <- function() {
 #' MaybeEmpty() (c("            ", "    ", "Important text"))
 #' MaybeEmpty() (c("Important text")) # success, in contrast to Spacer()
 MaybeEmpty <- function() {
-  (zero.or.more(Empty.line())) %ret% NULL
+  (zero_or_more(Empty.line())) %ret% NULL
 }
 
-#' Extracts all integer and floating point numbers from a line
-#'
-#' Ignores any other symbols. It tests whether exactly n numbers are found.
-#'
-#' @param n An integer.
-#'
-#' @return A parser.
-#' @export
-#' @examples
-#' Numbers(3) ('1  2  3') #success
-#' Numbers(3) ('1101\t201.5\t33') # success
-#' Numbers(2) ('1101\t201.5\t33') # failure
-#' Numbers(4) ('1101\t201.5\t33') # failure
-#'
-Numbers <- function(n) {
-  (satisfy( function(x) {
-    (stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE) |>
-       as.vector() |> length()) == n
-  })) %using%
-    function(x) {
-      stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE) |>
-        as.vector() |> as.numeric()
-    }
-}
+#' #' Extracts all integer and floating point numbers from a line
+#' #'
+#' #' Ignores any other symbols. It tests whether exactly n numbers are found.
+#' #'
+#' #' @param n An integer.
+#' #'
+#' #' @return A parser.
+#' #' @export
+#' #' @examples
+#' #' Numbers(3) ('1  2  3') #success
+#' #' Numbers(3) ('1101\t201.5\t33') # success
+#' #' Numbers(2) ('1101\t201.5\t33') # failure
+#' #' Numbers(4) ('1101\t201.5\t33') # failure
+#' #'
+# Numbers <- function(n) {
+#   (satisfy( function(x) {
+#     (stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE) |>
+#        as.vector() |> length()) == n
+#   })) %using%
+#     function(x) {
+#       stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE) |>
+#         as.vector() |> as.numeric()
+#     }
+# }

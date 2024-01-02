@@ -209,7 +209,7 @@ literal <- function(element) {
 #'
 # TODO how to interpret the above code
 #'
-#' @inheritParams zero.or.more
+#' @inheritParams zero_or_more
 #' @param f A function to be applied to the result of a succesful `p`
 #' @returns A parser
 #' @export
@@ -279,7 +279,7 @@ literal <- function(element) {
 #'
 #' `%ret% <- function(p, c) {p %using% function(x) c}`
 #'
-#' @inheritParams zero.or.more
+#' @inheritParams zero_or_more
 #' @param c A single-element character value. Character values are enforced
 #'
 #' @returns A parser
@@ -298,38 +298,32 @@ literal <- function(element) {
 #'
 #' @param p A parser
 #'
-#' @section Formal description:
-#'
-#' `zero.or.more p = ((p %then% zero.or.more p) %using% cons) %alt% (succeed [])`
-#'
-#' where `cons` is the list constructor: `cons (x,xs) = x:xs`
-#'
-#' `one.or.more p = (p %then% zero.or.more p) %using% cons.`
-#'
-#' Note that these parsers correspond to the `many` (`zero.or.more`) and
-#' `some` (`one.or,more`) parsers described in Hutton. The names used here are
-#' more clear about what we expect.
-#'
+# @section Formal description:
+# \preformatted{zero_or_more p = ((p %then% zero_or_more p) %using% cons) %alt% (succeed [])}
+# where `cons` is the list constructor: `cons (x,xs) = x:xs`
+#
+# \preformatted{one_or_more p = (p %then% zero_or_more p) %using% cons.}
+#
 #' @returns A parser
 #' @export
 #' @examples
-#' zero.or.more(literal("A")) (c("A",LETTERS[1:5]))
-#' zero.or.more(literal("A")) (LETTERS[2:5])
-zero.or.more <- function(p) {
-  (p %then% zero.or.more(p)) %or% succeed(NULL)
+#' zero_or_more(literal("A")) (c("A",LETTERS[1:5]))
+#' zero_or_more(literal("A")) (LETTERS[2:5])
+zero_or_more <- function(p) {
+  (p %then% zero_or_more(p)) %or% succeed(NULL)
 }
 
-#' @rdname zero.or.more
+#' @rdname zero_or_more
 #' @export
 #' @examples
-#' one.or.more(literal("A")) (c("A",LETTERS[1:5])) # success
-#' one.or.more(literal("A")) (LETTERS[2:5]) # failure
+#' one_or_more(literal("A")) (c("A",LETTERS[1:5])) # success
+#' one_or_more(literal("A")) (LETTERS[2:5]) # failure
 #'
-one.or.more <- function(p) {
-  p %then% zero.or.more(p)
+one_or_more <- function(p) {
+  p %then% zero_or_more(p)
 }
 
-#' @rdname zero.or.more
+#' @rdname zero_or_more
 #' @param n An integer
 #' @export
 #' @examples
@@ -337,41 +331,41 @@ one.or.more <- function(p) {
 #' exactly(2,literal("A")) (c(rep("A",2), LETTERS[1:5])) # failure: too many "A"
 #'
 exactly <- function(n, p) {
-  # notice that this is a greedy parser due to zero.or.more's greediness
-  # The non-greedy version is match.n
+  # notice that this is a greedy parser due to zero_or_more's greediness
+  # The non-greedy version is match_n
   function(x) {
-    r <- zero.or.more(p)(x)
+    r <- zero_or_more(p)(x)
     if (length(r$L) == n) r else fail()(x)
   }
 }
 
-#' @rdname zero.or.more
+#' @rdname zero_or_more
 #' @export
 #' @examples
-#' zero.or.one(literal("A")) (LETTERS[2:5]) # success
-#' zero.or.one(literal("A")) (LETTERS[1:5]) # success
-#' zero.or.one(literal("A")) (c("A",LETTERS[1:5])) # failure
+#' zero_or_one(literal("A")) (LETTERS[2:5]) # success
+#' zero_or_one(literal("A")) (LETTERS[1:5]) # success
+#' zero_or_one(literal("A")) (c("A",LETTERS[1:5])) # failure
 #'
-zero.or.one <- function(p) {
+zero_or_one <- function(p) {
   exactly(1,p) %or% exactly(0,p)
 }
 
-#' @rdname zero.or.more
+#' @rdname zero_or_more
 #' @param n An integer
 #' @export
 #' @examples
-#' match.n(2,literal("A")) (c("A", LETTERS[1:5])) # success
-#' match.n(2,literal("A")) (c(rep("A",2), LETTERS[1:5])) # success
+#' match_n(2,literal("A")) (c("A", LETTERS[1:5])) # success
+#' match_n(2,literal("A")) (c(rep("A",2), LETTERS[1:5])) # success
 #'
-match.n <- function(n, p) {
+match_n <- function(n, p) {
   # non-greedy version of 'exactly'
-  if (n == 1) p else (p %then% match.n(n - 1, p))
+  if (n == 1) p else (p %then% match_n(n - 1, p))
 }
 
 #' The parser that identifies a string and produces custom output.
 #'
 #' @description
-#' `match.s` matches a string using a function and returns a desired object type.
+#' `match_s` matches a string using a function and returns a desired object type.
 #'
 #' @details
 #' The function `s` should take a character vector as its single argument. It
@@ -381,7 +375,7 @@ match.n <- function(n, p) {
 #' element character vector (a string). This often simplifies further
 #' processing.
 #'
-#' This parser short-cuts the pattern `satisfy(b) %using% f`. With `match.s`
+#' This parser short-cuts the pattern `satisfy(b) %using% f`. With `match_s`
 #' you do not have to write separate predicate and processing functions `b` and
 #' `f` when identification and parsing can be done with a single string
 #' parsing function `s`.
@@ -398,10 +392,10 @@ match.n <- function(n, p) {
 #'     return(matches)
 #'   }
 #' }
-#' match.s(want_integers) ("12 15 16 and some text") # success
-#' match.s(want_integers) ("some text") # failure
+#' match_s(want_integers) ("12 15 16 and some text") # success
+#' match_s(want_integers) ("some text") # failure
 #'
-match.s <- function(s) {
+match_s <- function(s) {
   function(x) {
     if (is.empty(x)) {
       l <- x
