@@ -202,8 +202,7 @@ literal <- function(string) {
       if (failed(r1)) fail()(x)
       else {
         r2 <- p2(r1$R)
-        # if (failed(r2)) fail()(x) else succeed(c(r1$L, r2$L)) (r2$R)
-        if (failed(r2)) fail()(x) else succeed(concat(r1$L, r2$L)) (r2$R)
+        if (failed(r2)) fail()(x) else succeed(c(r1$L, r2$L)) (r2$R)
       }
     }
   }

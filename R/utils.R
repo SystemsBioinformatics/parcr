@@ -51,20 +51,3 @@ ensure.list <- function(x)  {
     # if (!is.list(x)) list(x) else x
   }
 }
-
-# In %then% may have to use concat(r1$L, r2$L) instead of c(r1$L, r2$L)
-#' Concatenate two lists.
-#'
-#' Make sure that empty lists disappear
-#'
-#' @param l1,l2 two `list` objects
-#'
-#' @return A `list`.
-#' @keywords internal
-concat <- function(l1, l2) {
-  if (length(l1)==0) l2
-  else {
-    if (length(l2)==0) l1
-    else c(l1, l2)
-  }
-}
