@@ -18,6 +18,23 @@ failed <- function(l) {
   is.list(l) && length(l) == 0
 }
 
+#' Selecting only left or right part from a `%then%` sequence
+#'
+#' Used by %xthen% and %thenx%
+#'
+#' @param x A vector.
+#'
+#' @return A vector.
+#' @keywords internal
+fst <- function(x) {
+  if (is.empty(x)) NULL else x[1]
+}
+
+#' @rdname fst
+snd <- function(x) {
+  if (length(x)==1) NULL else x[2]
+}
+
 #' Ensure that the structure of objects is preserved.
 #'
 #' After successful parsing the result must be present in a list to preserve
