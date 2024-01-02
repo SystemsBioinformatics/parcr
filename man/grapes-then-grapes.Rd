@@ -26,8 +26,8 @@ succession.
     else succeed([p1(x), p2(x[-1])])(x[-2])
 }
 
-where \code{x[-1]} and \code{x[-2]} are the vector \code{x} without the first element and
-without the first two elements, respectively.
+where \code{null} is the empty vector, \code{x[-1]} and \code{x[-2]} are the vector \code{x}
+without the first element and without the first two elements, respectively.
 }
 
 \examples{

@@ -61,7 +61,7 @@ fail <- function() {
 #'
 #' @section Pseudocode:
 #' \preformatted{
-#' satisfy(b) (x):
+#' satisfy(b)(x):
 #'   if x==null then
 #'     if b(x) then succeed(x)(null)
 #'   else
@@ -69,9 +69,9 @@ fail <- function() {
 #' }
 #'
 #' where `x[1]` is the first element of `x`, `x[-1]` all subsequent elements
-#' (or `null` if it only has one element). `null` is equivalent to
-#' `character(0)` in R. Note that if `x==null` then the parser may still
-#' succeed, see examples.
+#' (or `null` if it only has one element). `null` is the empty vector,
+#' equivalent to `character(0)` in R. Note that if `x==null` then the parser
+#' may still succeed, see examples.
 #'
 #' @param b a boolean function to determine if the string is accepted.
 #' @export
@@ -105,7 +105,7 @@ satisfy <- function(b) {
 #'
 #' @section Pseudocode:
 #' \preformatted{
-#' literal(a) (x): satisfy(F(y): y==a)(x)
+#' literal(a)(x): satisfy(F(y): y==a)(x)
 #' }
 #'
 #' where `F` is equivalent to the `function` declarator in R. So, we have an
@@ -180,8 +180,8 @@ literal <- function(string) {
 #'     else succeed([p1(x), p2(x[-1])])(x[-2])
 #' }
 #'
-#' where `x[-1]` and `x[-2]` are the vector `x` without the first element and
-#' without the first two elements, respectively.
+#' where `null` is the empty vector, `x[-1]` and `x[-2]` are the vector `x`
+#' without the first element and without the first two elements, respectively.
 #'
 #' @inheritParams %or%
 #' @returns A parser.
@@ -259,9 +259,11 @@ literal <- function(string) {
 #' (p1 \%thenx\% p2)(x):
 #'   if p1(x)==[] or x==null then fail()(x)
 #'   else
-#'     if p2(x[-1]) == [] then fail()(x)
+#'     if p2(x[-1])==[] then fail()(x)
 #'     else succeed(p2(x[-1]))(x[-2])
 #' }
+#' where `null` is the empty vector, `x[-1]` and `x[-2]` are the vector `x`
+#' without the first element and without the first two elements, respectively.
 #'
 #' @inheritParams %or%
 #'
@@ -334,7 +336,8 @@ literal <- function(string) {
 #'
 #' @seealso [%using%]
 #' @examples
-#' (literal("A") %ret% ("We have an A!")) (LETTERS[1:5])
+#' (literal("A") %ret% "We have an A!") (LETTERS[1:5])
+#' (literal("A") %ret% NULL) (LETTERS[1:5])
 `%ret%` <- function(p, c) {
   function(x) {
     r <- p(x)
@@ -366,6 +369,8 @@ literal <- function(string) {
 #' match_n:
 #'   if n==1 then p else (p \%then\% match_n(n-1, p))
 #' }
+#'
+#' where `null` is the empty vector.
 #'
 #' @returns A parser
 #' @export

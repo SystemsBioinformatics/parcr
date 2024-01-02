@@ -24,7 +24,7 @@ discard these.
 
 \preformatted{
 space_like_eraser(x):
-    d = replace all "\\\\s+" in x by ""
+    d = x in which all "\\\\s+" are replaced by ""
     if d=="" TRUE else FALSE
 
 Emptyline: satisfy(space_like_eraser)
@@ -33,6 +33,8 @@ Spacer: one_or_more(EmptyLine()) \%ret\% null
 
 MaybeEmpty: zero_or_more(EmptyLine()) \%ret\% null
 }
+
+where \code{null} is the empty vector.
 }
 
 \examples{

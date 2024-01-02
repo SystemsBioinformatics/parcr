@@ -15,7 +15,7 @@ satisfy(b)
 \section{Pseudocode}{
 
 \preformatted{
-satisfy(b) (x):
+satisfy(b)(x):
   if x==null then
     if b(x) then succeed(x)(null)
   else
@@ -23,9 +23,9 @@ satisfy(b) (x):
 }
 
 where \code{x[1]} is the first element of \code{x}, \code{x[-1]} all subsequent elements
-(or \code{null} if it only has one element). \code{null} is equivalent to
-\code{character(0)} in R. Note that if \code{x==null} then the parser may still
-succeed, see examples.
+(or \code{null} if it only has one element). \code{null} is the empty vector,
+equivalent to \code{character(0)} in R. Note that if \code{x==null} then the parser
+may still succeed, see examples.
 }
 
 \examples{

@@ -48,6 +48,8 @@ zero_or_one:
 match_n:
   if n==1 then p else (p \%then\% match_n(n-1, p))
 }
+
+where \code{null} is the empty vector.
 }
 
 \examples{

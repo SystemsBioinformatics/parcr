@@ -8,10 +8,11 @@ Authors@R:
            email = "d.molenaar@vu.nl",
            comment = c(ORCID = "0000-0001-7108-4545"))
 Description: The package contains tools to construct parser combinator 
-  functions, also known as closures. The main application of parsers constructed
-  with this package is the parsing of text files, read into a character vector. 
-  This package was inspired by the package "Ramble" by Chapman Siu and by the
-  paper "Higher-order functions for parsing" by Graham Hutton (1992).
+  functions, higher order functions that parse input. The main application of
+  parsers constructed with this package is the parsing of text files, read 
+  into a character vector. This package was inspired by the package "Ramble"
+  by Chapman Siu and by the paper "Higher-order functions for parsing" by 
+  Graham Hutton (1992).
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
