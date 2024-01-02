@@ -71,5 +71,5 @@ by_split <- function(p, split, finish=TRUE, fixed=FALSE, perl=FALSE) {
 #' by_symbol(exactly(3,literal("a"))) (c("aaa", "bb")) # success
 #' by_symbol(exactly(3,literal("a"))) (c("aaaa", "bb")) # failure
 by_symbol <- function(p, finish=TRUE) {
-  split_by(p, "", finish)
+  by_split(p, "", finish)
 }
