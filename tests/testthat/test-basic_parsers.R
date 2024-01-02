@@ -120,6 +120,5 @@ test_that("Parsers can consume the input up to the end", {
   expect_equal((one_or_more(literal("A"))) (c("A")), list(L=list("A"), R=character(0)))
   expect_equal((exactly(2,literal("A"))) (c("A","A")), list(L=c(list("A"),list("A")), R=character(0)))
   expect_equal((match_n(2,literal("A"))) (c("A","A")), list(L=c(list("A"),list("A")), R=character(0)))
-  expect_equal(Empty.line() (c(" ")), list(L=list(" "), R=character(0)))
   expect_equal(Spacer() (c(" "," ")), list(L=list(), R=character(0)))
 })

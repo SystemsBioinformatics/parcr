@@ -5,49 +5,52 @@
 #' @description
 #'
 #' An empty line is a line that consists entirely of space-like characters.
-#' `Empty.line` is a parser that recognizes one empty line and `Spacer`
-#' recognizes one or more empty lines and `MaybeEmpty` recognizes zero or more
-#' empty lines. `Empty.line` actually returns the empty line but `Spacer` and
-#' `MaybeEmpty` discard the empty lines.
+#' `EmptyLine` is a parser that recognizes one empty line, `Spacer` recognizes
+#' one or more empty lines and `MaybeEmpty` recognizes zero or more empty
+#' lines. `EmptyLine` returns the empty line but `Spacer` and `MaybeEmpty`
+#' discard these.
 #'
-#' @section Definitions:
+#' @section Pseudocode:
 #'
-#' ```
-#' Empty.line <- function() {
-#'   satisfy(function(x) {stringr::str_replace_all(x, "\\s+", "") == ""})
+#' \preformatted{
+#' space_like_eraser(x):
+#'     d = replace all "\\\\s+" in x by ""
+#'     if d=="" TRUE else FALSE
+#'
+#' Emptyline: satisfy(space_like_eraser)
+#'
+#' Spacer: one_or_more(EmptyLine()) \%ret\% null
+#'
+#' MaybeEmpty: zero_or_more(EmptyLine()) \%ret\% null
 #' }
-#'
-#' Spacer <- function() {one_or_more(Empty.line()) %ret% NULL}
-#'
-#' MaybeEmpty <- function() {(zero_or_more(Empty.line())) %ret% NULL}
-#' ```
 #'
 #' @importFrom stringr str_replace_all
 #' @export
 #' @examples
-#' Empty.line() (c(' \t  ')) # success
-#' Empty.line() (c('    .')) # failure
-Empty.line <- function() {
+#' EmptyLine() (" \t  ") # success
+#' EmptyLine() ("    .") # failure
+#' EmptyLine() ("") # success
+EmptyLine <- function() {
   satisfy(function(x) {stringr::str_replace_all(x, "\\s+", "") == ""})
 }
 
-#' @rdname Empty.line
+#' @rdname EmptyLine
 #' @export
 #' @examples
 #' Spacer() (c("   \t  ", "    ", "abc"))
 #' Spacer() (c("            ", "    ", "Important text"))
-#' Spacer() (c("Important text")) # failure
+#' Spacer() (c("Important text")) # failure, missing empty line
 Spacer <- function() {
-  one_or_more(Empty.line()) %ret% NULL
+  one_or_more(EmptyLine()) %ret% NULL
 }
 
-#' @rdname Empty.line
+#' @rdname EmptyLine
 #' @export
 #' @examples
-#' MaybeEmpty() (c("            ", "    ", "Important text"))
+#' MaybeEmpty() (c("            ", "    ", "Important text")) # success, just as Spacer()
 #' MaybeEmpty() (c("Important text")) # success, in contrast to Spacer()
 MaybeEmpty <- function() {
-  (zero_or_more(Empty.line())) %ret% NULL
+  (zero_or_more(EmptyLine())) %ret% NULL
 }
 
 #' #' Extracts all integer and floating point numbers from a line

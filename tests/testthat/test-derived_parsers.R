@@ -1,5 +1,7 @@
-test_that("'Empty.line' works in standard cases", {
-  expect_equal(Empty.line() (c("   \t  ", 'abc')), list(L=list("   \t  "), R='abc'))
+test_that("'EmptyLine' works in standard cases", {
+  expect_equal(EmptyLine() (c("   \t  ", 'abc')), list(L=list("   \t  "), R='abc'))
+  expect_equal(EmptyLine() (" "), list(L=list(" "), R=character(0)))
+  expect_equal(EmptyLine() (""), list(L=list(""), R=character(0)))
 })
 
 test_that("'Spacer' works in standard cases", {
@@ -26,6 +28,6 @@ test_that("'MaybeEmpty' works in standard cases", {
 # })
 
 test_that("Parsers can consume the input up to the end", {
-  expect_equal(Empty.line() (c(" ")), list(L=list(" "), R=character(0)))
+  expect_equal(EmptyLine() (c(" ")), list(L=list(" "), R=character(0)))
   expect_equal(Spacer() (c(" "," ")), list(L=list(), R=character(0)))
 })
