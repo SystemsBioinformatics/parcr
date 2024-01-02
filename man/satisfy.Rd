@@ -12,13 +12,20 @@ satisfy(b)
 \description{
 \code{satisfy} turns a predicate function into a parser that recognizes strings.
 }
-\section{Definition}{
+\section{Pseudocode}{
 
+\preformatted{
+satisfy(b) (x):
+  if x==null then
+    if b(x) then succeed(x)(null)
+  else
+    if b(x[1]) then succeed(x[1])(x[-1]) else fail()(x)
+}
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{satisfy(b)(x): fail()(x)             when x = NULL
-             : succeed(x[1]) (x[-1]) when b(x[1]])
-             : fail()(x)             otherwise
-}\if{html}{\out{</div>}}
+where \code{x[1]} is the first element of \code{x}, \code{x[-1]} all subsequent elements
+(or \code{null} if it only has one element). \code{null} is equivalent to
+\code{character(0)} in R. Note that if \code{x==null} then the parser may still
+succeed, see examples.
 }
 
 \examples{
@@ -29,4 +36,6 @@ starts_with_a <- function(x) grepl("^a",x)
 # Use it in the satisfy parser
 satisfy(starts_with_a)(c("abc","def")) # success
 satisfy(starts_with_a)(c("bca","def")) # failure
+# Using an anonymous function
+satisfy(function(x) {length(x)==0})(character(0)) # success
 }

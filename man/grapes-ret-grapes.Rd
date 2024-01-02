@@ -20,16 +20,17 @@ Sometimes we are not interested in the result from a parser at all, only
 that the parser succeeds. For example, if we find a reserved word during
 lexical analysis, it may be convenient to return some short representation
 rather than the string itself. The \verb{\%ret\%} combinator is useful in such
-cases. The parser \code{(p \%ret\% v)} has the same behavior as \code{p}, except that it
-returns the value \code{v} if successful
-
-This parser is identical to \code{p \%using\% (function(x) {return(c)})}. You may
-sometimes want to use \link{\%using\%} itself for more flexibility.
+cases. The parser \code{(p \%ret\% c)} has the same behavior as \code{p}, except that it
+returns the value \code{c} if successful
 }
-\section{Definition}{
+\section{Pseudocode}{
 
 
-\verb{\%ret\% <- function(p, c) \{p \%using\% function(x) c\}}
+\preformatted{
+(p \%xret\% c)(x):
+  if p(x)==[] then fail()(x)
+  else succeed(c)(x[-1])
+}
 }
 
 \examples{

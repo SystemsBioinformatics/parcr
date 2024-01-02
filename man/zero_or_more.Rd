@@ -29,6 +29,27 @@ A parser
 \description{
 Parsers that quantify a parser.
 }
+\section{Pseudocode}{
+
+\preformatted{
+zero_or_more(p):
+  (p \%then\% zero_or_more(p)) \%or\% succeed(null)
+
+one_or_more(p):
+  p \%then\% zero_or_more(p)
+
+exactly(n,p):
+  r = zero_or_more(p)(x)
+  if length(r[1]) == n) then r else fail()(x)
+
+zero_or_one:
+  exactly(1,p) \%or\% exactly(0,p)
+
+match_n:
+  if n==1 then p else (p \%then\% match_n(n-1, p))
+}
+}
+
 \examples{
 zero_or_more(literal("A")) (c("A",LETTERS[1:5]))
 zero_or_more(literal("A")) (LETTERS[2:5])

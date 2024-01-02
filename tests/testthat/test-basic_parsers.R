@@ -5,9 +5,12 @@ length_zero <- function(x) length(x)==0
 starts_with_hash <- function(x) grepl("^#",x[1])
 
 get_numbers <- function(x) {
-  m <- gregexpr("[[:digit:]]+", x)
-  matches <- as.numeric(regmatches(x,m)[[1]])
-  if (length(matches)==0) list() else matches
+  if (length(x)==0) list()
+  else {
+    m <- gregexpr("[[:digit:]]+", x)
+    matches <- as.numeric(regmatches(x,m)[[1]])
+    if (length(matches)==0) list() else matches
+  }
 }
 
 test_that("'succeed' works in standard cases", {
@@ -101,7 +104,7 @@ test_that("All parsers accept character(0) input", {
   expect_equal((literal(character(0)) %xthen% literal(character(0))) (character(0)), list())
   expect_equal((literal("A") %thenx% literal(character(0))) ("A"), list(L=list(), R=character(0)))
   expect_equal((literal(character(0)) %thenx% literal(character(0))) (character(0)), list())
-  expect_equal(match_s(get_numbers) (character(0)), list(L=list(), R=character(0)))
+  expect_equal(match_s(get_numbers) (character(0)), list())
 })
 
 test_that("Parsers can consume the input up to the end", {

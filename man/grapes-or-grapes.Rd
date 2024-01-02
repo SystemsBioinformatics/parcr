@@ -17,6 +17,18 @@ The \verb{\%or\%} combinator \code{(p1 \%or\% p2)} returns the result of \code{p
 successful or, if \code{p1} fails that of \code{p2} if \code{p2} parses successfully,
 otherwise it returns a \code{fail}.
 }
+\section{Pseudocode}{
+
+\preformatted{
+(p1 \%or\% p2)(x):
+  if p1(x)==[] then
+    if p2(x)==[] then fail()(x) else p2(x)
+  else p1(x)
+}
+
+where \verb{[]} is the empty list.
+}
+
 \examples{
 (literal("A") \%or\% literal("a"))(LETTERS[1:5]) # success on first parser
 (literal("A") \%or\% literal("a"))(letters[1:5]) # success on second parser

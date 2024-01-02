@@ -27,6 +27,17 @@ be pre-determined, so it is included as an extra parameter.
 While \code{succeed} never fails, \code{fail} always does, regardless of the input
 vector. It returns the empty list \code{list()} to signal this fact.
 }
+\section{Pseudocode}{
+
+\preformatted{
+succeed(y)(x): [[y],[x]]
+fail()(x):     []
+}
+
+where \verb{[[y],[x]]} is a list with lists \verb{[y]} and \verb{[x]} as elements and \verb{[]}
+is an empty list.
+}
+
 \section{Note}{
 
 You will probably never have to use these functions when constructing

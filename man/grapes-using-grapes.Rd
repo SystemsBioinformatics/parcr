@@ -19,10 +19,14 @@ The \verb{\%using\%} combinator allows us to manipulate results from a parser. T
 parser \code{(p \%using\% f)} has the same behavior as the parser \code{p}, except that
 the function \code{f} is applied to its result value.
 }
-\section{Formal description}{
+\section{Pseudocode}{
 
 
-\verb{(p \%using$\% f) inp = [(fv, out) | (v, out) <- p inp]}
+\preformatted{
+(p \%using\% f)(x):
+  if p1(x)==[] then fail()(x)
+  else succeed(f(p1(x)))(x[-1])
+}
 }
 
 \examples{

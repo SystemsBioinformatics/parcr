@@ -12,14 +12,11 @@ literal(string)
 \description{
 \code{literal} tests whether a supplied string literally equals a desired value.
 }
-\section{Definition}{
+\section{Pseudocode}{
 
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{literal(a)(x) <- satisfy(function(y) \{identical(y,a)\}) (x)
-}\if{html}{\out{</div>}}
-
-where \verb{= x} is to be understood as a function which tests its argument for
-equality with \code{x}
+\preformatted{
+literal(a) (x): satisfy(function(y) y==a)(x)
+}
 }
 
 \examples{

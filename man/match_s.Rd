@@ -15,27 +15,50 @@ match_s(s)
 \details{
 The function \code{s} should take a character vector as its single argument. It
 can return any object when succeeding, but to signal to the parser that it
-has failed it must return \code{list()} as output when failing. When constructing
-the output you should realize that the function will be given a single-
-element character vector (a string). This often simplifies further
-processing.
+has failed it must return \code{list()} as output when failing. Also, you must
+supply a valid output (i.e. failure or anything else) when \code{character(0)}
+is the input. Since using \code{x==character(0)} does not yield \code{TRUE} or \code{FALSE}
+but the input is guaranteed to be a character vector you can use the test
+\code{length(l) == 0} to signal \code{character(0)} input.
+
+When constructing the output you should realize that the function will be
+given a single-element character vector (a string). This often simplifies
+further processing.
 
 This parser short-cuts the pattern \code{satisfy(b) \%using\% f}. With \code{match_s}
 you do not have to write separate predicate and processing functions \code{b} and
 \code{f} when identification and parsing can be done with a single string
 parsing function \code{s}.
 }
+\section{Pseudocode}{
+
+\preformatted{
+match_s(s)(x):
+  if x==null then
+    if s(x)==[] then fail()(x) else succeed(s(x))(null)
+  else
+    if s(x[1]) then succeed(s(x[1]))(x[-1]) else fail()(x)
+}
+}
+
 \examples{
 want_integers <- function(x) {
-  m <- gregexpr("[[:digit:]]+", x)
-  matches <- as.numeric(regmatches(x,m)[[1]])
-  if (length(matches)==0) {
-    return(list())
-  } else {
-    return(matches)
+  if (length(x)==0) {
+    # if we would return list() then we would signal failure
+    return("NO NUMBERS")
+  }
+  else {
+    m <- gregexpr("[[:digit:]]+", x)
+    matches <- as.numeric(regmatches(x,m)[[1]])
+    if (length(matches)==0) {
+      return(list())
+    } else {
+      return(matches)
+    }
   }
 }
 match_s(want_integers) ("12 15 16 and some text") # success
 match_s(want_integers) ("some text") # failure
+match_s(want_integers) (character(0)) # we chose to signal success
 
 }

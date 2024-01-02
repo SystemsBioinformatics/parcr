@@ -16,17 +16,18 @@ A parser.
 \code{(p1 \%then\% p2)} recognizes anything that \code{p1} and \code{p2} would if placed in
 succession.
 }
-\section{Definition}{
+\section{Pseudocode}{
 
+\preformatted{
+(p1 \%then\% p2)(x):
+  if p1(x)==[] or x==null then fail()(x)
+  else
+    if p2(x[-1])==[] then fail()(x)
+    else succeed([p1(x), p2(x[-1])])(x[-2])
+}
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{(p1 \%then\% p2) (x) = [((v1,v2),out2) | (v1,outl) <- p1 inp;`
-                                     (v2,out2) <- p2 out1]`
-}\if{html}{\out{</div>}}
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{(p1 \%then\% p2) (x): fail()(x)             when x = NULL
-                  : succeed(x[1]) (x[-1]) when b(x[1]])
-             : fail()(x)             otherwise
-}\if{html}{\out{</div>}}
+where \code{x[-1]} and \code{x[-2]} are the vector \code{x} without the first element and
+without the first two elements, respectively.
 }
 
 \examples{

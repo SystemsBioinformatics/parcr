@@ -26,12 +26,22 @@ parsing. In such cases, two special versions of the \verb{\%then\%} combinator a
 useful, which throw away either the left or right result values, as reflected
 by the position of the letter 'x' in their names.
 }
-\section{Definitions}{
+\section{Pseudocode}{
 
 
-\verb{\%xthen\% <- function(p1, p2) \{(p1 \%then\% p2) \%using\% fst\}}
+\preformatted{
+(p1 \%xthen\% p2)(x):
+  if p1(x)==[] or x==null then fail()(x)
+  else
+    if p2(x[-1])==[] then fail()(x)
+    else succeed(p1(x))(x[-2])
 
-`\%thenx\% <- function(p1, p2) {(p1 \%then\% p2) \%using\% snd}``
+(p1 \%thenx\% p2)(x):
+  if p1(x)==[] or x==null then fail()(x)
+  else
+    if p2(x[-1]) == [] then fail()(x)
+    else succeed(p2(x[-1]))(x[-2])
+}
 }
 
 \examples{
@@ -42,7 +52,5 @@ is_number <- function(x) grepl("\\\\d+",x[1])
 (satisfy(is_number) \%xthen\% literal("C")) (c("21", "C"))
 }
 \seealso{
-\code{\link[=fst]{fst()}}
-
 \link{\%then\%}
 }

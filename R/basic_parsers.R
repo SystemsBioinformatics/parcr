@@ -22,6 +22,15 @@
 #' While `succeed` never fails, `fail` always does, regardless of the input
 #' vector. It returns the empty list `list()` to signal this fact.
 #'
+#' @section Pseudocode:
+#' \preformatted{
+#' succeed(y)(x): [[y],[x]]
+#' fail()(x):     []
+#' }
+#'
+#' where `[[y],[x]]` is a list with lists `[y]` and `[x]` as elements and `[]`
+#' is an empty list.
+#'
 #' @section Note:
 #' You will probably never have to use these functions when constructing
 #' parsers.
@@ -50,12 +59,19 @@ fail <- function() {
 #' @description
 #' `satisfy` turns a predicate function into a parser that recognizes strings.
 #'
-#' @section Definition:
-#' ```
-#' satisfy(b)(x): fail()(x)             when x = NULL
-#'              : succeed(x[1]) (x[-1]) when b(x[1]])
-#'              : fail()(x)             otherwise
-#' ```
+#' @section Pseudocode:
+#' \preformatted{
+#' satisfy(b) (x):
+#'   if x==null then
+#'     if b(x) then succeed(x)(null)
+#'   else
+#'     if b(x[1]) then succeed(x[1])(x[-1]) else fail()(x)
+#' }
+#'
+#' where `x[1]` is the first element of `x`, `x[-1]` all subsequent elements
+#' (or `null` if it only has one element). `null` is equivalent to
+#' `character(0)` in R. Note that if `x==null` then the parser may still
+#' succeed, see examples.
 #'
 #' @param b a boolean function to determine if the string is accepted.
 #' @export
@@ -67,11 +83,13 @@ fail <- function() {
 #' # Use it in the satisfy parser
 #' satisfy(starts_with_a)(c("abc","def")) # success
 #' satisfy(starts_with_a)(c("bca","def")) # failure
+#' # Using an anonymous function
+#' satisfy(function(x) {length(x)==0})(character(0)) # success
 satisfy <- function(b) {
   function(x) {
     if (is.empty(x)) {
-      l <- x
-      r <- x
+       l <- x
+       r <- x
     } else {
       l <- x[1]
       r <- x[-1]
@@ -85,14 +103,10 @@ satisfy <- function(b) {
 #' @description
 #' `literal` tests whether a supplied string literally equals a desired value.
 #'
-#' @section Definition:
-#'
-#' ```
-#' literal(a)(x) <- satisfy(function(y) {identical(y,a)}) (x)
-#' ```
-#'
-#' where `= x` is to be understood as a function which tests its argument for
-#' equality with `x`
+#' @section Pseudocode:
+#' \preformatted{
+#' literal(a) (x): satisfy(function(y) y==a)(x)
+#' }
 #'
 #' @param string a single element character vector.
 #' @export
@@ -119,6 +133,16 @@ literal <- function(string) {
 #' successful or, if `p1` fails that of `p2` if `p2` parses successfully,
 #' otherwise it returns a `fail`.
 #'
+#' @section Pseudocode:
+#' \preformatted{
+#' (p1 \%or\% p2)(x):
+#'   if p1(x)==[] then
+#'     if p2(x)==[] then fail()(x) else p2(x)
+#'   else p1(x)
+#' }
+#'
+#' where `[]` is the empty list.
+#'
 #' @param p1,p2 two parsers.
 #' @returns A parser.
 #' @export
@@ -144,17 +168,17 @@ literal <- function(string) {
 #' `(p1 %then% p2)` recognizes anything that `p1` and `p2` would if placed in
 #' succession.
 #'
-#' @section Definition:
+#' @section Pseudocode:
+#' \preformatted{
+#' (p1 \%then\% p2)(x):
+#'   if p1(x)==[] or x==null then fail()(x)
+#'   else
+#'     if p2(x[-1])==[] then fail()(x)
+#'     else succeed([p1(x), p2(x[-1])])(x[-2])
+#' }
 #'
-#'  ```
-#' (p1 %then% p2) (x) = [((v1,v2),out2) | (v1,outl) <- p1 inp;`
-#'                                       (v2,out2) <- p2 out1]`
-#' ```
-#' ```
-#' (p1 %then% p2) (x): fail()(x)             when x = NULL
-#'                   : succeed(x[1]) (x[-1]) when b(x[1]])
-#'              : fail()(x)             otherwise
-#' ```
+#' where `x[-1]` and `x[-2]` are the vector `x` without the first element and
+#' without the first two elements, respectively.
 #'
 #' @inheritParams %or%
 #' @returns A parser.
@@ -188,10 +212,13 @@ literal <- function(string) {
 #' parser `(p %using% f)` has the same behavior as the parser `p`, except that
 #' the function `f` is applied to its result value.
 #'
-#' @section Formal description:
+#' @section Pseudocode:
 #'
-#' `(p %using$% f) inp = [(fv, out) | (v, out) <- p inp]`
-#'
+#' \preformatted{
+#' (p \%using\% f)(x):
+#'   if p1(x)==[] then fail()(x)
+#'   else succeed(f(p1(x)))(x[-1])
+#' }
 #'
 #' @inheritParams zero_or_more
 #' @param f a function to be applied to the result of a succesful `p`.
@@ -217,17 +244,26 @@ literal <- function(string) {
 #' useful, which throw away either the left or right result values, as reflected
 #' by the position of the letter 'x' in their names.
 #'
-#' @section Definitions:
+#' @section Pseudocode:
 #'
-#' `%xthen% <- function(p1, p2) {(p1 %then% p2) %using% fst}`
+#' \preformatted{
+#' (p1 \%xthen\% p2)(x):
+#'   if p1(x)==[] or x==null then fail()(x)
+#'   else
+#'     if p2(x[-1])==[] then fail()(x)
+#'     else succeed(p1(x))(x[-2])
 #'
-#' `%thenx% <- function(p1, p2) {(p1 %then% p2) %using% snd}``
+#' (p1 \%thenx\% p2)(x):
+#'   if p1(x)==[] or x==null then fail()(x)
+#'   else
+#'     if p2(x[-1]) == [] then fail()(x)
+#'     else succeed(p2(x[-1]))(x[-2])
+#' }
 #'
 #' @inheritParams %or%
 #'
 #' @return A parser
 #' @export
-#' @seealso [fst()]
 #'
 #' @examples
 #' is_number <- function(x) grepl("\\d+",x[1])
@@ -236,14 +272,36 @@ literal <- function(string) {
 #' # Temperatures are followed by the unit 'C', but we only need the number
 #' (satisfy(is_number) %xthen% literal("C")) (c("21", "C"))
 `%xthen%` <- function(p1, p2) {
-  (p1 %then% p2) %using% fst
+  function(x) {
+    # Fail on NULL input, otherwise we create endless loops
+    if (is.empty(x)) fail()(x)
+    else {
+      r1 <- p1(x)
+      if (failed(r1)) fail()(x)
+      else {
+        r2 <- p2(r1$R)
+        if (failed(r2)) fail()(x) else succeed(r1$L) (r2$R)
+      }
+    }
+  }
 }
 
 #' @rdname grapes-xthen-grapes
 #' @export
 #' @seealso [%then%]
 `%thenx%` <- function(p1, p2) {
-  (p1 %then% p2) %using% snd
+  function(x) {
+    # Fail on NULL input, otherwise we create endless loops
+    if (is.empty(x)) fail()(x)
+    else {
+      r1 <- p1(x)
+      if (failed(r1)) fail()(x)
+      else {
+        r2 <- p2(r1$R)
+        if (failed(r2)) fail()(x) else succeed(r2$L) (r2$R)
+      }
+    }
+  }
 }
 
 #' Return a fixed value upon successful parsing.
@@ -253,15 +311,16 @@ literal <- function(string) {
 #' that the parser succeeds. For example, if we find a reserved word during
 #' lexical analysis, it may be convenient to return some short representation
 #' rather than the string itself. The `%ret%` combinator is useful in such
-#' cases. The parser `(p %ret% v)` has the same behavior as `p`, except that it
-#' returns the value `v` if successful
+#' cases. The parser `(p %ret% c)` has the same behavior as `p`, except that it
+#' returns the value `c` if successful
 #'
-#' This parser is identical to `p %using% (function(x) {return(c)})`. You may
-#' sometimes want to use [%using%] itself for more flexibility.
+#' @section Pseudocode:
 #'
-#' @section Definition:
-#'
-#' `%ret% <- function(p, c) {p %using% function(x) c}`
+#' \preformatted{
+#' (p \%xret\% c)(x):
+#'   if p(x)==[] then fail()(x)
+#'   else succeed(c)(x[-1])
+#' }
 #'
 #' @inheritParams zero_or_more
 #' @param c a single-element character value. `NULL` is coerced to
@@ -274,7 +333,10 @@ literal <- function(string) {
 #' @examples
 #' (literal("A") %ret% ("We have an A!")) (LETTERS[1:5])
 `%ret%` <- function(p, c) {
-  p %using% function(x) {return(c)}
+  function(x) {
+    r <- p(x)
+    if (failed(r)) fail()(x) else succeed(c)(r$R)
+  }
 }
 
 ## Parsers that quantify a parser.
@@ -283,12 +345,25 @@ literal <- function(string) {
 #'
 #' @param p a parser.
 #'
-# @section Formal description:
-# \preformatted{zero_or_more p = ((p %then% zero_or_more p) %using% cons) %alt% (succeed [])}
-# where `cons` is the list constructor: `cons (x,xs) = x:xs`
-#
-# \preformatted{one_or_more p = (p %then% zero_or_more p) %using% cons.}
-#
+#' @section Pseudocode:
+#' \preformatted{
+#' zero_or_more(p):
+#'   (p \%then\% zero_or_more(p)) \%or\% succeed(null)
+#'
+#' one_or_more(p):
+#'   p \%then\% zero_or_more(p)
+#'
+#' exactly(n,p):
+#'   r = zero_or_more(p)(x)
+#'   if length(r[1]) == n) then r else fail()(x)
+#'
+#' zero_or_one:
+#'   exactly(1,p) \%or\% exactly(0,p)
+#'
+#' match_n:
+#'   if n==1 then p else (p \%then\% match_n(n-1, p))
+#' }
+#'
 #' @returns A parser
 #' @export
 #' @examples
@@ -354,35 +429,56 @@ match_n <- function(n, p) {
 #' @details
 #' The function `s` should take a character vector as its single argument. It
 #' can return any object when succeeding, but to signal to the parser that it
-#' has failed it must return `list()` as output when failing. When constructing
-#' the output you should realize that the function will be given a single-
-#' element character vector (a string). This often simplifies further
-#' processing.
+#' has failed it must return `list()` as output when failing. Also, you must
+#' supply a valid output (i.e. failure or anything else) when `character(0)`
+#' is the input. Since using `x==character(0)` does not yield `TRUE` or `FALSE`
+#' but the input is guaranteed to be a character vector you can use the test
+#' `length(l) == 0` to signal `character(0)` input.
+#'
+#' When constructing the output you should realize that the function will be
+#' given a single-element character vector (a string). This often simplifies
+#' further processing.
 #'
 #' This parser short-cuts the pattern `satisfy(b) %using% f`. With `match_s`
 #' you do not have to write separate predicate and processing functions `b` and
 #' `f` when identification and parsing can be done with a single string
 #' parsing function `s`.
 #'
+#' @section Pseudocode:
+#' \preformatted{
+#' match_s(s)(x):
+#'   if x==null then
+#'     if s(x)==[] then fail()(x) else succeed(s(x))(null)
+#'   else
+#'     if s(x[1]) then succeed(s(x[1]))(x[-1]) else fail()(x)
+#' }
+#'
 #' @param s A string-parsing function.
 #' @export
 #' @examples
 #' want_integers <- function(x) {
-#'   m <- gregexpr("[[:digit:]]+", x)
-#'   matches <- as.numeric(regmatches(x,m)[[1]])
-#'   if (length(matches)==0) {
-#'     return(list())
-#'   } else {
-#'     return(matches)
+#'   if (length(x)==0) {
+#'     # if we would return list() then we would signal failure
+#'     return("NO NUMBERS")
+#'   }
+#'   else {
+#'     m <- gregexpr("[[:digit:]]+", x)
+#'     matches <- as.numeric(regmatches(x,m)[[1]])
+#'     if (length(matches)==0) {
+#'       return(list())
+#'     } else {
+#'       return(matches)
+#'     }
 #'   }
 #' }
 #' match_s(want_integers) ("12 15 16 and some text") # success
 #' match_s(want_integers) ("some text") # failure
+#' match_s(want_integers) (character(0)) # we chose to signal success
 #'
 match_s <- function(s) {
   function(x) {
     if (is.empty(x)) {
-      l <- x
+      l <- s(x)
       r <- x
     } else {
       l <- s(x[1])
