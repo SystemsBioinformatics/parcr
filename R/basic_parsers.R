@@ -77,7 +77,7 @@ satisfy <- function(b) {
       l <- x[1]
       r <- x[-1]
     }
-    if (b(l)) succeed(l)(r) else fail()(cv)
+    if (b(l)) succeed(l)(r) else fail()(x)
   }
 }
 

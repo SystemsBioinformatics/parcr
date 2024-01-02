@@ -12,15 +12,15 @@
 #'
 #' @section Definitions:
 #'
-#' `Empty.line <- function() {`
+#' ```
+#' Empty.line <- function() {
+#'   satisfy(function(x) {stringr::str_replace_all(x, "\\s+", "") == ""})
+#' }
 #'
-#' `satisfy(function(x) {stringr::str_replace_all(x, "\\s+", "") == ""})`
+#' Spacer <- function() {one.or.more(Empty.line()) %ret% NULL}
 #'
-#' `}`
-#'
-#' `Spacer <- function() {one.or.more(Empty.line()) %ret% NULL}`
-#'
-#' `MaybeEmpty <- function() {(zero.or.more(Empty.line())) %ret% NULL}`
+#' MaybeEmpty <- function() {(zero.or.more(Empty.line())) %ret% NULL}
+#' ```
 #'
 #' @importFrom stringr str_replace_all
 #' @export
@@ -59,8 +59,10 @@ MaybeEmpty <- function() {
 #' @return A parser.
 #' @export
 #' @examples
-#' Numbers(3) ('1  2  3')
-#' Numbers(3) ('1101\t201\t33')
+#' Numbers(3) ('1  2  3') #success
+#' Numbers(3) ('1101\t201.5\t33') # success
+#' Numbers(2) ('1101\t201.5\t33') # failure
+#' Numbers(4) ('1101\t201.5\t33') # failure
 #'
 Numbers <- function(n) {
   (satisfy( function(x) {
