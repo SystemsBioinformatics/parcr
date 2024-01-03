@@ -22,7 +22,7 @@ by [Graham Hutton](https://orcid.org/0000-0001-9584-5150) (1992).
 
 ## Installation
 
-Top install the package including its vignette run the following command
+To install the package including its vignette run the following command
 
 ```
 install_github("SystemsBioinformatics/parcr", ref="v0.2.5", build_vignettes=TRUE)
