@@ -30,12 +30,12 @@ vector. It returns the empty list \code{list()} to signal this fact.
 \section{Pseudocode}{
 
 \preformatted{
-succeed(y)(x): [[y],[x]]
+succeed(y)(x): [L=[y],R=[x]]
 fail()(x):     []
 }
 
-where \verb{[[y],[x]]} is a list with lists \verb{[y]} and \verb{[x]} as elements and \verb{[]}
-is an empty list.
+where \verb{[L=[y],R=[x]]} is a named list with lists \verb{[y]} and \verb{[x]} as elements
+and \verb{[]} is an empty list.
 }
 
 \section{Note}{

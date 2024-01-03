@@ -24,12 +24,12 @@
 #'
 #' @section Pseudocode:
 #' \preformatted{
-#' succeed(y)(x): [[y],[x]]
+#' succeed(y)(x): [L=[y],R=[x]]
 #' fail()(x):     []
 #' }
 #'
-#' where `[[y],[x]]` is a list with lists `[y]` and `[x]` as elements and `[]`
-#' is an empty list.
+#' where `[L=[y],R=[x]]` is a named list with lists `[y]` and `[x]` as elements
+#' and `[]` is an empty list.
 #'
 #' @section Note:
 #' You will probably never have to use these functions when constructing
@@ -177,7 +177,7 @@ literal <- function(string) {
 #'   if p1(x)==[] or x==null then fail()(x)
 #'   else
 #'     if p2(x[-1])==[] then fail()(x)
-#'     else succeed([p1(x), p2(x[-1])])(x[-2])
+#'     else succeed([p1(x)$L, p2(x[-1])$L])(x[-2])
 #' }
 #'
 #' where `null` is the empty vector, `x[-1]` and `x[-2]` are the vector `x`
@@ -220,7 +220,7 @@ literal <- function(string) {
 #' \preformatted{
 #' (p \%using\% f)(x):
 #'   if p1(x)==[] then fail()(x)
-#'   else succeed(f(p1(x)))(x[-1])
+#'   else succeed(f(p1(x)$L))(x[-1])
 #' }
 #'
 #' @inheritParams zero_or_more
@@ -254,13 +254,13 @@ literal <- function(string) {
 #'   if p1(x)==[] or x==null then fail()(x)
 #'   else
 #'     if p2(x[-1])==[] then fail()(x)
-#'     else succeed(p1(x))(x[-2])
+#'     else succeed(p1(x)$L)(x[-2])
 #'
 #' (p1 \%thenx\% p2)(x):
 #'   if p1(x)==[] or x==null then fail()(x)
 #'   else
 #'     if p2(x[-1])==[] then fail()(x)
-#'     else succeed(p2(x[-1]))(x[-2])
+#'     else succeed(p2(x[-1])$L)(x[-2])
 #' }
 #' where `null` is the empty vector, `x[-1]` and `x[-2]` are the vector `x`
 #' without the first element and without the first two elements, respectively.
@@ -341,7 +341,7 @@ literal <- function(string) {
 `%ret%` <- function(p, c) {
   function(x) {
     r <- p(x)
-    if (failed(r)) fail()(x) else succeed(c)(r$R)
+    if (failed(r)) fail()(x) else succeed(as.character(c))(r$R)
   }
 }
 

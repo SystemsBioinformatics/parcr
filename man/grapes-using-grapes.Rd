@@ -25,7 +25,7 @@ the function \code{f} is applied to its result value.
 \preformatted{
 (p \%using\% f)(x):
   if p1(x)==[] then fail()(x)
-  else succeed(f(p1(x)))(x[-1])
+  else succeed(f(p1(x)$L))(x[-1])
 }
 }
 

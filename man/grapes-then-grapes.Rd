@@ -23,7 +23,7 @@ succession.
   if p1(x)==[] or x==null then fail()(x)
   else
     if p2(x[-1])==[] then fail()(x)
-    else succeed([p1(x), p2(x[-1])])(x[-2])
+    else succeed([p1(x)$L, p2(x[-1])$L])(x[-2])
 }
 
 where \code{null} is the empty vector, \code{x[-1]} and \code{x[-2]} are the vector \code{x}
