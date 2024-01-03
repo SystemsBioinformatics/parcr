@@ -25,5 +25,5 @@ by [Graham Hutton](https://orcid.org/0000-0001-9584-5150) (1992).
 Top install the package including its vignette run the following command
 
 ```
-install_github("SystemBioinformatics/parcr", ref="Latest", build_vignettes=TRUE)
+install_github("https://github.com/SystemsBioinformatics/parcr/releases/tag/v0.2.5", build_vignettes=TRUE)
 ```
