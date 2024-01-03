@@ -378,7 +378,7 @@ literal <- function(string) {
 #' zero_or_more(literal("A")) (c("A",LETTERS[1:5]))
 #' zero_or_more(literal("A")) (LETTERS[2:5])
 zero_or_more <- function(p) {
-  (p %then% zero_or_more(p)) %or% succeed(NULL)
+  (p %then% zero_or_more(p)) %or% succeed(character(0))
 }
 
 #' @rdname zero_or_more
