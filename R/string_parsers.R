@@ -33,7 +33,7 @@
 by_split <- function(p, split, finish=TRUE, fixed=FALSE, perl=FALSE) {
   # if (!(length(split)==1)) stop("Argument 'split' should be a vector of length 1")
   function(x) {
-    if (is.empty(x)) fail()(x)
+    if (is_empty_atom(x)) fail()(x)
     else {
       w <- unlist(strsplit(x[1], split, fixed, perl, useBytes = FALSE))
       r <- x[-1]
@@ -41,7 +41,7 @@ by_split <- function(p, split, finish=TRUE, fixed=FALSE, perl=FALSE) {
       if (failed(l1)) fail()(x)
       else {
         if (finish) {
-          if (!is.empty(l1$R)) (fail()(x))
+          if (!is_empty_atom(l1$R)) (fail()(x))
           else succeed(l1$L)(r)
         } else {
           succeed(l1$L)(r)

@@ -4,7 +4,7 @@
 #'
 #' @return TRUE or FALSE.
 #' @keywords internal
-is.empty <- function(l) {
+is_empty_atom <- function(l) {
   is.atomic(l) && length(l) == 0
 }
 
@@ -28,7 +28,7 @@ failed <- function(l) {
 #' @return A list.
 #' @keywords internal
 ensure.list <- function(x)  {
-  if (is.empty(x)) list()
+  if (is_empty_atom(x)) list()
   else {
     if (!methods::is(x,'list')) list(x) else x
     # if (!is.list(x)) list(x) else x
