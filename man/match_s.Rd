@@ -34,31 +34,22 @@ parsing function \code{s}.
 
 \preformatted{
 match_s(s)(x):
-  if x==null then
-    if s(x)==[] then fail()(x) else succeed(s(x))(null)
-  else
-    if s(x[1]) then succeed(s(x[1]))(x[-1]) else fail()(x)
+  if x==null then fail()(x)
+  else if s(x[1]) then succeed(s(x[1]))(x[-1]) else fail()(x)
 }
 }
 
 \examples{
 want_integers <- function(x) {
-  if (length(x)==0) {
-    # if we would return list() then we would signal failure
-    return("NO NUMBERS")
-  }
-  else {
-    m <- gregexpr("[[:digit:]]+", x)
-    matches <- as.numeric(regmatches(x,m)[[1]])
-    if (length(matches)==0) {
-      return(list())
-    } else {
-      return(matches)
-    }
+  m <- gregexpr("[[:digit:]]+", x)
+  matches <- as.numeric(regmatches(x,m)[[1]])
+  if (length(matches)==0) {
+    return(list())
+  } else {
+    return(matches)
   }
 }
 match_s(want_integers) ("12 15 16 and some text") # success
 match_s(want_integers) ("some text") # failure
-match_s(want_integers) (character(0)) # we chose to signal success
 
 }
