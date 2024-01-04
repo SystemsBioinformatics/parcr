@@ -1,3 +1,5 @@
+# parcr 0.3.1
+
 * Redesigned `exactly(n,p)` to behave as expected with non-emitting parsers 
   like `literal("A") %ret% NULL` and `eof()`.
 
