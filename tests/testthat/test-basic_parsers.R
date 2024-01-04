@@ -86,6 +86,7 @@ test_that("'exactly' works in standard cases", {
   expect_equal(exactly(2,literal("A")) (c("A", LETTERS[1:5])), list(L=c(list("A"),list("A")), R=LETTERS[2:5]))
   expect_equal(exactly(2,literal("A")) (c(rep("A",2), LETTERS[1:5])), list())
   expect_equal(exactly(0,literal("A")) (LETTERS[2:5]), list(L=list(), R=LETTERS[2:5]))
+  expect_equal(exactly(2,(literal("A") %ret% NULL))(rep("A",2)), list(L=list(), R=character(0)))
 })
 
 test_that("'zero_or_one' works in standard cases", {
