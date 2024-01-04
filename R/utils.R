@@ -30,7 +30,7 @@ failed <- function(l) {
 ensure.list <- function(x)  {
   if (is_empty_atom(x)) list()
   else {
-    if (!methods::is(x,'list')) list(x) else x
-    # if (!is.list(x)) list(x) else x
+    if (!isa(x, "list")) list(x) else x
+    # if (!methods::is(x,'list')) list(x) else x
   }
 }

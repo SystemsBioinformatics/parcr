@@ -2,6 +2,7 @@ test_that("'EmptyLine' works in standard cases", {
   expect_equal(EmptyLine() (c("   \t  ", 'abc')), list(L=list("   \t  "), R='abc'))
   expect_equal(EmptyLine() (" "), list(L=list(" "), R=character(0)))
   expect_equal(EmptyLine() (""), list(L=list(""), R=character(0)))
+  expect_equal(EmptyLine() ("   ."), list())
 })
 
 test_that("'Spacer' works in standard cases", {

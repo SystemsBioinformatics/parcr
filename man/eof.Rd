@@ -2,7 +2,7 @@
 % Please edit documentation in R/basic_parsers.R
 \name{eof}
 \alias{eof}
-\title{Detect end of input}
+\title{Detect end of input.}
 \usage{
 eof()
 }

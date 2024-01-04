@@ -10,7 +10,7 @@ p \%ret\% c
 \item{p}{a parser.}
 
 \item{c}{a single-element character value. \code{NULL} is coerced to
-\code{character(0)}.}
+\code{character()}.}
 }
 \value{
 A parser

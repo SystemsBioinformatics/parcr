@@ -26,14 +26,13 @@
 #'
 #' where `null` is the empty vector.
 #'
-#' @importFrom stringr str_replace_all
 #' @export
 #' @examples
 #' EmptyLine() (" \t  ") # success
 #' EmptyLine() ("    .") # failure
 #' EmptyLine() ("") # success
 EmptyLine <- function() {
-  satisfy(function(x) {stringr::str_replace_all(x, "\\s+", "") == ""})
+  satisfy(function(x) {gsub("\\s+", "", x) == ""})
 }
 
 #' @rdname EmptyLine
