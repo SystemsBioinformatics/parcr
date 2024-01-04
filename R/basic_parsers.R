@@ -399,8 +399,9 @@ eof <- function() {
 #'   p \%then\% zero_or_more(p)
 #'
 #' exactly(n,p):
-#'   r = zero_or_more(p)(x)
-#'   if length(r[1]) == n) then r else fail()(x)
+#'   counter = 0
+#'   r = zero_or_more((p %using% F(x): counter = counter + 1; x))(x)
+#'   if counter == n then r else fail()(x)
 #'
 #' zero_or_one:
 #'   exactly(0,p) \%or\% exactly(1,p)
@@ -444,9 +445,10 @@ exactly <- function(n, p) {
   # The non-greedy version is match_n
   stopifnot(n >= 0)
   stopifnot(as.integer(n) == n)
+  counter <- 0
   function(x) {
-    r <- zero_or_more(p)(x)
-    if (length(r$L) == n) r else fail()(x)
+    r <- zero_or_more((p) %using% function(x) {counter <<- counter + 1; return(x)})(x)
+    if (counter == n) r else fail()(x)
   }
 }
 

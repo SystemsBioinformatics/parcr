@@ -40,6 +40,7 @@ test_that("'eof' works in standard conditions", {
 })
 
 test_that("`eof` works in repetition parsers", {
+  expect_equal(zero_or_one(eof())(character(0)), list(L=list(), R=list()))
   expect_equal(zero_or_more(eof())(character(0)), list(L=list(), R=list()))
   expect_equal(one_or_more(eof())(character(0)), list(L=list(), R=list()))
   expect_equal(match_n(1,eof())(character(0)), list(L=list(), R=list()))
