@@ -282,7 +282,7 @@ match_n(1, satisfy(starts_with_a))(c('att','aac','cct'))
 
 When constructing a parser you will often need to recognize as well as process
 strings. For example, you want to recognize multiple integers in a line, 
-extract these and then return them as a numeric vector. You're not interested.
+extract these and then return them as a numeric vector. You're not interested
 in other elements like comments in these strings. This could be achieved by 
 combining `satisfy()` and subsequently `%using%`, like:
 
