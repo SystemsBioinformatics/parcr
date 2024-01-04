@@ -373,9 +373,24 @@ eof <- function() {
   }
 }
 
-## Parsers that quantify a parser.
+## Repeated application of parsers.
 
-#' Parsers that quantify a parser.
+#' Parsers that repeat application of a parser.
+#'
+#' @description
+#' Often, you expect repetition of a structure that can be parsed by a parser
+#' `p`, or you expect that a parser zero or more times. The following parsers
+#' these conditions.
+#'
+#' @details
+#' All these parsers except `match_n` are greedy. This means that they try to
+#' apply `p` as many times as possible. If that number of times is not equal to
+#' what was expected, for example if `p` can successfully parse more than `n`
+#' times in `exactly(n,p)`, then the parser will fail. In contrast,
+#' `match_n(n,p)` will apply `p` `n` times and no more, even if `p` could be
+#' successfully applied more often. Clearly, both functions will fail if `p`
+#' leads to failure after less than `n` repetitions.
+#'
 #'
 #' @param p a parser.
 #'
@@ -394,7 +409,7 @@ eof <- function() {
 #' zero_or_one:
 #'   exactly(1,p) \%or\% exactly(0,p)
 #'
-#' match_n:
+#' match_n(n,p):
 #'   if n==1 then p else (p \%then\% match_n(n-1, p))
 #' }
 #'
