@@ -39,9 +39,11 @@ test_that("'eof' works in standard conditions", {
   expect_equal((literal("a") %then% eof())("a"), list(L=list("a"), R=list()))
 })
 
-test_that("No racing condition can be induced by `eof`", {
-  expect_equal(one_or_more(eof())(character(0)), list())
-  expect_equal(exactly(1,eof())(character(0)), list())
+test_that("`eof` works in repetition parsers", {
+  expect_equal(zero_or_more(eof())(character(0)), list(L=list(), R=list()))
+  expect_equal(one_or_more(eof())(character(0)), list(L=list(), R=list()))
+  expect_equal(match_n(1,eof())(character(0)), list(L=list(), R=list()))
+  expect_equal(exactly(1,eof())(character(0)), list(L=list(), R=list()))
 })
 
 test_that("'%then%' works in standard cases", {
