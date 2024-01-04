@@ -402,17 +402,21 @@ file <- c(
 
 We can distinguish the following higher order components in a fasta file:
  
-- A **fasta file**: consist of one or more **sequence blocks** until the 
+- A **fasta file**: consists of one or more **sequence blocks** until the 
   **end of the file**.
-- A **sequence block**: consist of a **header**[^1] and a **sequence**. A 
+- A **sequence block**: consist of a **header** and a **sequence**. A 
   sequence block could be preceded by zero or more **empty lines**.
-- A **sequence**: consists of one or more **sequence strings** consisting of
-  consecutive symbols without spaces, representing the nucleotides.
+- A **sequence**: consists of one or more **sequence strings**.
+- A **header** is a *string* that starts with a ">" immediately followed by
+  a **title** without spaces.
+- A **sequence string** is a *string* without spaces that consists of one or
+  more symbols from the set $\{\text{A},\text{C},\text{G},\text{T}\}$.
 
 This description already suggest which higher order elements of the `fasta` 
-parser we need and how they should be constructed:
+parser we need and how they should be constructed[^1]:
 
-[^1]: Note that fasta headers can be much more complicated than we pretend here.
+[^1]: Note that real fasta headers and sequences can have more complicated
+      formats than we pretend here.
 
 ```{r}
 Fastafile <- function() {
@@ -443,7 +447,7 @@ these parsers.
 # returns the title after the ">" in the sequence header
 parse_header <- function(line) {
   # Study stringr::str_match() to understand what we do here
-  m <- stringr::str_match(line, "^>[ \\t]?(\\w+)")
+  m <- stringr::str_match(line, "^>(\\w+)")
   if (is.na(m[1])) {
     return(list()) # signal failure: no title found
   } else {
@@ -451,7 +455,7 @@ parse_header <- function(line) {
   }
 }
 
-# returns a nucleotide string consisting of consecutive symbols G, A, T or C
+# returns a sequence string
 parse_sequence_line <- function(line) {
   m <- stringr::str_match(line, "([GATC]+)")
   if (is.na(m[1])) {
@@ -482,7 +486,7 @@ Fastafile()(file)
 
 The problem with this output is that is not well-structured. It just returns 
 the elements recognized in each line in an unstructured list object. It is 
-difficult to extract the individual sequences and headers from it, we would 
+difficult to extract the individual sequences and titles from it, we would 
 have to write a parser again. So, we should structure the output by letting
 every sequence block be returned as an element of a list. To achieve this we 
 extend the `SequenceBlock` parser by changing its output with the `%using%` 
@@ -522,14 +526,14 @@ Fastafile()(file)[["L"]]
 ```
 
 which looks much better: we know that the first element in each of these lists
-is the header and the second element is the complete sequence. Then why not 
+is the title and the second element is the complete sequence. Then why not 
 just attach a name to these elements? This would make extracting the 
 information even easier:
 
 ```{r}
 Header <- function() {
   match_s(parse_header) %using% 
-    function(x) list(header = unlist(x))
+    function(x) list(title = unlist(x))
 }
 
 Sequence <- function() {
@@ -548,7 +552,7 @@ d
 Let's present the result more concisely using the names of these elements:
 
 ```{r}
-invisible(lapply(d, function(x) {cat(x$header, x$sequence, "\n")}))
+invisible(lapply(d, function(x) {cat(x$title, x$sequence, "\n")}))
 ```
 
 ## Literature
