@@ -410,7 +410,7 @@ We can distinguish the following higher order components in a fasta file:
 - A **header** is a *string* that starts with a ">" immediately followed by
   a **title** without spaces.
 - A **sequence string** is a *string* without spaces that consists of one or
-  more symbols from the set $\{\text{A},\text{C},\text{G},\text{T}\}$.
+  more symbols from the set {`G`,`A`,`T`,`C`}.
 
 This description already suggest which higher order elements of the `fasta` 
 parser we need and how they should be constructed[^1]:
