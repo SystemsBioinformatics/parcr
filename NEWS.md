@@ -1,3 +1,6 @@
+
+* Dependencies on packages `stringr` and `methods` were removed.
+
 # parcr 0.3.0
 
 * Added function `eof()` which detects an end of file. With that, the behavior
