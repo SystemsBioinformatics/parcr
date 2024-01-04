@@ -233,7 +233,7 @@ which do test but then discard the result from the first or second argument:
 
 
 
-### Qantifying combinators
+### Repeater combinators
 
 - `zero_or_one(p)`: where `p` is a parser.
 - `zero_or_more(p)`: where `p` is a parser.

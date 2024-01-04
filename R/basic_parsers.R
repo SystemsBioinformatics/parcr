@@ -44,7 +44,7 @@ succeed <- function(left) {
   function(right) list(L=ensure.list(left), R=right)
 }
 
-# The parser that always fails
+# The parser that always fails.
 #' @rdname succeed
 #' @export
 #' @examples
@@ -120,7 +120,7 @@ literal <- function(string) {
   satisfy(function(x) identical(x, as.character(string)))
 }
 
-#' Detect end of input
+#' Detect end of input.
 #'
 #' @description
 #' `eof` tests whether the end of the input character vector has been reached,
