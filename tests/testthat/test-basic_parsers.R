@@ -98,6 +98,11 @@ test_that("'match_n' works in standard cases", {
   expect_equal(match_n(2,literal("A")) (LETTERS[1:5]), list())
 })
 
+test_that("'match_n' and 'exactly' wor when n=0", {
+  expect_equal(match_n(0,literal("A"))("A"), list(L=list(), R="A"))
+  expect_equal(exactly(0,literal("A"))("B"), list(L=list(), R="B"))
+})
+
 test_that("'match_s' works in standard cases", {
   expect_equal(match_s(get_numbers) ("12 13 14"), list(L=list(c(12,13,14)), R=character(0)))
   expect_equal(match_s(get_numbers) ("ab cd ef"), list())

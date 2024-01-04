@@ -378,9 +378,9 @@ eof <- function() {
 #' Parsers that repeat application of a parser.
 #'
 #' @description
-#' Often, you expect repetition of a structure that can be parsed by a parser
-#' `p`, or you expect that a parser zero or more times. The following parsers
-#' these conditions.
+#' Often, a structure that can be parsed by a parser `p` is repeated several
+#' times in a file, or the parser can be applied zero or more times. The
+#' following combinators test these conditions.
 #'
 #' @details
 #' All these parsers except `match_n` are greedy. This means that they try to
@@ -407,10 +407,12 @@ eof <- function() {
 #'   if length(r[1]) == n) then r else fail()(x)
 #'
 #' zero_or_one:
-#'   exactly(1,p) \%or\% exactly(0,p)
+#'   exactly(0,p) \%or\% exactly(1,p)
 #'
 #' match_n(n,p):
-#'   if n==1 then p else (p \%then\% match_n(n-1, p))
+#'   if n==0 then F(x): succeed(list())(x)
+#'   else
+#'     if n==1 then p else (p \%then\% match_n(n-1, p))
 #' }
 #'
 #' where `null` is the empty vector.
@@ -444,6 +446,8 @@ one_or_more <- function(p) {
 exactly <- function(n, p) {
   # notice that this is a greedy parser due to zero_or_more's greediness
   # The non-greedy version is match_n
+  stopifnot(n >= 0)
+  stopifnot(as.integer(n) == n)
   function(x) {
     r <- zero_or_more(p)(x)
     if (length(r$L) == n) r else fail()(x)
@@ -458,7 +462,7 @@ exactly <- function(n, p) {
 #' zero_or_one(literal("A")) (c("A",LETTERS[1:5])) # failure
 #'
 zero_or_one <- function(p) {
-  exactly(1,p) %or% exactly(0,p)
+  exactly(0,p) %or% exactly(1,p)
 }
 
 #' @rdname zero_or_more
@@ -469,7 +473,12 @@ zero_or_one <- function(p) {
 #'
 match_n <- function(n, p) {
   # non-greedy version of 'exactly'
-  if (n == 1) p else (p %then% match_n(n - 1, p))
+  stopifnot(n >= 0)
+  stopifnot(as.integer(n) == n)
+  if (n == 0) function(x) succeed(list())(x)
+  else {
+    if (n == 1) p else (p %then% match_n(n - 1, p))
+  }
 }
 
 #' The parser that identifies a string and produces custom output.

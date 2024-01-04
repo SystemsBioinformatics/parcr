@@ -27,9 +27,9 @@ match_n(n, p)
 A parser
 }
 \description{
-Often, you expect repetition of a structure that can be parsed by a parser
-\code{p}, or you expect that a parser zero or more times. The following parsers
-these conditions.
+Often, a structure that can be parsed by a parser \code{p} is repeated several
+times in a file, or the parser can be applied zero or more times. The
+following combinators test these conditions.
 }
 \details{
 All these parsers except \code{match_n} are greedy. This means that they try to
@@ -54,10 +54,12 @@ exactly(n,p):
   if length(r[1]) == n) then r else fail()(x)
 
 zero_or_one:
-  exactly(1,p) \%or\% exactly(0,p)
+  exactly(0,p) \%or\% exactly(1,p)
 
 match_n(n,p):
-  if n==1 then p else (p \%then\% match_n(n-1, p))
+  if n==0 then F(x): succeed(list())(x)
+  else
+    if n==1 then p else (p \%then\% match_n(n-1, p))
 }
 
 where \code{null} is the empty vector.
