@@ -459,22 +459,17 @@ match_n <- function(n, p) {
 #' `match_s` matches a string using a function and returns a desired object type.
 #'
 #' @details
-#' The function `s` should take a character vector as its single argument. It
-#' can return any object when succeeding, but to signal to the parser that it
-#' has failed it must return `list()` as output when failing. Also, you must
-#' supply a valid output (i.e. failure or anything else) when `character(0)`
-#' is the input. Since using `x==character(0)` does not yield `TRUE` or `FALSE`
-#' but the input is guaranteed to be a character vector you can use the test
-#' `length(l) == 0` to signal `character(0)` input.
-#'
-#' When constructing the output you should realize that the function will be
-#' given a single-element character vector (a string). This often simplifies
-#' further processing.
-#'
 #' This parser short-cuts the pattern `satisfy(b) %using% f`. With `match_s`
 #' you do not have to write separate predicate and processing functions `b` and
 #' `f` when identification and parsing can be done with a single string
 #' parsing function `s`.
+#'
+#' The function `s` will be given a non-empty single-element character vector
+#' as its argument, so you don't have to test for empty input, like
+#' `character(0)`. These two facts also often simplify further processing with
+#' the string functions like `grep`, `regmatches` and those from the `stringr`
+#' package. The function `s` can return any R-object when succeeding, but to
+#' signal failure to the parser it must return `list()` as the output.
 #'
 #' @section Pseudocode:
 #' \preformatted{
@@ -486,17 +481,19 @@ match_n <- function(n, p) {
 #' @param s A string-parsing function.
 #' @export
 #' @examples
-#' want_integers <- function(x) {
+#' expect_integers <- function(x) {
 #'   m <- gregexpr("[[:digit:]]+", x)
-#'   matches <- as.numeric(regmatches(x,m)[[1]])
+#'   matches <- regmatches(x,m)[[1]]
 #'   if (length(matches)==0) {
+#'     # this means failure to detect numbers where we expected them
 #'     return(list())
 #'   } else {
-#'     return(matches)
+#'     return(as.numeric(matches))
 #'   }
 #' }
-#' match_s(want_integers) ("12 15 16 and some text") # success
-#' match_s(want_integers) ("some text") # failure
+#'
+#' match_s(expect_integers) ("12 15 16 # some comment") # success
+#' match_s(expect_integers) ("some text") # failure
 #'
 match_s <- function(s) {
   function(x) {
