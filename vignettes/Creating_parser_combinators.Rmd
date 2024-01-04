@@ -142,6 +142,13 @@ The basic functions for recognizing an element in a character vector are
 - `literal(c)`: where `c` is a string.
 - `satisfy(b)`: where `b()` is a logical function: it takes a string as input
                 and returns `TRUE` or `FALSE`.
+- `eof()`
+
+`eof()` is a special function that detects the end of a character vector, or if 
+that character vector contains the lines of text file, the end of the file 
+(EOF). In fact, it detects `character(0)` and when successful it turns the 
+right hand side of the output into an empty list (`list()`) to signal that 
+fact.
 
 #### Examples
 
@@ -160,7 +167,17 @@ And here is an example of an unsuccessful parser:
 literal('a')(c('ab','a'))
 ```
 
+An application of `eof()` to detect that we parsed the input completely.
 
+```{r}
+(literal("a") %then% literal("att") %then% eof())(c("a","att"))
+```
+
+Notice how this output differs from just
+
+```{r}
+(literal("a") %then% literal("att"))(c("a","att"))
+```
 
 ### Functions that modify the output
 
@@ -265,35 +282,31 @@ match_n(1, satisfy(starts_with_a))(c('att','aac','cct'))
 
 When constructing a parser you will often need to recognize as well as process
 strings. For example, you want to recognize multiple integers in a line, 
-extract these and then return them as a numeric vector. This can be done by 
+extract these and then return them as a numeric vector. You're not interested.
+in other elements like comments in these strings. This could be achieved by 
 combining `satisfy()` and subsequently `%using%`, like:
 
 `satisfy(has_integers) %using% process_integers`
 
 where `has_integers` is a boolean function and `process_integers` is a function
-that both recognizes , extracts and rearranges numbers to a vector. You will 
-often find that `has_integers` and `process_integers` use the same regular 
+that both recognizes , extracts and rearranges numbers to a numeric vector. You
+will often find that `has_integers` and `process_integers` use the same regular 
 expressions. Then it may be more efficient to combine these.
 
 #### Example
 
 ```{r}
 numbers <- function(x) {
-  if (length(x)==0) {
-    # we want to signal parser failure when presented with character(0)
-    return(list())
+  m <- gregexpr("[[:digit:]]+", x)
+  matches <- as.numeric(regmatches(x,m)[[1]])
+  if (length(matches)==0) {
+    return(list()) # we signal parser failure: no numbers found
   } else {
-    m <- gregexpr("[[:digit:]]+", x)
-    matches <- as.numeric(regmatches(x,m)[[1]])
-    if (length(matches)==0) {
-      return(list()) # we signal parser failure: no numbers found
-    } else {
-      return(matches)
-    }
+    return(matches)
   }
 }
 
-match_s(numbers)(" 101 12 187 # a comment")
+match_s(numbers)(" 101 12 187 # a comment on these numbers")
 ```
 
 
@@ -389,7 +402,8 @@ file <- c(
 
 We can distinguish the following higher order components in a fasta file:
  
-- A **fasta file**: consist of one or more **sequence blocks**.
+- A **fasta file**: consist of one or more **sequence blocks** until the 
+  **end of the file**.
 - A **sequence block**: consist of a **header**[^1] and a **sequence**. A 
   sequence block could be preceded by zero or more **empty lines**.
 - A **sequence**: consists of one or more **sequence strings** consisting of
@@ -402,7 +416,8 @@ parser we need and how they should be constructed:
 
 ```{r}
 Fastafile <- function() {
-  one_or_more(SequenceBlock())
+  one_or_more(SequenceBlock()) %then%
+    eof()
 }
 
 SequenceBlock <- function() {
@@ -427,34 +442,22 @@ these parsers.
 ```{r}
 # returns the title after the ">" in the sequence header
 parse_header <- function(line) {
-  if (length(line)==0) {
-    # This part is needed to return output when reaching the end of a file
-    # See the documentation of match_s
-    return(list()) # signal failure
-  }
-  else {
-    # Study stringr::str_match() to understand what we do here
-    m <- stringr::str_match(line, "^>[ \\t]?(\\w+)")
-    if (is.na(m[1])) {
-      return(list()) # signal failure
-    } else {
-      return(m[2])
-    }
+  # Study stringr::str_match() to understand what we do here
+  m <- stringr::str_match(line, "^>[ \\t]?(\\w+)")
+  if (is.na(m[1])) {
+    return(list()) # signal failure: no title found
+  } else {
+    return(m[2])
   }
 }
 
 # returns a nucleotide string consisting of consecutive symbols G, A, T or C
 parse_sequence_line <- function(line) {
-    if (length(line)==0) {
-    return(list())
-  }
-  else {
-    m <- stringr::str_match(line, "([GATC]+)")
-    if (is.na(m[1])) {
-      return(list())
-    } else {
-      return(m[2])
-    }
+  m <- stringr::str_match(line, "([GATC]+)")
+  if (is.na(m[1])) {
+    return(list()) # signal failure: no nucleotides found
+  } else {
+    return(m[2])
   }
 }
 ```
