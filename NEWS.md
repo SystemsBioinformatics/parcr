@@ -1,3 +1,5 @@
+* Redesigned `exactly(n,p)` to behave as expected with non-emitting parsers 
+  like `literal("A") %ret% NULL` and `eof()`.
 
 * Dependencies on packages `stringr` and `methods` were removed.
 
