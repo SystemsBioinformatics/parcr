@@ -223,15 +223,11 @@ eof <- function() {
 #' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("ab", "ac", "de")) # failure
 `%then%` <- function(p1, p2) {
   function(x) {
-    # Fail on NULL input, otherwise we create endless loops
-    if (is_empty_atom(x)) fail()(x)
+    r1 <- p1(x)
+    if (failed(r1)) fail()(x)
     else {
-      r1 <- p1(x)
-      if (failed(r1)) fail()(x)
-      else {
-        r2 <- p2(r1$R)
-        if (failed(r2)) fail()(x) else succeed(c(r1$L, r2$L)) (r2$R)
-      }
+      r2 <- p2(r1$R)
+      if (failed(r2)) fail()(x) else succeed(c(r1$L, r2$L)) (r2$R)
     }
   }
 }
