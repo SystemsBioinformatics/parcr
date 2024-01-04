@@ -59,6 +59,11 @@ fail <- function() {
 #' @description
 #' `satisfy` turns a predicate function into a parser that recognizes strings.
 #'
+#' @details
+#' Notice (see pseudocode) that `satisfy` fails when presented with empty
+#' input, so it is futile to write predicate functions that would recognize
+#' such input.
+#'
 #' @section Pseudocode:
 #' \preformatted{
 #' satisfy(b)(x):
@@ -68,8 +73,7 @@ fail <- function() {
 #'
 #' where `x[1]` is the first element of `x`, `x[-1]` all subsequent elements
 #' (or `null` if it only has one element). `null` is the empty vector,
-#' equivalent to `character(0)` in R. Note that if `x==null` then the parser
-#' may still succeed, see examples.
+#' equivalent to `character(0)` in R.
 #'
 #' @param b a boolean function to determine if the string is accepted.
 #' @export
