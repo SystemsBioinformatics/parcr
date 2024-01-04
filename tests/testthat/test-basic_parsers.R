@@ -1,7 +1,6 @@
 # Some predicate functions used in testing
 starts_with_a <- function(x) grepl("^a",x[1])
 starts_with_b <- function(x) grepl("^b",x[1])
-length_zero <- function(x) length(x)==0
 starts_with_hash <- function(x) grepl("^#",x[1])
 
 get_numbers <- function(x) {
@@ -30,8 +29,19 @@ test_that("'satisfy' works in standard cases", {
 })
 
 test_that("'literal' works in standard cases", {
-  expect_equal(literal("ab") (c("ab", "cdef")), list(L=list('ab'), R='cdef'))
+  expect_equal(literal("ab") (c("ab", "cdef")), list(L=list("ab"), R="cdef"))
   expect_equal(literal("ab") (c("abc", "cdef")), list())
+})
+
+test_that("'eof' works in standard conditions", {
+  expect_equal(eof()("a"), list())
+  expect_equal(eof()(character(0)), list(L=list(), R=list()))
+  expect_equal((literal("a") %then% eof())("a"), list(L=list("a"), R=list()))
+})
+
+test_that("No racing condition can be induced by `eof`", {
+  expect_equal(one_or_more(eof())(character(0)), list())
+  expect_equal(exactly(1,eof())(character(0)), list())
 })
 
 test_that("'%then%' works in standard cases", {
@@ -93,16 +103,15 @@ test_that("'match_s' works in standard cases", {
   expect_equal(match_s(get_numbers) ("ab cd ef"), list())
 })
 
-test_that("All parsers accept character(0) input", {
-  expect_equal(satisfy(length_zero) (character(0)), list(L=list(), R=character(0)))
-  expect_equal(satisfy(is.empty) (character(0)), list(L=list(), R=character(0)))
-  expect_equal(literal(character(0)) (character(0)), list(L=list(), R=character(0)))
-  expect_equal((literal(character(0)) %or% literal(character(0))) (character(0)), list(L=list(), R=character(0)))
-  expect_equal((literal("A") %then% literal(character(0))) ("A"), list(L=list("A"), R=character(0)))
+test_that("All parsers accept character(0) input and return failure", {
+  expect_equal(satisfy(is_empty_atom) (character(0)), list())
+  expect_equal(literal(character(0)) (character(0)), list())
+  expect_equal((literal(character(0)) %or% literal(character(0))) (character(0)), list())
+  expect_equal((literal("A") %then% literal(character(0))) ("A"), list())
   expect_equal((literal(character(0)) %then% literal(character(0))) (character(0)), list())
-  expect_equal((literal("A") %xthen% literal(character(0))) ("A"), list(L=list("A"), R=character(0)))
+  expect_equal((literal("A") %xthen% literal(character(0))) ("A"), list())
   expect_equal((literal(character(0)) %xthen% literal(character(0))) (character(0)), list())
-  expect_equal((literal("A") %thenx% literal(character(0))) ("A"), list(L=list(), R=character(0)))
+  expect_equal((literal("A") %thenx% literal(character(0))) ("A"), list())
   expect_equal((literal(character(0)) %thenx% literal(character(0))) (character(0)), list())
   expect_equal(match_s(get_numbers) (character(0)), list())
 })

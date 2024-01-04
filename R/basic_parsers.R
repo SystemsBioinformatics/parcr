@@ -62,10 +62,8 @@ fail <- function() {
 #' @section Pseudocode:
 #' \preformatted{
 #' satisfy(b)(x):
-#'   if x==null then
-#'     if b(x) then succeed(x)(null)
-#'   else
-#'     if b(x[1]) then succeed(x[1])(x[-1]) else fail()(x)
+#'   if x==null then fail()(x)
+#'   else if b(x[1]) then succeed(x[1])(x[-1]) else fail()(x)
 #' }
 #'
 #' where `x[1]` is the first element of `x`, `x[-1]` all subsequent elements
@@ -84,17 +82,15 @@ fail <- function() {
 #' satisfy(starts_with_a)(c("abc","def")) # success
 #' satisfy(starts_with_a)(c("bca","def")) # failure
 #' # Using an anonymous function
-#' satisfy(function(x) {length(x)==0})(character(0)) # success
+#' satisfy(function(x) {as.numeric(x)>10})("15") # success
 satisfy <- function(b) {
   function(x) {
-    if (is.empty(x)) {
-       l <- x
-       r <- x
-    } else {
+    if (is_empty_atom(x)) fail()(x)
+    else {
       l <- x[1]
       r <- x[-1]
+      if (b(l)) succeed(l)(r) else fail()(x)
     }
-    if (b(l)) succeed(l)(r) else fail()(x)
   }
 }
 
@@ -117,12 +113,40 @@ satisfy <- function(b) {
 #' literal("ab") (c("ab", "cdef")) # success
 #' literal("ab") (c("abc", "cdef")) # failure
 literal <- function(string) {
-  satisfy(
-    function(x) {
-      if (is.empty(x)) {first.element <- x} else {first.element <- x[1]}
-      return(identical(first.element, string))
-    }
-  )
+  satisfy(function(x) identical(x, as.character(string)))
+}
+
+#' Detect end of input
+#'
+#' @description
+#' `eof` tests whether the end of the input character vector has been reached,
+#' which boils down to detection of `character(0)` as input. Since the intended
+#' application of this parser is parsing of text files the function has been
+#' called after end of file (EOF) signal. To indicate that an end of file has
+#' been detected, the right hand side of the parser result will be converted to
+#' an empty list.
+#'
+#' @section Pseudocode:
+#' \preformatted{
+#' eof()(x):
+#'   if x==null then succeed(x)(list())
+#'   else fail()(x)
+#' }
+#'
+#' @return A parser
+#' @export
+#'
+#' @examples
+#' (literal("a") %then% eof())("a") # success
+#' # Notice the difference on the R-side with
+#' literal("a")("a")
+#' eof()(character(0)) # success
+#' eof()("a") # failure
+eof <- function() {
+  function(x) {
+    if (is_empty_atom(x)) succeed(x)(list())
+    else fail()(x)
+  }
 }
 
 ## Combinators
@@ -196,7 +220,7 @@ literal <- function(string) {
 `%then%` <- function(p1, p2) {
   function(x) {
     # Fail on NULL input, otherwise we create endless loops
-    if (is.empty(x)) fail()(x)
+    if (is_empty_atom(x)) fail()(x)
     else {
       r1 <- p1(x)
       if (failed(r1)) fail()(x)
@@ -279,7 +303,7 @@ literal <- function(string) {
 `%xthen%` <- function(p1, p2) {
   function(x) {
     # Fail on NULL input, otherwise we create endless loops
-    if (is.empty(x)) fail()(x)
+    if (is_empty_atom(x)) fail()(x)
     else {
       r1 <- p1(x)
       if (failed(r1)) fail()(x)
@@ -297,7 +321,7 @@ literal <- function(string) {
 `%thenx%` <- function(p1, p2) {
   function(x) {
     # Fail on NULL input, otherwise we create endless loops
-    if (is.empty(x)) fail()(x)
+    if (is_empty_atom(x)) fail()(x)
     else {
       r1 <- p1(x)
       if (failed(r1)) fail()(x)
@@ -485,7 +509,7 @@ match_n <- function(n, p) {
 #'
 match_s <- function(s) {
   function(x) {
-    if (is.empty(x)) {
+    if (is_empty_atom(x)) {
       l <- s(x)
       r <- x
     } else {

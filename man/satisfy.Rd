@@ -16,10 +16,8 @@ satisfy(b)
 
 \preformatted{
 satisfy(b)(x):
-  if x==null then
-    if b(x) then succeed(x)(null)
-  else
-    if b(x[1]) then succeed(x[1])(x[-1]) else fail()(x)
+  if x==null then fail()(x)
+  else if b(x[1]) then succeed(x[1])(x[-1]) else fail()(x)
 }
 
 where \code{x[1]} is the first element of \code{x}, \code{x[-1]} all subsequent elements
@@ -37,5 +35,5 @@ starts_with_a <- function(x) grepl("^a",x)
 satisfy(starts_with_a)(c("abc","def")) # success
 satisfy(starts_with_a)(c("bca","def")) # failure
 # Using an anonymous function
-satisfy(function(x) {length(x)==0})(character(0)) # success
+satisfy(function(x) {as.numeric(x)>10})("15") # success
 }
