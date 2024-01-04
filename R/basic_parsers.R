@@ -353,7 +353,7 @@ eof <- function() {
 #'
 #' @inheritParams zero_or_more
 #' @param c a single-element character value. `NULL` is coerced to
-#'  `character()`.
+#'  `character(0)`.
 #'
 #' @returns A parser
 #' @export
@@ -419,7 +419,7 @@ eof <- function() {
 #' zero_or_more(literal("A")) (c("A",LETTERS[1:5]))
 #' zero_or_more(literal("A")) (LETTERS[2:5])
 zero_or_more <- function(p) {
-  (p %then% zero_or_more(p)) %or% succeed(character())
+  (p %then% zero_or_more(p)) %or% succeed(character(0))
 }
 
 #' @rdname zero_or_more
