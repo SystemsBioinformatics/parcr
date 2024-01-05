@@ -1,3 +1,8 @@
+* Again modified `exacly(n,p)` because, since repeater functions call the 
+  same instance of a function, the counter is not reset when this 
+  parser is nested in a repeater parser (`zero_or_more`, etc.). The reset is 
+  now performed in the function itself.
+
 # parcr 0.3.2
 
 * Added `fastafile` example data which is used in the vignette.

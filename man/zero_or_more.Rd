@@ -50,9 +50,12 @@ one_or_more(p):
   p \%then\% zero_or_more(p)
 
 exactly(n,p):
-  counter = 0
-  r = zero_or_more((p %using% F(x): counter = counter + 1; x))(x)
-  if counter == n then r else fail()(x)
+  count = 0
+  r = zero_or_more((p %using% F(x): count = count + 1; x))(x)
+  if counter == n then
+    count = 0
+    r
+  else fail()(x)
 
 zero_or_one:
   exactly(0,p) \%or\% exactly(1,p)

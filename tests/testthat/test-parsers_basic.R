@@ -140,3 +140,17 @@ test_that("Parsers can consume the input up to the end", {
   expect_equal((match_n(2,literal("A"))) (c("A","A")), list(L=c(list("A"),list("A")), R=character(0)))
   expect_equal(Spacer() (c(" "," ")), list(L=list(), R=character(0)))
 })
+
+test_that("repeater parsers work when nested", {
+  nested1 <- function() {exactly(2,literal("A")) %then% literal("B")}
+  nested2 <- function() {one_or_more(nested1())}
+  expect_equal(nested1()(c("A","A","B","A","A","B")), list(L=c(list("A"),list("A"),list("B")), R=c("A","A","B")))
+  expect_equal(one_or_more(nested1())(c("A","A","B","A","A","B")), list(L=c(list("A"),list("A"),list("B"),list("A"),list("A"),list("B")), R=character(0)))
+  expect_equal(zero_or_one(nested1())(c("A","A","B")), list(L=c(list("A"),list("A"),list("B")), R=character(0)))
+  expect_equal(zero_or_one(nested1())(c("B","A","B")), list(L=list(), R=c("B","A","B")))
+  expect_equal(exactly(2,nested1())(c("A","A","B","A","A","B")), list(L=c(list("A"),list("A"),list("B"),list("A"),list("A"),list("B")), R=character(0)))
+  nested3 <- function() {literal("A") %then% literal("A") %then% literal("B")}
+  nested4 <- function() {one_or_more(nested3())}
+  expect_equal(nested3()(c("A","A","B","A","A","B")), list(L=c(list("A"),list("A"),list("B")), R=c("A","A","B")))
+  expect_equal(one_or_more(nested4())(c("A","A","B","A","A","B")), list(L=c(list("A"),list("A"),list("B"),list("A"),list("A"),list("B")), R=character(0)))
+})
