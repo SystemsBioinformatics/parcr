@@ -1,3 +1,5 @@
+* Added `fastafile` example data which is used in the vignette.
+
 # parcr 0.3.1
 
 * Redesigned `exactly(n,p)` to behave as expected with non-emitting parsers 
