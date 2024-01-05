@@ -399,8 +399,8 @@ We can distinguish the following higher order components in a fasta file:
 - A **sequence**: consists of one or more **sequence strings**.
 - A **header** is a *string* that starts with a ">" immediately followed by
   a **title** without spaces.
-- A **sequence string** is a *string* without spaces that consists of one or
-  more symbols from the set {`G`,`A`,`T`,`C`}.
+- A **sequence string** is a *string* without spaces that consists *entirely* 
+  of symbols from the set {`G`,`A`,`T`,`C`}.
 
 This description already suggest which higher order elements of the `fasta` 
 parser we need and how they should be constructed[^1]:
@@ -447,9 +447,10 @@ parse_header <- function(line) {
 
 # returns a sequence string
 parse_sequence_line <- function(line) {
-  m <- stringr::str_match(line, "([GATC]+)")
+  # The line must consist of GATC from the start (^) until the end ($)
+  m <- stringr::str_match(line, "^([GATC]+)$")
   if (is.na(m[1])) {
-    return(list()) # signal failure: no nucleotides found
+    return(list()) # signal failure: not a valid nucleotide sequence string
   } else {
     return(m[2])
   }
