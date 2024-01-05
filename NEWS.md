@@ -1,3 +1,5 @@
+# parcr 0.3.3
+
 * Again modified `exacly(n,p)` because, since repeater functions call the 
   same instance of a function, the counter is not reset when this 
   parser is nested in a repeater parser (`zero_or_more`, etc.). The reset is 
