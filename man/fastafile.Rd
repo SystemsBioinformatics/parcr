@@ -17,6 +17,7 @@ Modified from \url{https://bioinformatics.org/annhyb/examples/seq_fasta.html}
 fastafile
 }
 \description{
-An example fasta-formatted file with multiple nucleotide sequences.
+An example fasta-formatted file with multiple nucleotide sequences. It is
+used in the vignette to demonstrate parsing with the tools from the package.
 }
 \keyword{datasets}
