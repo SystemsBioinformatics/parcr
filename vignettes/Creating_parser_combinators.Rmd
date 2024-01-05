@@ -377,32 +377,22 @@ for fasta-formatted files for nucleotide sequences.
 
 A nucleotide fasta file could look like the example below
 
-```
->sequence1
-TACGTTGTTTTT
-CGG
-
->sequence2
-TGGGTTAAATTT
-CTTGGCTTTATT
-CCGGA
+```{r, echo=FALSE, comment = NA}
+data("fastafile")
+cat(paste0(fastafile, collapse="\n"))
 ```
 
 Since fasta files are text files we could read such a file using `readLines()`.
-Below we simulate the result of reading the file above by constructing a 
-character vector called `file` that we will try to parse.
+Below we simulate the result of reading the file above by loading the 
+`fastafile` data set present in the package. It is a character vector.
 
-```{r}
-file <- c(
-  ">sequence1", "TACGTTGTTTTT", "CGG",
-  "",
-  ">sequence2", "TGGGTTAAATTT", "CTTGGCTTTATT", "CCGGA"
-)
+```{r,eval=FALSE}
+data("fastafile")
 ```
 
 We can distinguish the following higher order components in a fasta file:
  
-- A **fasta file**: consists of one or more **sequence blocks** until the 
+- A **fasta** file: consists of one or more **sequence blocks** until the 
   **end of the file**.
 - A **sequence block**: consist of a **header** and a **sequence**. A 
   sequence block could be preceded by zero or more **empty lines**.
@@ -419,7 +409,7 @@ parser we need and how they should be constructed[^1]:
       formats than we pretend here.
 
 ```{r}
-Fastafile <- function() {
+Fasta <- function() {
   one_or_more(SequenceBlock()) %then%
     eof()
 }
@@ -481,7 +471,7 @@ SequenceString <- function() {
 Now we have all the elements that we need to apply the `FastaFile()` parser.
 
 ```{r}
-Fastafile()(file)
+Fasta()(fastafile)
 ```
 
 The problem with this output is that is not well-structured. It just returns 
@@ -504,7 +494,7 @@ SequenceBlock <- function() {
 Now the result is a list of two lists, one for each sequence block.
 
 ```{r}
-Fastafile()(file)[["L"]]
+Fasta()(fastafile)[["L"]]
 ```
 
 In principle, this output is easier to extract information from, but we can
@@ -522,7 +512,7 @@ Sequence <- function() {
 Then we get
 
 ```{r}
-Fastafile()(file)[["L"]]
+Fasta()(fastafile)[["L"]]
 ```
 
 which looks much better: we know that the first element in each of these lists
@@ -545,7 +535,7 @@ Sequence <- function() {
 Finally, we have our desired output.
 
 ```{r}
-d <- Fastafile()(file)[["L"]]
+d <- Fasta()(fastafile)[["L"]]
 d
 ```
 
