@@ -33,8 +33,9 @@ package simplifies the task of creating such parsers.
 
 The parsers that are created with this package make extensive use of
 functional programming. If this topic is new to you then please read about
-[Functional Programming](https://adv-r.hadley.nz/fp.html) in R in Hadley 
-Wickham's book [**Advanced R**](https://adv-r.hadley.nz).
+[Functional Programming](https://adv-r.hadley.nz/fp.html), in particular the 
+chapters *Function Factories* and *Function Operators*, in Hadley Wickham's
+book [**Advanced R**](https://adv-r.hadley.nz).
 
 ## Creating parser combinators in R to parse text files
 
