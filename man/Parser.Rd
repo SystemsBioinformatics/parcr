@@ -17,6 +17,9 @@ failed.
 Turn a parser into an error messaging parser
 }
 \examples{
-Parser(match_n(3,literal("a") \%then\% literal("t")) \%then\% eof())(c("a","t","a","t","t","t")) # fails on "line" 5
-Parser(match_n(2,literal("a") \%then\% literal("t")) \%then\% eof())(c("a","t","a","t")) # success
+# Yields an error message about parser failing on line 5
+\dontrun{
+Parser(match_n(3,literal("a") \%then\% literal("t")) \%then\% eof())(c(rep(c("a","t"),2),"t","t"))
+}
+Parser(match_n(2,literal("a") \%then\% literal("t")) \%then\% eof())(rep(c("a","t"),2)) # success
 }
