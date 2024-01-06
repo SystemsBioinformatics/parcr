@@ -5,7 +5,7 @@
   alternative parsers like `p1 %or% p2` the marker with the largest index value
   is reported when both parsers fail.
 
-# parcr (development version)
+# parcr 0.3.3.9000
 
 * Developing marker error messaging
 
