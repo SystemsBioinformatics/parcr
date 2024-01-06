@@ -1,3 +1,5 @@
+# parcr (development version)
+
 # parcr 0.3.3
 
 * Again modified `exacly(n,p)` because, since repeater functions call the 
