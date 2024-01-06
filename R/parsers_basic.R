@@ -549,7 +549,7 @@ match_n <- function(n, p) {
   # non-greedy version of 'exactly'
   stopifnot(n >= 0)
   stopifnot(as.integer(n) == n)
-  if (n == 0) function(x) succeed(list())(x)
+  if (n == 0) function(x) {succeed(list())(x)}
   else {
     if (n == 1) p else (p %then% match_n(n - 1, p))
   }

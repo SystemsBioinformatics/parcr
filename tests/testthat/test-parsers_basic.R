@@ -189,3 +189,9 @@ test_that("All combinations of 3 alternative, exclusive parsers yield same error
   expect_error(Parser((p2 %or% p7 %or% p1))(c("A","C","E","F")), regexp = "line 4")
 })
 
+test_that("'match_n' yields correct error", {
+  expect_equal(Parser(match_n(1,literal("A")))(c("A","B","A")), list(L=list("A"), R=c("B","A")))
+  expect_error(Parser(match_n(2,literal("A")))(c("A","B","A")), regexp = "line 2")
+  expect_error(Parser(match_n(5,literal("A")))(c("A","A","A","A","B")), regexp = "line 5")
+})
+
