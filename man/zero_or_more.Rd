@@ -72,6 +72,7 @@ where \code{null} is the empty vector.
 \examples{
 zero_or_more(literal("A")) (c("A",LETTERS[1:5]))
 zero_or_more(literal("A")) (LETTERS[2:5])
+
 one_or_more(literal("A")) (c("A",LETTERS[1:5])) # success
 one_or_more(literal("A")) (LETTERS[2:5]) # failure
 

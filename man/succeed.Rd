@@ -2,24 +2,23 @@
 % Please edit documentation in R/parsers_basic.R
 \name{succeed}
 \alias{succeed}
-\alias{satisfy}
+\alias{fail}
 \title{The most basic parsers.}
 \usage{
 succeed(left)
 
-satisfy(b)
+fail(lnr = LNR())
 }
 \arguments{
 \item{left}{any R-object constructed from a parsed vector.}
 
-\item{b}{a boolean function to determine if the string is accepted.}
+\item{lnr}{an integer. The line number (element number) at which the fail
+occurs}
 }
 \description{
 These are the most basic constructors of a parser, but they are important
 cogs of the parser machinery. The \code{succeed} parser always succeeds, without
 consuming any input, whereas the \code{fail} parser always fails.
-
-\code{satisfy} turns a predicate function into a parser that recognizes strings.
 }
 \details{
 The \code{succeed} parser constructs a \code{list} object with a 'left' or L-part
@@ -30,10 +29,6 @@ be pre-determined, so it is included as an extra parameter.
 
 While \code{succeed} never fails, \code{fail} always does, regardless of the input
 vector. It returns the empty list \code{list()} to signal this fact.
-
-Notice (see pseudocode) that \code{satisfy} fails when presented with empty
-input, so it is futile to write predicate functions that would recognize
-such input.
 }
 \section{Pseudocode}{
 
@@ -44,17 +39,6 @@ fail()(x):     []
 
 where \verb{[L=[y],R=[x]]} is a named list with lists \verb{[y]} and \verb{[x]} as elements
 and \verb{[]} is an empty list.
-
-
-\preformatted{
-satisfy(b)(x):
-  if x==null then fail()(x)
-  else if b(x[1]) then succeed(x[1])(x[-1]) else fail()(x)
-}
-
-where \code{x[1]} is the first element of \code{x}, \code{x[-1]} all subsequent elements
-(or \code{null} if it only has one element). \code{null} is the empty vector,
-equivalent to \code{character(0)} in R.
 }
 
 \section{Note}{
@@ -68,15 +52,4 @@ succeed("A")("abc")
 succeed(data.frame(title="Keisri hull", author="Jaan Kross"))(c("Unconsumed","text"))
 fail()("abc")
 
-The parser that matches an element using a predicate function.
-
-
-# define a predicate function that tests whether the next element starts
-# with an 'a'
-starts_with_a <- function(x) grepl("^a",x)
-# Use it in the satisfy parser
-satisfy(starts_with_a)(c("abc","def")) # success
-satisfy(starts_with_a)(c("bca","def")) # failure
-# Using an anonymous function
-satisfy(function(x) {as.numeric(x)>10})("15") # success
 }

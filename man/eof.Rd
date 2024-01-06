@@ -32,4 +32,5 @@ eof()(x):
 literal("a")("a")
 eof()(character(0)) # success
 eof()("a") # failure
+
 }

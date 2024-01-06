@@ -25,4 +25,5 @@ anonymous function in the argument of \code{satisfy}.
 \examples{
 literal("ab") (c("ab", "cdef")) # success
 literal("ab") (c("abc", "cdef")) # failure
+
 }

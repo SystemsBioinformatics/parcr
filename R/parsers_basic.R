@@ -46,10 +46,16 @@ succeed <- function(left) {
 
 # The parser that always fails.
 #' @rdname succeed
+#'
+#' @param lnr an integer. The line number (element number) at which the fail
+#'            occurs
 #' @export
 #' @examples
 #' fail()("abc")
 #'
+fail <- function(lnr=LNR()) {
+  function(x) new_tracker(lnr)
+}
 # fail <- function() {
 #   function(x) list()
 # }
@@ -87,6 +93,7 @@ succeed <- function(left) {
 #' satisfy(starts_with_a)(c("bca","def")) # failure
 #' # Using an anonymous function
 #' satisfy(function(x) {as.numeric(x)>10})("15") # success
+#'
 satisfy <- function(b) {
   function(x) {
     if (is_empty_atom(x)) fail()(x)
@@ -116,6 +123,7 @@ satisfy <- function(b) {
 #' @examples
 #' literal("ab") (c("ab", "cdef")) # success
 #' literal("ab") (c("abc", "cdef")) # failure
+#'
 literal <- function(string) {
   satisfy(function(x) identical(x, as.character(string)))
 }
@@ -146,6 +154,7 @@ literal <- function(string) {
 #' literal("a")("a")
 #' eof()(character(0)) # success
 #' eof()("a") # failure
+#'
 eof <- function() {
   function(x) {
     if (is_empty_atom(x)) succeed(x)(list())
@@ -184,6 +193,20 @@ eof <- function() {
 #' starts_with_a <- function(x) grepl("^a",x[1])
 #' # success on both parsers, but returns result of p1 only
 #' (literal("a") %or% satisfy(starts_with_a)) (letters[1:5])
+#'
+`%or%` <- function(p1, p2) {
+  function(x) {
+    init_lnr <- LNR()
+    r1 <- p1(x)
+    if (!failed(r1)) r1 else {
+      set_LNR(init_lnr) # reset to where started
+      r2 <- p2(x)
+      if (!failed(r2)) r2 else {
+        return(new_tracker(max(tracker_val(r1), tracker_val(r2)))) # perhaps new method for max?
+      }
+    }
+  }
+}
 # `%or%` <- function(p1, p2) {
 #   function(x) {
 #     r1 <- p1(x)
@@ -221,6 +244,18 @@ eof <- function() {
 #' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("ab", "bc", "de")) # success
 #' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("bb", "bc", "de")) # failure
 #' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("ab", "ac", "de")) # failure
+#'
+`%then%` <- function(p1, p2) {
+  function(x) {
+    r1 <- p1(x)
+    if (failed(r1)) r1
+    else {
+      inc_LNR()
+      r2 <- p2(r1$R)
+      if (failed(r2)) r2 else succeed(c(r1$L, r2$L))(r2$R)
+    }
+  }
+}
 # `%then%` <- function(p1, p2) {
 #   function(x) {
 #     r1 <- p1(x)
@@ -254,6 +289,7 @@ eof <- function() {
 #' @examples
 #' (literal('ab') %using% toupper) (c("ab","cdef")) # success
 #' (literal('ab') %using% toupper) (c("bb","cdef")) # failure
+#'
 `%using%` <- function(p, f) {
   function(x) {
     r <- p(x)
@@ -300,6 +336,18 @@ eof <- function() {
 #' (literal(">") %thenx% satisfy(is_number)) (c(">", "12"))
 #' # Temperatures are followed by the unit 'C', but we only need the number
 #' (satisfy(is_number) %xthen% literal("C")) (c("21", "C"))
+#'
+`%xthen%` <- function(p1, p2) {
+  function(x) {
+    r1 <- p1(x)
+    if (failed(r1)) r1
+    else {
+      inc_LNR()
+      r2 <- p2(r1$R)
+      if (failed(r2)) r2 else succeed(r1$L) (r2$R)
+    }
+  }
+}
 # `%xthen%` <- function(p1, p2) {
 #   function(x) {
 #     # Fail on NULL input, otherwise we create endless loops
@@ -318,6 +366,19 @@ eof <- function() {
 #' @rdname grapes-xthen-grapes
 #' @export
 #' @seealso [%then%]
+#'
+`%thenx%` <- function(p1, p2) {
+  function(x) {
+    r1 <- p1(x)
+    if (failed(r1)) r1
+    else {
+      inc_LNR()
+      r2 <- p2(r1$R)
+      if (failed(r2)) r2 else succeed(r2$L) (r2$R)
+    }
+  }
+}
+
 # `%thenx%` <- function(p1, p2) {
 #   function(x) {
 #     # Fail on NULL input, otherwise we create endless loops
@@ -422,9 +483,13 @@ eof <- function() {
 #' @examples
 #' zero_or_more(literal("A")) (c("A",LETTERS[1:5]))
 #' zero_or_more(literal("A")) (LETTERS[2:5])
+#'
 zero_or_more <- function(p) {
-  (p %then% zero_or_more(p)) %or% succeed(character(0))
+  (p %then% zero_or_more(p)) %or% (succeed(character(0)) %using% function(x){dec_LNR(); x})
 }
+# zero_or_more <- function(p) {
+#   (p %then% zero_or_more(p)) %or% succeed(character(0))
+# }
 
 #' @rdname zero_or_more
 #' @export
