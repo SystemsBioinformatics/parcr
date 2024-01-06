@@ -1,3 +1,7 @@
+# parcr 0.4.1
+
+* Correct example in documentation for Parser() function
+
 # parcr 0.4.0
 
 * Marker error messaging implemented and tested. Markers are line numbers 
