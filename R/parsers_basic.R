@@ -54,7 +54,7 @@ succeed <- function(left) {
 #' fail()("abc")
 #'
 fail <- function(lnr=LNR()) {
-  function(x) new_tracker(lnr)
+  function(x) new_marker(lnr)
 }
 # fail <- function() {
 #   function(x) list()
@@ -202,7 +202,7 @@ eof <- function() {
       set_LNR(init_lnr) # reset to where started
       r2 <- p2(x)
       if (!failed(r2)) r2 else {
-        return(new_tracker(max(tracker_val(r1), tracker_val(r2)))) # perhaps new method for max?
+        return(new_marker(max(marker_val(r1), marker_val(r2)))) # perhaps new method for max?
       }
     }
   }

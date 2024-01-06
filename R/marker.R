@@ -1,12 +1,12 @@
-new_tracker <- function(n) {
+new_marker <- function(n) {
   structure(
     list(),
     n = as.integer(n),
-    class = c("tracker")
+    class = c("marker")
   )
 }
 
-tracker_val <- function(tracker) {attr(tracker,"n")}
+marker_val <- function(marker) {attr(marker,"n")}
 
 the <- list2env(list(LNR = 1L), parent = emptyenv())
 
@@ -20,7 +20,7 @@ dec_LNR <- function() {the$LNR <- the$LNR - 1L}
 
 reset_LNR <- function() {set_LNR(1L)}
 
-print.tracker <- function(x, ...) {
+print.marker <- function(x, ...) {
   print("list()")
   invisible(x)
 }

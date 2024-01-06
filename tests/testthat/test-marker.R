@@ -1,7 +1,7 @@
-test_that("'new_tracker' works", {
-  expect_equal(new_tracker(1), structure(list(), n = 1L, class = c("tracker")))
-  t <- new_tracker(78)
-  expect_identical(tracker_val(t), 78L)
+test_that("'new_marker' works", {
+  expect_equal(new_marker(1), structure(list(), n = 1L, class = c("marker")))
+  t <- new_marker(78)
+  expect_identical(marker_val(t), 78L)
 })
 
 test_that("LNR works", {

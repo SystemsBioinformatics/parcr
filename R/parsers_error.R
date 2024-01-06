@@ -2,7 +2,7 @@ Parser <- function(p) {
   reset_LNR()
   function(x) {
     r <- p(x)
-    if (!failed(r)) r else parser_error2(tracker_val(r))
+    if (!failed(r)) r else parser_error2(marker_val(r))
   }
 }
 
