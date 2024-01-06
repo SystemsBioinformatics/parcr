@@ -11,8 +11,8 @@ parser_error2 <- function (nr) {
 }
 
 # Fail should produce a tracker
-fail <- function() {
-  function(x) new_tracker(LNR())
+fail <- function(lnr=LNR()) {
+  function(x) new_tracker(lnr)
 }
 
 # The or() function for error tracking
