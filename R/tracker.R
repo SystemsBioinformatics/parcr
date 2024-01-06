@@ -22,6 +22,6 @@ reset_LNR <- function() {set_LNR(1L)}
 
 print.tracker <- function(x, ...) {
   print("list()")
-  invisible(t)
+  invisible(x)
 }
 
