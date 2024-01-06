@@ -16,6 +16,8 @@ set_LNR <- function(n) {the$LNR <- as.integer(n)}
 
 inc_LNR <- function() {the$LNR <- the$LNR + 1L}
 
+dec_LNR <- function() {the$LNR <- the$LNR - 1L}
+
 reset_LNR <- function() {set_LNR(1L)}
 
 incby_LNR <- function(n) {

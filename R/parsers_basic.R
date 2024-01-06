@@ -50,9 +50,9 @@ succeed <- function(left) {
 #' @examples
 #' fail()("abc")
 #'
-fail <- function() {
-  function(x) list()
-}
+# fail <- function() {
+#   function(x) list()
+# }
 
 #' The parser that matches an element using a predicate function.
 #'
@@ -184,13 +184,13 @@ eof <- function() {
 #' starts_with_a <- function(x) grepl("^a",x[1])
 #' # success on both parsers, but returns result of p1 only
 #' (literal("a") %or% satisfy(starts_with_a)) (letters[1:5])
-`%or%` <- function(p1, p2) {
-  function(x) {
-    r1 <- p1(x)
-    r2 <- p2(x)
-    if (!failed(r1)) r1 else {if (!failed(r2)) r2 else fail()(x)}
-  }
-}
+# `%or%` <- function(p1, p2) {
+#   function(x) {
+#     r1 <- p1(x)
+#     r2 <- p2(x)
+#     if (!failed(r1)) r1 else {if (!failed(r2)) r2 else fail()(x)}
+#   }
+# }
 
 #' The parser of sequences of parsers.
 #'
@@ -221,16 +221,16 @@ eof <- function() {
 #' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("ab", "bc", "de")) # success
 #' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("bb", "bc", "de")) # failure
 #' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("ab", "ac", "de")) # failure
-`%then%` <- function(p1, p2) {
-  function(x) {
-    r1 <- p1(x)
-    if (failed(r1)) fail()(x)
-    else {
-      r2 <- p2(r1$R)
-      if (failed(r2)) fail()(x) else succeed(c(r1$L, r2$L)) (r2$R)
-    }
-  }
-}
+# `%then%` <- function(p1, p2) {
+#   function(x) {
+#     r1 <- p1(x)
+#     if (failed(r1)) fail()(x)
+#     else {
+#       r2 <- p2(r1$R)
+#       if (failed(r2)) fail()(x) else succeed(c(r1$L, r2$L)) (r2$R)
+#     }
+#   }
+# }
 
 #' Manipulate results from a parser by applying a function.
 #'
@@ -300,38 +300,38 @@ eof <- function() {
 #' (literal(">") %thenx% satisfy(is_number)) (c(">", "12"))
 #' # Temperatures are followed by the unit 'C', but we only need the number
 #' (satisfy(is_number) %xthen% literal("C")) (c("21", "C"))
-`%xthen%` <- function(p1, p2) {
-  function(x) {
-    # Fail on NULL input, otherwise we create endless loops
-    if (is_empty_atom(x)) fail()(x)
-    else {
-      r1 <- p1(x)
-      if (failed(r1)) fail()(x)
-      else {
-        r2 <- p2(r1$R)
-        if (failed(r2)) fail()(x) else succeed(r1$L) (r2$R)
-      }
-    }
-  }
-}
+# `%xthen%` <- function(p1, p2) {
+#   function(x) {
+#     # Fail on NULL input, otherwise we create endless loops
+#     if (is_empty_atom(x)) fail()(x)
+#     else {
+#       r1 <- p1(x)
+#       if (failed(r1)) fail()(x)
+#       else {
+#         r2 <- p2(r1$R)
+#         if (failed(r2)) fail()(x) else succeed(r1$L) (r2$R)
+#       }
+#     }
+#   }
+# }
 
 #' @rdname grapes-xthen-grapes
 #' @export
 #' @seealso [%then%]
-`%thenx%` <- function(p1, p2) {
-  function(x) {
-    # Fail on NULL input, otherwise we create endless loops
-    if (is_empty_atom(x)) fail()(x)
-    else {
-      r1 <- p1(x)
-      if (failed(r1)) fail()(x)
-      else {
-        r2 <- p2(r1$R)
-        if (failed(r2)) fail()(x) else succeed(r2$L) (r2$R)
-      }
-    }
-  }
-}
+# `%thenx%` <- function(p1, p2) {
+#   function(x) {
+#     # Fail on NULL input, otherwise we create endless loops
+#     if (is_empty_atom(x)) fail()(x)
+#     else {
+#       r1 <- p1(x)
+#       if (failed(r1)) fail()(x)
+#       else {
+#         r2 <- p2(r1$R)
+#         if (failed(r2)) fail()(x) else succeed(r2$L) (r2$R)
+#       }
+#     }
+#   }
+# }
 
 #' Return a fixed value upon successful parsing.
 #'

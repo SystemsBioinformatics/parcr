@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers_basic.R
 \name{\%using\%}
 \alias{\%using\%}
-\title{Manipulate results from a parser by applying a function.}
+\title{The parser of alternative parsers.}
 \usage{
 p \%using\% f
 }
@@ -10,16 +10,51 @@ p \%using\% f
 \item{p}{a parser.}
 
 \item{f}{a function to be applied to the result of a succesful \code{p}.}
+
+\item{p1, p2}{two parsers.}
 }
 \value{
 A parser.
+
+A parser.
+
+A parser.
 }
 \description{
+The \verb{\%or\%} combinator \code{(p1 \%or\% p2)} returns the result of \code{p1} if \code{p1} is
+successful or, if \code{p1} fails that of \code{p2} if \code{p2} parses successfully,
+otherwise it returns a \code{fail}.
+
+\code{(p1 \%then\% p2)} recognizes anything that \code{p1} and \code{p2} would if placed in
+succession.
+
 The \verb{\%using\%} combinator allows us to manipulate results from a parser. The
 parser \code{(p \%using\% f)} has the same behavior as the parser \code{p}, except that
 the function \code{f} is applied to its result value.
 }
 \section{Pseudocode}{
+
+\preformatted{
+(p1 \%or\% p2)(x):
+  if p1(x)==[] then
+    if p2(x)==[] then fail()(x) else p2(x)
+  else p1(x)
+}
+
+where \verb{[]} is the empty list.
+
+
+\preformatted{
+(p1 \%then\% p2)(x):
+  if p1(x)==[] or x==null then fail()(x)
+  else
+    if p2(x[-1])==[] then fail()(x)
+    else succeed([p1(x)$L, p2(x[-1])$L])(x[-2])
+}
+
+where \code{null} is the empty vector, \code{x[-1]} and \code{x[-2]} are the vector \code{x}
+without the first element and without the first two elements, respectively.
+
 
 
 \preformatted{
@@ -30,6 +65,24 @@ the function \code{f} is applied to its result value.
 }
 
 \examples{
+(literal("A") \%or\% literal("a"))(LETTERS[1:5]) # success on first parser
+(literal("A") \%or\% literal("a"))(letters[1:5]) # success on second parser
+(literal("A") \%or\% literal("a"))(LETTERS[2:6]) # failure
+starts_with_a <- function(x) grepl("^a",x[1])
+# success on both parsers, but returns result of p1 only
+(literal("a") \%or\% satisfy(starts_with_a)) (letters[1:5])
+The parser of sequences of parsers.
+
+starts_with_a <- function(x) grepl("^a",x[1])
+starts_with_b <- function(x) grepl("^b",x[1])
+(satisfy(starts_with_a) \%then\% satisfy(starts_with_b)) (c("ab", "bc", "de")) # success
+(satisfy(starts_with_a) \%then\% satisfy(starts_with_b)) (c("bb", "bc", "de")) # failure
+(satisfy(starts_with_a) \%then\% satisfy(starts_with_b)) (c("ab", "ac", "de")) # failure
+Manipulate results from a parser by applying a function.
+
 (literal('ab') \%using\% toupper) (c("ab","cdef")) # success
 (literal('ab') \%using\% toupper) (c("bb","cdef")) # failure
+}
+\seealso{
+The discarding versions \link{\%xthen\%} and \link{\%thenx\%}
 }
