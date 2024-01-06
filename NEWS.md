@@ -1,3 +1,5 @@
+# parcr 0.4.0
+
 * Marker error messaging implemented and tested. Markers are line numbers 
   (element numbers in a character vector) where the parser fails. In case of
   alternative parsers like `p1 %or% p2` the marker with the largest index value
