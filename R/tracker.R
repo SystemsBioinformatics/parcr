@@ -2,7 +2,7 @@ new_tracker <- function(n) {
   structure(
     list(),
     n = as.integer(n),
-    class = c("tracker", "list")
+    class = c("tracker")
   )
 }
 
@@ -20,26 +20,8 @@ dec_LNR <- function() {the$LNR <- the$LNR - 1L}
 
 reset_LNR <- function() {set_LNR(1L)}
 
-incby_LNR <- function(n) {
-  UseMethod("incby_LNR")
+print.tracker <- function(x, ...) {
+  print("list()")
+  invisible(t)
 }
 
-decby_LNR <- function(n) {
-  UseMethod("decby_LNR")
-}
-
-incby_LNR.integer <- function(n) {
-  the$LNR <- the$LNR + n
-}
-
-decby_LNR.integer <- function(n) {
-  the$LNR <- the$LNR - n
-}
-
-incby_LNR.tracker <- function(tracker) {
-  incby_LNR(tracker_val(tracker)) # Something possible with NextMethod()?
-}
-
-decby_LNR.tracker <- function(tracker) {
-  decby_LNR(tracker_val(tracker)) # Something possible with NextMethod()?
-}
