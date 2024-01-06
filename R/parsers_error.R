@@ -10,7 +10,7 @@ parser_error2 <- function (nr) {
   stop("Parser failed on line ", nr, " of input")
 }
 
-# Fail should produce a tracker object
+# Fail should produce a tracker
 fail <- function() {
   function(x) new_tracker(LNR())
 }
@@ -22,15 +22,10 @@ fail <- function() {
     init_lnr <- LNR()
     r1 <- p1(x)
     if (!failed(r1)) r1 else {
-      tracker_lines1 <- tracker_val(r1)
-      # cat("r1 lines:",tracker_lines1,"\n")
-      set_LNR(init_lnr)
+      set_LNR(init_lnr) # reset to where started
       r2 <- p2(x)
       if (!failed(r2)) r2 else {
-        tracker_lines2 <- tracker_val(r2)
-        # cat("r2 lines:",tracker_lines2,"\n")
-        # cat("maximum lines parsed:", max(tracker_lines1, tracker_lines2),"\n")
-        return(new_tracker(max(tracker_lines1, tracker_lines2)))
+        return(new_tracker(max(tracker_val(r1), tracker_val(r2)))) # perhaps new method for max?
       }
     }
   }
@@ -46,8 +41,7 @@ fail <- function() {
     else {
       inc_LNR()
       r2 <- p2(r1$R)
-      if (failed(r2)) r2
-      else succeed(c(r1$L, r2$L))(r2$R)
+      if (failed(r2)) r2 else succeed(c(r1$L, r2$L))(r2$R)
     }
   }
 }
