@@ -154,3 +154,38 @@ test_that("repeater parsers work when nested", {
   expect_equal(nested3()(c("A","A","B","A","A","B")), list(L=c(list("A"),list("A"),list("B")), R=c("A","A","B")))
   expect_equal(one_or_more(nested4())(c("A","A","B","A","A","B")), list(L=c(list("A"),list("A"),list("B"),list("A"),list("A"),list("B")), R=character(0)))
 })
+
+p1 <- function(x) {(literal("A") %then% literal("B"))(x)}
+p2 <- function(x) {(literal("A") %then% literal("C") %then% literal("D"))(x)}
+p7 <- function(x) {(literal("A") %then% literal("C") %then% literal("E") %then% literal("D"))(x)}
+p3 <- function(x) {(EmptyLine() %then% EmptyLine() %then% literal("A"))(x)}
+p4 <- function(x) {(exactly(2,EmptyLine()) %then% literal("A"))(x)}
+p5 <- function(x) {(one_or_more(EmptyLine()) %then% literal("A"))(x)}
+p6 <- function(x) {(MaybeEmpty() %then% literal("A"))(x)}
+
+test_that("'Parser' works", {
+  expect_error(Parser(literal("A"))("B"), regexp="line 1")
+  expect_equal(Parser(p1)(c("A","B")), list(L=c(list("A"), list("B")), R=character(0)))
+  expect_equal(Parser(p2)(c("A","C","D")), list(L=c(list("A"), list("C"), list("D")), R=character(0)))
+  expect_error(Parser(p1)(c("A","C")), regexp="line 2")
+  expect_error(Parser(p2)(c("A","C","E")), regexp="line 3")
+  expect_equal(Parser((literal("B") %or% literal("A")))(c("A","B")), list(L=c(list("A")), R="B"))
+  expect_error(Parser(literal("A") %or% literal("B"))("C"), regexp = "line 1")
+  expect_equal(Parser(p1 %or% p2)(c("A","C","D")), list(L=c(list("A"), list("C"), list("D")), R=character(0)))
+  expect_error(Parser(p2 %or% p1)(c("A","C","E")), regexp = "line 3")
+  expect_error(Parser(p1 %or% p2)(c("A","C","E")), regexp = "line 3")
+  expect_error(Parser(p3)(c("","","C")), regexp = "line 3")
+  expect_error(Parser(p4)(c("","","C")), regexp = "line 3")
+  expect_error(Parser(p5)(c("","","C")), regexp = "line 3")
+  expect_error(Parser(p6)(c("","","C")), regexp = "line 3")
+})
+
+test_that("All combinations of 3 alternative, exclusive parsers yield same error",{
+  expect_error(Parser((p1 %or% p2 %or% p7))(c("A","C","E","F")), regexp = "line 4")
+  expect_error(Parser((p1 %or% p7 %or% p2))(c("A","C","E","F")), regexp = "line 4")
+  expect_error(Parser((p7 %or% p1 %or% p2))(c("A","C","E","F")), regexp = "line 4")
+  expect_error(Parser((p7 %or% p2 %or% p1))(c("A","C","E","F")), regexp = "line 4")
+  expect_error(Parser((p2 %or% p1 %or% p7))(c("A","C","E","F")), regexp = "line 4")
+  expect_error(Parser((p2 %or% p7 %or% p1))(c("A","C","E","F")), regexp = "line 4")
+})
+
