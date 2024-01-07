@@ -430,9 +430,9 @@ Sequence <- function() {
 Notice that these elements are functions taking no input, hence the empty 
 argument brackets `()` behind their names. Now we need to define the 
 line-parsers `Header()` and `SequenceString()` that recognize and 
-process these elements in the character vector `file`. We use functions from
-`stringr` to do this in a few helper functions, and we use `match_s()` to shape
-these parsers.
+process these elements in the character vector `fastafile`. We use functions 
+from `stringr` to do this in a few helper functions, and we use `match_s()` to
+shape these parsers.
 
 ```{r}
 # returns the title after the ">" in the sequence header
@@ -470,7 +470,7 @@ SequenceString <- function() {
 }
 ```
 
-Now we have all the elements that we need to apply the `FastaFile()` parser.
+Now we have all the elements that we need to apply the `Fasta()` parser.
 
 ```{r}
 Fasta()(fastafile)
@@ -537,7 +537,7 @@ Sequence <- function() {
 Finally, we have our desired output.
 
 ```{r}
-d <- Fasta()(fastafile)[["L"]]
+d <- Fasta()(fastafile)
 d
 ```
 
