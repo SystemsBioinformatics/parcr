@@ -94,8 +94,11 @@ Sequence <- function() {
 ```
 
 Functions like `one_or_more()`, `%then%`, `%using%`, `eof()` and
-`MaybeEmoty()` are defined in the package and are the basic parsers with
-which the package user can build complex parsers.
+`MaybeEmpty()` are defined in the package and are the basic parsers with
+which the package user can build complex parsers. The `%using%` operator uses
+the function on its right-hand side to modify parser output on its left hand 
+side. Please see the vignette in the `parcr` package for more explanation why
+this is useful.
 
 Notice that the new parser functions that we define above are higher order 
 functions taking no input, hence the empty argument brackets `()` behind their
@@ -133,11 +136,13 @@ Then we define the line-parsers.
 
 ```r
 Header <- function() {
-  match_s(parse_header)
+  match_s(parse_header) %using% 
+    function(x) list(title = unlist(x))
 }
 
-SequenceString <- function() {
-  match_s(parse_sequence_line)
+Sequence <- function() {
+  one_or_more(SequenceString()) %using% 
+    function(x) list(sequence = paste(x, collapse=""))
 }
 ```
 where `match_s()` is also a parser defined in `parcr`.
