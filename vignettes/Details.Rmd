@@ -1,0 +1,24 @@
+---
+title: "Details"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Details}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(parcr)
+```
+
+```{r,out.width="30%", fig.align='center', echo=FALSE, fig.cap="Illustration of marker positioning when a parser fails on an input vector of length 6. Each filled dot represents a successful parse. A `%then%` combinator shifts to the next element whereas an `%or%` combinator investigates alterantive parsers on the input. The parser fails at the red crosses and the red square. The marker(red square) will be put at the parser that fails at the input element with the highest index, which is element 5 here."}
+knitr::include_graphics("tree.png")
+```
+
