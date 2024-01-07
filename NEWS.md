@@ -1,3 +1,7 @@
+# parcr 0.4.2
+
+* Resolved [issue #5](https://github.com/SystemsBioinformatics/parcr/issues/5)
+
 # parcr 0.4.1
 
 * Correct example in documentation for Parser() function
