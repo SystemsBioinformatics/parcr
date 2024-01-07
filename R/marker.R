@@ -20,8 +20,22 @@ dec_LNR <- function() {the$LNR <- the$LNR - 1L}
 
 reset_LNR <- function() {set_LNR(1L)}
 
+#' Prints an object of class `marker`
+#'
+#' An object of class `marker` is an empty list create by the function
+#' `fail()`.
+#'
+#' @details
+#' The `marker` class is used only for internal purposes. It contains the
+#' attribute `n` which is the index of the element in which a parser failed.
+#' Its `print` method is exported because the user of the `parcr` package will
+#' often observe this object.
+#'
+#' @inheritParams base::print
+#'
+#' @export
 print.marker <- function(x, ...) {
-  print("list()")
+  cat("list()")
   invisible(x)
 }
 
