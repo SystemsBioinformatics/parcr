@@ -1,3 +1,8 @@
+* `print.marker` now emits '[]' to make explicit that it differs from a simple
+  `list()`.
+* Export of function `failed()` to test failure of a parser. Useful in 
+  unit testing.
+
 # parcr 0.4.2
 
 * Resolved [issue #5](https://github.com/SystemsBioinformatics/parcr/issues/5)

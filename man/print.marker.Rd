@@ -12,12 +12,17 @@
 \item{...}{further arguments passed to or from other methods.}
 }
 \description{
-An object of class \code{marker} is an empty list create by the function
-\code{fail()}.
+An object of class \code{marker} is an empty list created by the function
+\code{fail()}. To indicate that this object differs from simply \code{list()} its
+print method prints \verb{[]}.
 }
 \details{
-The \code{marker} class is used only for internal purposes. It contains the
-attribute \code{n} which is the index of the element in which a parser failed.
-Its \code{print} method is exported because the user of the \code{parcr} package will
-often observe this object.
+The \code{marker} class is used internally to mark the largest index number of
+the element (i.e. line) of the input character vector at which the parser
+failed. This number is stored in the attribute \code{n} of a marker and only
+correctly corresponds to that index number if the parser is wrapped in a
+\code{Parser()} call.
+}
+\seealso{
+\code{\link[=Parser]{Parser()}}, \code{\link[=failed]{failed()}}
 }

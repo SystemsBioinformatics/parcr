@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers_error.R
 \name{Parser}
 \alias{Parser}
-\title{Turn a parser into an error messaging parser}
+\title{Turn a parser into an error messaging parser.}
 \usage{
 Parser(p)
 }
@@ -14,7 +14,7 @@ A parser result or an error message about the line where the parser
 failed.
 }
 \description{
-Turn a parser into an error messaging parser
+Turn a parser into an error messaging parser.
 }
 \examples{
 # Yields an error message about parser failing on line 5

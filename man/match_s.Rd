@@ -23,7 +23,9 @@ as its argument, so you don't have to test for empty input, like
 \code{character(0)}. These two facts also often simplify further processing with
 the string functions like \code{grep}, \code{regmatches} and those from the \code{stringr}
 package. The function \code{s} can return any R-object when succeeding, but to
-signal failure to the parser it must return \code{list()} as the output.
+signal failure to the parser it must return the empty \code{list()}. Note that
+\code{list()} output from \code{s} will be turned into a marker object, the internal
+object to mark failure, by \code{match_s()}, see \code{\link[=failed]{failed()}}.
 }
 \section{Pseudocode}{
 

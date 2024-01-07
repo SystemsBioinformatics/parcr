@@ -8,16 +8,6 @@ is_empty_atom <- function(l) {
   is.atomic(l) && length(l) == 0
 }
 
-#' Testing for empty list.
-#'
-#' @param l An object.
-#'
-#' @return TRUE or FALSE.
-#' @keywords internal
-failed <- function(l) {
-  is.list(l) && length(l) == 0
-}
-
 #' Ensure that the structure of objects is preserved.
 #'
 #' After successful parsing the result must be present in a list to preserve

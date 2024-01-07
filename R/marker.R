@@ -30,20 +30,40 @@ reset_LNR <- function() {set_LNR(1L)}
 
 #' Prints an object of class `marker`
 #'
-#' An object of class `marker` is an empty list create by the function
-#' `fail()`.
+#' An object of class `marker` is an empty list created by the function
+#' `fail()`. To indicate that this object differs from simply `list()` its
+#' print method prints `[]`.
 #'
 #' @details
-#' The `marker` class is used only for internal purposes. It contains the
-#' attribute `n` which is the index of the element in which a parser failed.
-#' Its `print` method is exported because the user of the `parcr` package will
-#' often observe this object.
+#' The `marker` class is used internally to mark the largest index number of
+#' the element (i.e. line) of the input character vector at which the parser
+#' failed. This number is stored in the attribute `n` of a marker and only
+#' correctly corresponds to that index number if the parser is wrapped in a
+#' `Parser()` call.
 #'
 #' @inheritParams base::print
-#'
+#' @seealso [Parser()], [failed()]
 #' @export
 print.marker <- function(x, ...) {
-  cat("list()")
+  cat("[]")
   invisible(x)
+}
+
+#' Testing for parser failure.
+#'
+#' Use this function to test whether your parser failed, for example in
+#' unit testing of your parsers when writing a package.
+#'
+#' @param o Output from applying a parser to a character vector.
+#'
+#' @return A logical value.
+#' @seealso [print.marker()]
+#' @export
+#' @examples
+#' d <- (literal("A") %then% literal("B"))(c("A","A"))
+#' failed(d)
+#'
+failed <- function(o) {
+  is.list(o) && length(o) == 0
 }
 

@@ -120,7 +120,8 @@ the 'right' or R-part that contains the unconsumed part of the vector. The
 left part can be any R-object.
 
 While `succeed` never fails, `fail` always does, regardless of the input
-vector. It returns the empty list `list()` to signal failure.
+vector. To signal failure it returns a special form of the empty list `list()`,
+namely a `marker` object printed as `[]`.
 
 **Important**: In practice you will probably not not use these two functions to 
 construct parsers.

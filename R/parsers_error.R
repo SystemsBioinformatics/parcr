@@ -1,5 +1,4 @@
-
-#' Turn a parser into an error messaging parser
+#' Turn a parser into an error messaging parser.
 #'
 #' @param p a parser.
 #'

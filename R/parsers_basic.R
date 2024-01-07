@@ -571,7 +571,9 @@ match_n <- function(n, p) {
 #' `character(0)`. These two facts also often simplify further processing with
 #' the string functions like `grep`, `regmatches` and those from the `stringr`
 #' package. The function `s` can return any R-object when succeeding, but to
-#' signal failure to the parser it must return the empty `list()`.
+#' signal failure to the parser it must return the empty `list()`. Note that
+#' `list()` output from `s` will be turned into a marker object, the internal
+#' object to mark failure, by `match_s()`, see [failed()].
 #'
 #' @section Pseudocode:
 #' \preformatted{
