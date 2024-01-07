@@ -89,7 +89,7 @@ SequenceBlock <- function() {
 
 Sequence <- function() {
   one_or_more(SequenceString()) %using% 
-    function(x) paste(x, collapse="")
+    function(x) list(sequence = paste(x, collapse=""))
 }
 ```
 
@@ -140,9 +140,8 @@ Header <- function() {
     function(x) list(title = unlist(x))
 }
 
-Sequence <- function() {
-  one_or_more(SequenceString()) %using% 
-    function(x) list(sequence = paste(x, collapse=""))
+SequenceString <- function() {
+  match_s(parse_sequence_line)
 }
 ```
 where `match_s()` is also a parser defined in `parcr`.
