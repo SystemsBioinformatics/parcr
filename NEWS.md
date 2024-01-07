@@ -1,3 +1,5 @@
+# parcr 0.4.3
+
 * `print.marker` now emits '[]' to make explicit that it differs from a simple
   `list()`.
 * Export of function `failed()` to test failure of a parser. Useful in 
