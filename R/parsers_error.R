@@ -16,10 +16,32 @@ Parser <- function(p) {
   reset_LNR()
   function(x) {
     r <- p(x)
-    if (!failed(r)) r else parser_error2(marker_val(r))
+    if (!failed(r)) {
+      if (!finished(r)) {
+        # message that we did not completely consume the input and that user should consider using eof()
+      }
+      r
+    } else parser_error(nr=marker_val(r), content=x[marker_val(r)])
   }
 }
 
-parser_error2 <- function (nr) {
-  stop("Parser failed on line ", nr, " of input")
+# from https://adv-r.hadley.nz/conditions.html
+stop_custom <- function(.subclass, message, call = NULL, ...) {
+  err <- structure(
+    list(
+      message = message,
+      call = call,
+      ...
+    ),
+    class = c(.subclass, "error", "condition")
+  )
+  stop(err)
+}
+
+parser_error <- function(nr, content) {
+  message = paste0("Parser failed on line ", nr, " of input.\nLine content: \"",content,"\"")
+  stop_custom (.subclass = "error_parser",
+               message = message,
+               linenr = nr,
+               linecontent = content)
 }
