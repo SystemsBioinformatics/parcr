@@ -14,3 +14,9 @@ test_that("LNR works", {
   reset_LNR()
   expect_identical(LNR(), 1L)
 })
+
+test_that("'finished' works", {
+  expect_true(finished((literal("A") %then% eof())("A")))
+  expect_false(finished((literal("A"))("A")))
+  expect_false(finished((literal("A") %then% eof())(c("A","C"))))
+})

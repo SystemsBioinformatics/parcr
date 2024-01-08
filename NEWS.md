@@ -1,3 +1,6 @@
+* Added function `finished()` to test for complete consumption of the input by
+  the parser. 
+
 # parcr 0.4.3
 
 * `print.marker` now emits '[]' to make explicit that it differs from a simple

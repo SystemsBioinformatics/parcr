@@ -67,3 +67,21 @@ failed <- function(o) {
   is.list(o) && length(o) == 0
 }
 
+
+#' Test whether the parser has completely consumed the input
+#'
+#' A parser has completely consumed its input when the input has satisfied
+#' `eof()`.
+#'
+#' @inheritParams failed
+#'
+#' @return A logical value.
+#' @export
+#'
+#' @examples
+#' finished((literal("A") %then% eof())("A")) # TRUE
+#' finished((literal("A"))("A")) # FALSE
+#' finished((literal("A") %then% eof())(c("A","C"))) # FALSE
+finished <- function(o) {
+  is.list(o$R)
+}
