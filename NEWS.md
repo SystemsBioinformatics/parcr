@@ -1,5 +1,10 @@
+# parcr 0.4.4
+
+* Added (started) Details vignette.
+* Custom `error_parser` includes line number and line content fields of the 
+  element index on which the parser failed.
 * Added function `finished()` to test for complete consumption of the input by
-  the parser. 
+  the parser.
 
 # parcr 0.4.3
 
