@@ -28,7 +28,7 @@ knitr::include_graphics("tree.png")
 
 In the current implementation we chose to track the current element index number with a state variable. The principle of using state variables is described in [section 7.4](https://r-pkgs.org/data.html#sec-data-state) of [R Packages (2e)](https://r-pkgs.org/).
 
-Note that correct tracking an error messaging only takes place when the parser is wrapped in the `Parser()` function.
+Note that correct tracking an error messaging only takes place when the parser is wrapped in the `Parser()` function. Below we illustrate the example above by parsing the first 6 letters of the alphabet by a parser that fails on the indicated positions.
 
 ```{r}
 arm1 <- function() {
@@ -39,13 +39,29 @@ arm1 <- function() {
 }
 
 arm2 <- function() {
-  literal("C") %then% ()
+  literal("C") %then% 
+    (arm21() %or% arm22())
 }
 
-  p <- function() {
+arm21 <- function() {
+  literal("D") %then%
+    literal("F") %then%
+    literal("G")
+}
+
+arm22 <- function() {
+  literal("E") %then%
+    literal("F") %then%
+    literal("G")
+}
+
+p <- function() {
   literal("A") %then%
     literal("B") %then%
-    ()
+    (arm1() %or% arm2())
 }
+
+# The following line generates an error
+# Parser((p() %then% eol()))(LETTERS[1:6])
 ```
 
