@@ -1,18 +1,18 @@
-#' Turn a parser into an error messaging parser.
+#' Turn a parser into an error reporting parser.
 #'
 #' @param p a parser.
 #'
-#' @return A parser result or an error message about the line where the parser
-#'         failed.
+#' @return The `L`-part of a successful parser result or an error message about
+#'         the line where the parser failed.
 #' @export
 #'
 #' @examples
 #' # Yields an error message about parser failing on line 5
 #' \dontrun{
-#' Parser(match_n(3,literal("a") %then% literal("t")) %then% eof())(c(rep(c("a","t"),2),"t","t"))
+#' Reporter(match_n(3,literal("a") %then% literal("t")) %then% eof())(c(rep(c("a","t"),2),"t","t"))
 #' }
-#' Parser(match_n(2,literal("a") %then% literal("t")) %then% eof())(rep(c("a","t"),2)) # success
-Parser <- function(p) {
+#' Reporter(match_n(2,literal("a") %then% literal("t")) %then% eof())(rep(c("a","t"),2)) # success
+Reporter <- function(p) {
   reset_LNR()
   function(x) {
     r <- p(x)
@@ -20,7 +20,7 @@ Parser <- function(p) {
       if (!finished(r)) {
         # message that we did not completely consume the input and that user should consider using eof()
       }
-      r
+      r$L
     } else parser_error(nr=marker_val(r), content=x[marker_val(r)])
   }
 }

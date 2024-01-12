@@ -39,10 +39,10 @@ reset_LNR <- function() {set_LNR(1L)}
 #' the element (i.e. line) of the input character vector at which the parser
 #' failed. This number is stored in the attribute `n` of a marker and only
 #' correctly corresponds to that index number if the parser is wrapped in a
-#' `Parser()` call.
+#' `Reporter()` call.
 #'
 #' @inheritParams base::print
-#' @seealso [Parser()], [failed()]
+#' @seealso [Reporter()], [failed()]
 #' @export
 print.marker <- function(x, ...) {
   cat("[]")

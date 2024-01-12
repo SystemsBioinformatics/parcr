@@ -21,8 +21,8 @@ The \code{marker} class is used internally to mark the largest index number of
 the element (i.e. line) of the input character vector at which the parser
 failed. This number is stored in the attribute \code{n} of a marker and only
 correctly corresponds to that index number if the parser is wrapped in a
-\code{Parser()} call.
+\code{Reporter()} call.
 }
 \seealso{
-\code{\link[=Parser]{Parser()}}, \code{\link[=failed]{failed()}}
+\code{\link[=Reporter]{Reporter()}}, \code{\link[=failed]{failed()}}
 }

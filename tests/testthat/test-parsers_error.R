@@ -44,4 +44,4 @@
 # fastafile2 <- fastafile
 # fastafile2[3] <- "TTGCAYTTCC"
 #
-# Parser(Fastafile())(fastafile2)
+# Reporter(Fastafile())(fastafile2)
