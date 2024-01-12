@@ -9,10 +9,10 @@
 #' @examples
 #' # Yields an error message about parser failing on line 5
 #' \dontrun{
-#' Reporter(match_n(3,literal("a") %then% literal("t")) %then% eof())(c(rep(c("a","t"),2),"t","t"))
+#' reporter(match_n(3,literal("a") %then% literal("t")) %then% eof())(c(rep(c("a","t"),2),"t","t"))
 #' }
-#' Reporter(match_n(2,literal("a") %then% literal("t")) %then% eof())(rep(c("a","t"),2)) # success
-Reporter <- function(p) {
+#' reporter(match_n(2,literal("a") %then% literal("t")) %then% eof())(rep(c("a","t"),2)) # success
+reporter <- function(p) {
   reset_LNR()
   function(x) {
     r <- p(x)
