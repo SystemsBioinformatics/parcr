@@ -47,18 +47,17 @@ TCTGTTGCCAGAAAAAACACTTTTAGGCTA
 >sequence_B
 ATTGTGATATAATTAAAATTATATTCATAT
 TATTAGAGCCATCTTCTTTGAAGCGTTGTC
-TATGCATCGATCGACGACTG
+TATGCATCGATC
 
 >sequence_C
 MTEITAAMVKELRESTGAGMMDCKNALSET
 NGDFDKAVQLLREKGLGKAAKKADRLAAEG
-LVSVKVSDDFTIAAMRPSYLSYEDLDMTFV
 ENEYKALVAELEKE
 ```
 
 Since fasta files are text files we could read such a file using `readLines()`
-into a character vector. The package provides the data set `fastafile` to
-which is that character vector.
+into a character vector. The package provides the data set `fastafile` which 
+contains that character vector.
 
 ```r
 data("fastafile")
@@ -121,9 +120,9 @@ Notice that the new parser functions that we define above are higher order
 functions taking no input, hence the empty argument brackets `()` behind their
 names. Now we need to define the line-parsers `Header()`, `NuclSequenceString()`
 and `ProtSequenceString()` that recognize and process the header line and 
-single lines of nucleotide sequences in the character vector `fastafile`. We 
-use functions from `stringr` to do this in a few helper functions, and we use
-`match_s()` to to create `parcr` parsers from these.
+single lines of nucleotide or protein sequences in the character vector 
+`fastafile`. We use functions from `stringr` to do this in a few helper 
+functions, and we use `match_s()` to to create `parcr` parsers from these.
 
 ```r
 # returns the title after the ">" in the sequence header
