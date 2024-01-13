@@ -501,7 +501,7 @@ parse_prot_sequence_line <- function(line) {
   # end ($)
   m <- stringr::str_match(line, "^([ARNDBCEQZGHILKMFPSTWYV]+)$")
   if (is.na(m[1])) {
-    return(list()) # signal failure: not a valid nucleotide sequence string
+    return(list()) # signal failure: not a valid protein sequence string
   } else {
     return(m[2])
   }
