@@ -31,24 +31,29 @@ install_github("https://github.com/SystemsBioinformatics/parcr/releases/latest",
 ## Example application: a parser for *fasta* sequence files
 
 As an example of a realistic application we write a parser for 
-fasta-formatted files for nucleotide sequences. We use a few simplifying 
-assumptions about this format for the sake of the example. Real fasta files are
-more complex than we pretend here.
+fasta-formatted files for nucleotide and protein sequences. We use a few 
+simplifying assumptions about this format for the sake of the example. Real 
+fasta files are more complex than we pretend here.
 
 *Please note that more background about the functions that we use here is 
 available in the package documentation. Here we only present a summary.*
 
-A nucleotide fasta file could look like the example below
+A fasta file with mixed sequence types could look like the example below
 
 ```
 >sequence_A
 GGTAAGTCCTCTAGTACAAACACCCCCAAT
 TCTGTTGCCAGAAAAAACACTTTTAGGCTA
-
 >sequence_B
 ATTGTGATATAATTAAAATTATATTCATAT
 TATTAGAGCCATCTTCTTTGAAGCGTTGTC
 TATGCATCGATCGACGACTG
+
+>sequence_C
+MTEITAAMVKELRESTGAGMMDCKNALSET
+NGDFDKAVQLLREKGLGKAAKKADRLAAEG
+LVSVKVSDDFTIAAMRPSYLSYEDLDMTFV
+ENEYKALVAELEKE
 ```
 
 Since fasta files are text files we could read such a file using `readLines()`
@@ -63,13 +68,19 @@ We can distinguish the following higher order components in a fasta file:
  
 - A **fasta** file: consists of one or more **sequence blocks** until the 
   **end of the file**.
-- A **sequence block**: consist of a **header** and a **sequence**. A 
-  sequence block could be preceded by zero or more **empty lines**.
-- A **sequence**: consists of one or more **sequence strings**.
+- A **sequence block**: consist of a **header**[^2] and a 
+  **nucleotide sequence** or a **protein sequence**. A sequence block could be
+  preceded by zero or more **empty lines**.
+- A **nucleotide sequence**: consists of one or more 
+  **nucleotide sequence strings**.
+- A **protein sequence**: consists of one or more 
+  **protein sequence strings**.
 - A **header** is a *string* that starts with a ">" immediately followed by
   a **title** without spaces.
-- A **sequence string** is a *string* without spaces that consists *entirely* 
-  of symbols from the set {`G`,`A`,`T`,`C`}.
+- A **nucleotide sequence string** is a *string* without spaces that consists
+  *entirely* of symbols from the set `{G,A,T,C}`.
+- A **protein sequence string** is a *string* without spaces that consists
+  *entirely* of symbols from the set `{A,R,N,D,B,C,E,Q,Z,G,H,I,L,K,M,F,P,S,T,W,Y,V}`.
 
 It now becomes clear what we mean when we say that the package allows us
 to write *transparent* parsers: the description above of the structure of fasta
@@ -84,30 +95,35 @@ Fasta <- function() {
 SequenceBlock <- function() {
   MaybeEmpty() %then% 
     Header() %then% 
-    Sequence() %using%
+    (NuclSequence() %or% ProtSequence()) %using%
     function(x) list(x)
 }
 
-Sequence <- function() {
-  one_or_more(SequenceString()) %using% 
-    function(x) list(sequence = paste(x, collapse=""))
+NuclSequence <- function() {
+  one_or_more(NuclSequenceString()) %using% 
+    function(x) list(type = "Nucl", sequence = paste(x, collapse=""))
+}
+
+ProtSequence <- function() {
+  one_or_more(ProtSequenceString()) %using% 
+    function(x) list(type = "Prot", sequence = paste(x, collapse=""))
 }
 ```
 
-Functions like `one_or_more()`, `%then%`, `%using%`, `eof()` and
+Functions like `one_or_more()`, `%then%`, `%or%`, `%using%`, `eof()` and
 `MaybeEmpty()` are defined in the package and are the basic parsers with
 which the package user can build complex parsers. The `%using%` operator uses
 the function on its right-hand side to modify parser output on its left hand 
 side. Please see the vignette in the `parcr` package for more explanation why
-this is useful.
+this is useful or necessary even.
 
 Notice that the new parser functions that we define above are higher order 
 functions taking no input, hence the empty argument brackets `()` behind their
-names. Now we need to define the line-parsers `Header()` and `SequenceString()`
-that recognize and process the header line and single lines of nucleotide 
-sequences in the character vector `fastafile`. We use functions from
-`stringr` to do this in a few helper functions, and we use `match_s()` to shape
-these parsers.
+names. Now we need to define the line-parsers `Header()`, `NuclSequenceString()`
+and `ProtSequenceString()` that recognize and process the header line and 
+single lines of nucleotide sequences in the character vector `fastafile`. We 
+use functions from `stringr` to do this in a few helper functions, and we use
+`match_s()` to to create `parcr` parsers from these.
 
 ```r
 # returns the title after the ">" in the sequence header
@@ -115,18 +131,30 @@ parse_header <- function(line) {
   # Study stringr::str_match() to understand what we do here
   m <- stringr::str_match(line, "^>(\\w+)")
   if (is.na(m[1])) {
-    return(list()) # signal parser failure: no title found
+    return(list()) # signal failure: no title found
   } else {
     return(m[2])
   }
 }
 
-# returns a sequence string
-parse_sequence_line <- function(line) {
+# returns a nucleotide sequence string
+parse_nucl_sequence_line <- function(line) {
   # The line must consist of GATC from the start (^) until the end ($)
   m <- stringr::str_match(line, "^([GATC]+)$")
   if (is.na(m[1])) {
-    return(list()) # signal parser failure: not a valid nucleotide sequence string
+    return(list()) # signal failure: not a valid nucleotide sequence string
+  } else {
+    return(m[2])
+  }
+}
+
+# returns a protein sequence string
+parse_prot_sequence_line <- function(line) {
+  # The line must consist of ARNDBCEQZGHILKMFPSTWYV from the start (^) until the
+  # end ($)
+  m <- stringr::str_match(line, "^([ARNDBCEQZGHILKMFPSTWYV]+)$")
+  if (is.na(m[1])) {
+    return(list()) # signal failure: not a valid nucleotide sequence string
   } else {
     return(m[2])
   }
@@ -141,8 +169,14 @@ Header <- function() {
     function(x) list(title = unlist(x))
 }
 
-SequenceString <- function() {
-  match_s(parse_sequence_line)
+NuclSequence <- function() {
+  one_or_more(NuclSequenceString()) %using% 
+    function(x) list(type = "Nucl", sequence = paste(x, collapse=""))
+}
+
+ProtSequence <- function() {
+  one_or_more(ProtSequenceString()) %using% 
+    function(x) list(type = "Prot", sequence = paste(x, collapse=""))
 }
 ```
 where `match_s()` is also a parser defined in `parcr`.
@@ -161,6 +195,9 @@ $L[[1]]
 $L[[1]]$title
 [1] "sequence_A"
 
+$L[[1]]$type
+[1] "Nucl"
+
 $L[[1]]$sequence
 [1] "GGTAAGTCCTCTAGTACAAACACCCCCAATTCTGTTGCCAGAAAAAACACTTTTAGGCTA"
 
@@ -169,8 +206,22 @@ $L[[2]]
 $L[[2]]$title
 [1] "sequence_B"
 
+$L[[2]]$type
+[1] "Nucl"
+
 $L[[2]]$sequence
-[1] "ATTGTGATATAATTAAAATTATATTCATATTATTAGAGCCATCTTCTTTGAAGCGTTGTCTATGCATCGATCGACGACTG"
+[1] "ATTGTGATATAATTAAAATTATATTCATATTATTAGAGCCATCTTCTTTGAAGCGTTGTCTATGCATCGATC"
+
+
+$L[[3]]
+$L[[3]]$title
+[1] "sequence_C"
+
+$L[[3]]$type
+[1] "Prot"
+
+$L[[3]]$sequence
+[1] "MTEITAAMVKELRESTGAGMMDCKNALSETNGDFDKAVQLLREKGLGKAAKKADRLAAEGENEYKALVAELEKE"
 
 
 
@@ -182,10 +233,11 @@ Let's present the result more concisely using the names of these elements:
 
 ```r
 d <- Fasta()(fastafile)[["L"]]
-invisible(lapply(d, function(x) {cat(x$title, x$sequence, "\n")}))
+invisible(lapply(d, function(x) {cat(x$type, x$title, x$sequence, "\n")}))
 ```
 
 ```
-sequence_A GGTAAGTCCTCTAGTACAAACACCCCCAATTCTGTTGCCAGAAAAAACACTTTTAGGCTA 
-sequence_B ATTGTGATATAATTAAAATTATATTCATATTATTAGAGCCATCTTCTTTGAAGCGTTGTCTATGCATCGATCGACGACTG 
+Nucl sequence_A GGTAAGTCCTCTAGTACAAACACCCCCAATTCTGTTGCCAGAAAAAACACTTTTAGGCTA 
+Nucl sequence_B ATTGTGATATAATTAAAATTATATTCATATTATTAGAGCCATCTTCTTTGAAGCGTTGTCTATGCATCGATC 
+Prot sequence_C MTEITAAMVKELRESTGAGMMDCKNALSETNGDFDKAVQLLREKGLGKAAKKADRLAAEGENEYKALVAELEKE 
 ```

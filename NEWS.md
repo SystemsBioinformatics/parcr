@@ -1,3 +1,9 @@
+* Extended the fasta file example in the vignette by showing the use of %or% 
+  to apply alternative parsers. Added a protein sequence fasta file to the data
+  set.
+* Function `Parser()` was changed and renamed to `reporter()`. This better 
+  reflects its use.
+
 # parcr 0.4.4
 
 * Added (started) Details vignette.
