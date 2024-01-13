@@ -168,14 +168,12 @@ Header <- function() {
     function(x) list(title = unlist(x))
 }
 
-NuclSequence <- function() {
-  one_or_more(NuclSequenceString()) %using% 
-    function(x) list(type = "Nucl", sequence = paste(x, collapse=""))
+NuclSequenceString <- function() {
+  match_s(parse_nucl_sequence_line)
 }
 
-ProtSequence <- function() {
-  one_or_more(ProtSequenceString()) %using% 
-    function(x) list(type = "Prot", sequence = paste(x, collapse=""))
+ProtSequenceString <- function() {
+  match_s(parse_prot_sequence_line)
 }
 ```
 where `match_s()` is also a parser defined in `parcr`.
