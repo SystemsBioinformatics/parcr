@@ -1,3 +1,5 @@
+# parcr 0.4.5
+
 * Extended the fasta file example in the vignette by showing the use of %or% 
   to apply alternative parsers. Added a protein sequence fasta file to the data
   set.
