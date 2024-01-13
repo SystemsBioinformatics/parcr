@@ -226,7 +226,16 @@ $R
 list()
 ```
 
-Let's present the result more concisely using the names of these elements:
+The output of the parser consists of two elements, `L` and `R`, where `L` 
+contains the parsed and processed part of the input and `R` the remaining 
+un-parsed part of the input. Since we explicitly demanded to parse until the 
+end of the file by the `eof()` function in the definition of the `Fasta()` 
+parser, the `R` element contains an empty list to signal that the parser was
+indeed at the end of the input. Please see the package documentation for more
+examples and explanation.
+
+Finally, let's present the result of the parse more concisely using the names 
+of the elements insie the `L` element:
 
 ```r
 d <- Fasta()(fastafile)[["L"]]
