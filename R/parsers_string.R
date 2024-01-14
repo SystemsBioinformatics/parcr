@@ -1,28 +1,25 @@
-
 #' Applying a parser to a split string
 #'
-#' @description
 #' Splits a string by using a split pattern and then applies the parser `p`
 #' to the resulting character vector. If `finish = TRUE` then the parser should
 #' completely consume its input, otherwise the parser fails. If
 #' `finish = FALSE` then any remaining part of the string is discarded.
 #'
 #' @param p A parser.
-#' @param split A **single element** character vector (or object which can be
-#'  coerced to such) containing \link{regular expression}(s)
-#'  (unless fixed = TRUE) to use for splitting. If empty matches occur, in
-#'  particular if split has length 0, x is split into single characters.
-#' @param finish logical. Should the parser should completely consume the
-#'  string? Defaults to `TRUE`.
+#' @param split a string (or object which can be coerced to such) containing
+#'  \link{regular expression}(s) (unless fixed = TRUE) to use for splitting.
+#'  If empty matches occur, in particular if split has length 0, x is split
+#'  into single characters.
+#' @param finish logical. Should the parser completely consume the string?
+#'  Defaults to `TRUE`.
 #' @inheritParams base::strsplit
-#'
 #'
 #' @details
 #' The function [base::strsplit()] is used to perform the splitting. The
-#' parameters `split`, `fixed` and `perl` are inherited from that function.
+#' parameters `split`, `fixed` and `perl` are passed on to that function.
 #'
 #'
-#' @return A parser.
+#' @inherit satisfy return
 #' @seealso [base::strsplit()], [by_symbol()]
 #' @export
 #'
@@ -55,8 +52,6 @@ by_split <- function(p, split, finish=TRUE, fixed=FALSE, perl=FALSE) {
 
 #' Applying a parser to individual symbols of a string
 #'
-#' @inheritParams by_split
-#'
 #' @description
 #' Splits a string to individual symbols and then applies the parser `p` to the
 #' resulting character vector, otherwise the parser fails. If `finish = TRUE`
@@ -65,7 +60,9 @@ by_split <- function(p, split, finish=TRUE, fixed=FALSE, perl=FALSE) {
 #'
 #' This function is identical to `by_split(p, "", finish)`.
 #'
-#' @return A parser.
+#' @inheritParams by_split
+#'
+#' @inherit satisfy return
 #' @seealso [by_split()]
 #' @export
 #'

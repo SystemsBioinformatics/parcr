@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers_basic.R
 \name{\%or\%}
 \alias{\%or\%}
-\title{The parser of alternative parsers.}
+\title{The parser of alternative parsers}
 \usage{
 p1 \%or\% p2
 }

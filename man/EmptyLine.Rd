@@ -12,6 +12,9 @@ Spacer()
 
 MaybeEmpty()
 }
+\value{
+A parser.
+}
 \description{
 An empty line is a line that consists entirely of space-like characters.
 \code{EmptyLine} is a parser that recognizes one empty line, \code{Spacer} recognizes

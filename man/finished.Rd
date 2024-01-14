@@ -7,14 +7,14 @@
 finished(o)
 }
 \arguments{
-\item{o}{Output from applying a parser to a character vector.}
+\item{o}{Output from a parser.}
 }
 \value{
 A logical value.
 }
 \description{
 A parser has completely consumed its input when the input has satisfied
-\code{eof()}.
+\code{\link[=eof]{eof()}}.
 }
 \examples{
 finished((literal("A") \%then\% eof())("A")) # TRUE

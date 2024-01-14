@@ -2,26 +2,25 @@
 % Please edit documentation in R/parsers_basic.R
 \name{\%ret\%}
 \alias{\%ret\%}
-\title{Return a fixed value upon successful parsing.}
+\title{Return a fixed value upon successful parsing}
 \usage{
 p \%ret\% c
 }
 \arguments{
 \item{p}{a parser.}
 
-\item{c}{a single-element character value. \code{NULL} is coerced to
-\code{character(0)}.}
+\item{c}{string, \emph{i.e.} a single-element character vector. \code{NULL} is coerced
+to \code{character(0)}.}
 }
 \value{
-A parser
+A parser.
 }
 \description{
-Sometimes we are not interested in the result from a parser at all, only
-that the parser succeeds. For example, if we find a reserved word during
-lexical analysis, it may be convenient to return some short representation
-rather than the string itself. The \verb{\%ret\%} combinator is useful in such
-cases. The parser \code{(p \%ret\% c)} has the same behavior as \code{p}, except that it
-returns the value \code{c} if successful
+Sometimes we are not interested in the result from a parser, only that the
+parser succeeds. It may be convenient to return some short representation
+or nothing even rather than the string itself. The \verb{\%ret\%} combinator is
+useful in such cases. The parser \code{(p \%ret\% c)} has the same behavior as \code{p},
+except that it returns the value \code{c} if successful.
 }
 \section{Pseudocode}{
 

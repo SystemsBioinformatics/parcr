@@ -1,8 +1,6 @@
 ## Derived, "higher order" parsers start with a capital
 
-#' @title Recognize empty lines
-#'
-#' @description
+#' Recognize empty lines
 #'
 #' An empty line is a line that consists entirely of space-like characters.
 #' `EmptyLine` is a parser that recognizes one empty line, `Spacer` recognizes
@@ -26,6 +24,7 @@
 #'
 #' where `null` is the empty vector.
 #'
+#' @inherit satisfy return
 #' @export
 #' @examples
 #' EmptyLine() (" \t  ") # success
@@ -54,27 +53,3 @@ MaybeEmpty <- function() {
   (zero_or_more(EmptyLine())) %ret% NULL
 }
 
-#' #' Extracts all integer and floating point numbers from a line
-#' #'
-#' #' Ignores any other symbols. It tests whether exactly n numbers are found.
-#' #'
-#' #' @param n An integer.
-#' #'
-#' #' @return A parser.
-#' #' @export
-#' #' @examples
-#' #' Numbers(3) ('1  2  3') #success
-#' #' Numbers(3) ('1101\t201.5\t33') # success
-#' #' Numbers(2) ('1101\t201.5\t33') # failure
-#' #' Numbers(4) ('1101\t201.5\t33') # failure
-#' #'
-# Numbers <- function(n) {
-#   (satisfy( function(x) {
-#     (stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE) |>
-#        as.vector() |> length()) == n
-#   })) %using%
-#     function(x) {
-#       stringr::str_extract_all(x, pattern = "[\\d\\.]+", simplify = TRUE) |>
-#         as.vector() |> as.numeric()
-#     }
-# }

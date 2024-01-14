@@ -9,13 +9,13 @@ by_split(p, split, finish = TRUE, fixed = FALSE, perl = FALSE)
 \arguments{
 \item{p}{A parser.}
 
-\item{split}{A \strong{single element} character vector (or object which can be
-coerced to such) containing \link{regular expression}(s)
-(unless fixed = TRUE) to use for splitting. If empty matches occur, in
-particular if split has length 0, x is split into single characters.}
+\item{split}{a string (or object which can be coerced to such) containing
+\link{regular expression}(s) (unless fixed = TRUE) to use for splitting.
+If empty matches occur, in particular if split has length 0, x is split
+into single characters.}
 
-\item{finish}{logical. Should the parser should completely consume the
-string? Defaults to \code{TRUE}.}
+\item{finish}{logical. Should the parser completely consume the string?
+Defaults to \code{TRUE}.}
 
 \item{fixed}{
     logical.  If \code{TRUE} match \code{split} exactly, otherwise
@@ -35,7 +35,7 @@ completely consume its input, otherwise the parser fails. If
 }
 \details{
 The function \code{\link[base:strsplit]{base::strsplit()}} is used to perform the splitting. The
-parameters \code{split}, \code{fixed} and \code{perl} are inherited from that function.
+parameters \code{split}, \code{fixed} and \code{perl} are passed on to that function.
 }
 \examples{
 by_split((literal("a") \%then\% literal("b")),"\\\\t") ("a\tb") # success

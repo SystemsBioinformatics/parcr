@@ -2,15 +2,19 @@
 % Please edit documentation in R/parsers_basic.R
 \name{match_s}
 \alias{match_s}
-\title{The parser that identifies a string and produces custom output.}
+\title{The parser that identifies a string and produces custom output}
 \usage{
 match_s(s)
 }
 \arguments{
-\item{s}{A string-parsing function.}
+\item{s}{a string-parsing function.}
+}
+\value{
+A parser.
 }
 \description{
-\code{match_s} matches a string using a function and returns a desired object type.
+\code{match_s} matches a string using a function and returns a desired object
+type.
 }
 \details{
 This parser short-cuts the pattern \code{satisfy(b) \%using\% f}. With \code{match_s}

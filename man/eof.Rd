@@ -2,12 +2,12 @@
 % Please edit documentation in R/parsers_basic.R
 \name{eof}
 \alias{eof}
-\title{Detect end of input.}
+\title{Detect end of input}
 \usage{
 eof()
 }
 \value{
-A parser
+A parser.
 }
 \description{
 \code{eof} tests whether the end of the input character vector has been reached,

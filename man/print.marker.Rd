@@ -2,7 +2,7 @@
 % Please edit documentation in R/marker.R
 \name{print.marker}
 \alias{print.marker}
-\title{Prints an object of class \code{marker}}
+\title{Print method for an object of class \code{marker}}
 \usage{
 \method{print}{marker}(x, ...)
 }
@@ -10,6 +10,9 @@
 \item{x}{an object used to select a method.}
 
 \item{...}{further arguments passed to or from other methods.}
+}
+\value{
+The printed \code{marker} object is returned invisibly.
 }
 \description{
 An object of class \code{marker} is an empty list created by the function
@@ -21,7 +24,7 @@ The \code{marker} class is used internally to mark the largest index number of
 the element (i.e. line) of the input character vector at which the parser
 failed. This number is stored in the attribute \code{n} of a marker and only
 correctly corresponds to that index number if the parser is wrapped in a
-\code{reporter()} call.
+\code{\link[=reporter]{reporter()}} call.
 }
 \seealso{
 \code{\link[=reporter]{reporter()}}, \code{\link[=failed]{failed()}}

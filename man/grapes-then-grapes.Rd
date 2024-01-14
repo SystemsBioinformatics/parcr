@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers_basic.R
 \name{\%then\%}
 \alias{\%then\%}
-\title{The parser of sequences of parsers.}
+\title{The parser of sequences of parsers}
 \usage{
 p1 \%then\% p2
 }

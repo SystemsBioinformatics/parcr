@@ -9,8 +9,8 @@ by_symbol(p, finish = TRUE)
 \arguments{
 \item{p}{A parser.}
 
-\item{finish}{logical. Should the parser should completely consume the
-string? Defaults to \code{TRUE}.}
+\item{finish}{logical. Should the parser completely consume the string?
+Defaults to \code{TRUE}.}
 }
 \value{
 A parser.

@@ -2,12 +2,12 @@
 % Please edit documentation in R/marker.R
 \name{failed}
 \alias{failed}
-\title{Testing for parser failure.}
+\title{Testing for parser failure}
 \usage{
 failed(o)
 }
 \arguments{
-\item{o}{Output from applying a parser to a character vector.}
+\item{o}{Output from a parser.}
 }
 \value{
 A logical value.

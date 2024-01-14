@@ -3,7 +3,7 @@
 \name{succeed}
 \alias{succeed}
 \alias{fail}
-\title{The most basic parsers.}
+\title{The most basic parsers}
 \usage{
 succeed(left)
 
@@ -12,8 +12,12 @@ fail(lnr = LNR())
 \arguments{
 \item{left}{any R-object constructed from a parsed vector.}
 
-\item{lnr}{an integer. The line number (element number) at which the fail
+\item{lnr}{integer. The line number (element number) at which the fail
 occurs}
+}
+\value{
+A list. \code{succeed()} returns a list with two elements named \code{L} and
+\code{R}. \code{fail()} returns an empty list.
 }
 \description{
 These are the most basic constructors of a parser, but they are important
@@ -43,13 +47,14 @@ and \verb{[]} is an empty list.
 
 \section{Note}{
 
-You will probably never have to use these functions when constructing
-parsers.
+It is very unlikely that you will ever have to use these functions when
+constructing parsers.
 }
 
 \examples{
 succeed("A")("abc")
 succeed(data.frame(title="Keisri hull", author="Jaan Kross"))(c("Unconsumed","text"))
+
 fail()("abc")
 
 }

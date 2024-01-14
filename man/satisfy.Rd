@@ -2,15 +2,18 @@
 % Please edit documentation in R/parsers_basic.R
 \name{satisfy}
 \alias{satisfy}
-\title{The parser that matches an element using a predicate function.}
+\title{The parser that matches an element using a predicate function}
 \usage{
 satisfy(b)
 }
 \arguments{
 \item{b}{a boolean function to determine if the string is accepted.}
 }
+\value{
+A parser.
+}
 \description{
-\code{satisfy} turns a predicate function into a parser that recognizes strings.
+\code{satisfy()} turns a predicate function into a parser that recognizes strings.
 }
 \details{
 Notice (see pseudocode) that \code{satisfy} fails when presented with empty
@@ -31,7 +34,6 @@ equivalent to \code{character(0)} in R.
 }
 
 \examples{
-
 # define a predicate function that tests whether the next element starts
 # with an 'a'
 starts_with_a <- function(x) grepl("^a",x)

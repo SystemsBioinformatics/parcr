@@ -18,8 +18,13 @@ Turn a parser into an error reporting parser.
 }
 \examples{
 # Yields an error message about parser failing on line 5
-\dontrun{
-reporter(match_n(3,literal("a") \%then\% literal("t")) \%then\% eof())(c(rep(c("a","t"),2),"t","t"))
-}
-reporter(match_n(2,literal("a") \%then\% literal("t")) \%then\% eof())(rep(c("a","t"),2)) # success
+try(
+  reporter(match_n(3,literal("a") \%then\%
+   literal("t")) \%then\%
+    eof())(c(rep(c("a","t"),2),"t","t"))
+)
+# No error, but parser result
+reporter(match_n(2,literal("a") \%then\%
+  literal("t")) \%then\%
+  eof())(rep(c("a","t"),2))
 }

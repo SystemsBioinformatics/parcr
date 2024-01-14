@@ -2,14 +2,14 @@
 % Please edit documentation in R/parsers_basic.R
 \name{\%using\%}
 \alias{\%using\%}
-\title{Manipulate results from a parser by applying a function.}
+\title{Manipulate results from a parser by applying a function}
 \usage{
 p \%using\% f
 }
 \arguments{
 \item{p}{a parser.}
 
-\item{f}{a function to be applied to the result of a succesful \code{p}.}
+\item{f}{a function to be applied to the result of a successful \code{p}.}
 }
 \value{
 A parser.

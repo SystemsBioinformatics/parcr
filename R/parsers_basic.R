@@ -4,7 +4,7 @@
 ## Primitive parsers
 # The primitive parsers are the building blocks of combinator parsing.
 
-#' The most basic parsers.
+#' The most basic parsers
 #'
 #' @description
 #'
@@ -32,22 +32,26 @@
 #' and `[]` is an empty list.
 #'
 #' @section Note:
-#' You will probably never have to use these functions when constructing
-#' parsers.
+#' It is very unlikely that you will ever have to use these functions when
+#' constructing parsers.
 #'
 #' @param left any R-object constructed from a parsed vector.
+#' @returns A list. `succeed()` returns a list with two elements named `L` and
+#'  `R`. `fail()` returns an empty list.
+#'
 #' @export
 #' @examples
 #' succeed("A")("abc")
 #' succeed(data.frame(title="Keisri hull", author="Jaan Kross"))(c("Unconsumed","text"))
+#'
 succeed <- function(left) {
   function(right) list(L=ensure.list(left), R=right)
 }
 
-# The parser that always fails.
+# The parser that always fails
 #' @rdname succeed
 #'
-#' @param lnr an integer. The line number (element number) at which the fail
+#' @param lnr integer. The line number (element number) at which the fail
 #'            occurs
 #' @export
 #' @examples
@@ -56,14 +60,11 @@ succeed <- function(left) {
 fail <- function(lnr=LNR()) {
   function(x) new_marker(lnr)
 }
-# fail <- function() {
-#   function(x) list()
-# }
 
-#' The parser that matches an element using a predicate function.
+#' The parser that matches an element using a predicate function
 #'
 #' @description
-#' `satisfy` turns a predicate function into a parser that recognizes strings.
+#' `satisfy()` turns a predicate function into a parser that recognizes strings.
 #'
 #' @details
 #' Notice (see pseudocode) that `satisfy` fails when presented with empty
@@ -82,9 +83,9 @@ fail <- function(lnr=LNR()) {
 #' equivalent to `character(0)` in R.
 #'
 #' @param b a boolean function to determine if the string is accepted.
+#' @returns A parser.
 #' @export
 #' @examples
-#'
 #' # define a predicate function that tests whether the next element starts
 #' # with an 'a'
 #' starts_with_a <- function(x) grepl("^a",x)
@@ -105,7 +106,7 @@ satisfy <- function(b) {
   }
 }
 
-#' The parser that matches an element using a literal string.
+#' The parser that matches an element using a literal string
 #'
 #' @description
 #' `literal` tests whether a supplied string literally equals a desired value.
@@ -118,7 +119,8 @@ satisfy <- function(b) {
 #' where `F` is equivalent to the `function` declarator in R. So, we have an
 #' anonymous function in the argument of `satisfy`.
 #'
-#' @param string a single element character vector.
+#' @param string string, a single-element character vector.
+#' @inherit satisfy return
 #' @export
 #' @examples
 #' literal("ab") (c("ab", "cdef")) # success
@@ -128,7 +130,7 @@ literal <- function(string) {
   satisfy(function(x) identical(x, as.character(string)))
 }
 
-#' Detect end of input.
+#' Detect end of input
 #'
 #' @description
 #' `eof` tests whether the end of the input character vector has been reached,
@@ -145,7 +147,7 @@ literal <- function(string) {
 #'   else fail()(x)
 #' }
 #'
-#' @return A parser
+#' @inherit satisfy return
 #' @export
 #'
 #' @examples
@@ -166,7 +168,7 @@ eof <- function() {
 # Above we made the basic building blocks. We consider how they should be put
 # together to form useful parsers.
 
-#' The parser of alternative parsers.
+#' The parser of alternative parsers
 #'
 #' @description
 #' The `%or%` combinator `(p1 %or% p2)` returns the result of `p1` if `p1` is
@@ -184,7 +186,7 @@ eof <- function() {
 #' where `[]` is the empty list.
 #'
 #' @param p1,p2 two parsers.
-#' @returns A parser.
+#' @inherit satisfy return
 #' @export
 #' @examples
 #' (literal("A") %or% literal("a"))(LETTERS[1:5]) # success on first parser
@@ -207,15 +209,8 @@ eof <- function() {
     }
   }
 }
-# `%or%` <- function(p1, p2) {
-#   function(x) {
-#     r1 <- p1(x)
-#     r2 <- p2(x)
-#     if (!failed(r1)) r1 else {if (!failed(r2)) r2 else fail()(x)}
-#   }
-# }
 
-#' The parser of sequences of parsers.
+#' The parser of sequences of parsers
 #'
 #' @description
 #'
@@ -235,7 +230,7 @@ eof <- function() {
 #' without the first element and without the first two elements, respectively.
 #'
 #' @inheritParams %or%
-#' @returns A parser.
+#' @inherit satisfy return
 #' @export
 #' @seealso The discarding versions [%xthen%] and [%thenx%]
 #' @examples
@@ -256,18 +251,8 @@ eof <- function() {
     }
   }
 }
-# `%then%` <- function(p1, p2) {
-#   function(x) {
-#     r1 <- p1(x)
-#     if (failed(r1)) fail()(x)
-#     else {
-#       r2 <- p2(r1$R)
-#       if (failed(r2)) fail()(x) else succeed(c(r1$L, r2$L)) (r2$R)
-#     }
-#   }
-# }
 
-#' Manipulate results from a parser by applying a function.
+#' Manipulate results from a parser by applying a function
 #'
 #' @description
 #' The `%using%` combinator allows us to manipulate results from a parser. The
@@ -283,8 +268,8 @@ eof <- function() {
 #' }
 #'
 #' @inheritParams zero_or_more
-#' @param f a function to be applied to the result of a succesful `p`.
-#' @returns A parser.
+#' @param f a function to be applied to the result of a successful `p`.
+#' @inherit satisfy return
 #' @export
 #' @examples
 #' (literal('ab') %using% toupper) (c("ab","cdef")) # success
@@ -297,7 +282,7 @@ eof <- function() {
   }
 }
 
-#' Keeping only the left or right result from a `%then%` sequence.
+#' Keeping only the left or right result from a `%then%` sequence
 #'
 #' @details
 #' Recall that two parsers composed in sequence produce a pair of results.
@@ -326,8 +311,7 @@ eof <- function() {
 #' without the first element and without the first two elements, respectively.
 #'
 #' @inheritParams %or%
-#'
-#' @return A parser
+#' @inherit satisfy return
 #' @export
 #'
 #' @examples
@@ -348,20 +332,6 @@ eof <- function() {
     }
   }
 }
-# `%xthen%` <- function(p1, p2) {
-#   function(x) {
-#     # Fail on NULL input, otherwise we create endless loops
-#     if (is_empty_atom(x)) fail()(x)
-#     else {
-#       r1 <- p1(x)
-#       if (failed(r1)) fail()(x)
-#       else {
-#         r2 <- p2(r1$R)
-#         if (failed(r2)) fail()(x) else succeed(r1$L) (r2$R)
-#       }
-#     }
-#   }
-# }
 
 #' @rdname grapes-xthen-grapes
 #' @export
@@ -379,30 +349,14 @@ eof <- function() {
   }
 }
 
-# `%thenx%` <- function(p1, p2) {
-#   function(x) {
-#     # Fail on NULL input, otherwise we create endless loops
-#     if (is_empty_atom(x)) fail()(x)
-#     else {
-#       r1 <- p1(x)
-#       if (failed(r1)) fail()(x)
-#       else {
-#         r2 <- p2(r1$R)
-#         if (failed(r2)) fail()(x) else succeed(r2$L) (r2$R)
-#       }
-#     }
-#   }
-# }
-
-#' Return a fixed value upon successful parsing.
+#' Return a fixed value upon successful parsing
 #'
 #' @description
-#' Sometimes we are not interested in the result from a parser at all, only
-#' that the parser succeeds. For example, if we find a reserved word during
-#' lexical analysis, it may be convenient to return some short representation
-#' rather than the string itself. The `%ret%` combinator is useful in such
-#' cases. The parser `(p %ret% c)` has the same behavior as `p`, except that it
-#' returns the value `c` if successful
+#' Sometimes we are not interested in the result from a parser, only that the
+#' parser succeeds. It may be convenient to return some short representation
+#' or nothing even rather than the string itself. The `%ret%` combinator is
+#' useful in such cases. The parser `(p %ret% c)` has the same behavior as `p`,
+#' except that it returns the value `c` if successful.
 #'
 #' @section Pseudocode:
 #'
@@ -413,10 +367,10 @@ eof <- function() {
 #' }
 #'
 #' @inheritParams zero_or_more
-#' @param c a single-element character value. `NULL` is coerced to
-#'  `character(0)`.
+#' @param c string, _i.e._ a single-element character vector. `NULL` is coerced
+#'  to `character(0)`.
 #'
-#' @returns A parser
+#' @inherit satisfy return
 #' @export
 #'
 #' @seealso [%using%]
@@ -430,13 +384,13 @@ eof <- function() {
   }
 }
 
-## Repeated application of parsers.
+## Iterated application of parsers.
 
-#' Parsers that repeat application of a parser.
+#' Parsers that repeat application of a parser
 #'
 #' @description
-#' Often, a structure that can be parsed by a parser `p` is repeated several
-#' times in a file, or the parser can be applied zero or more times. The
+#' Often, a structure that can be parsed by a parser `p` occurs several times
+#' in row in a file, or the parser can be applied zero or more times. The
 #' following combinators test these conditions.
 #'
 #' @details
@@ -461,8 +415,8 @@ eof <- function() {
 #'
 #' exactly(n,p):
 #'   count = 0
-#'   r = zero_or_more((p %using% F(x): count = count + 1; x))(x)
-#'   if counter == n then
+#'   r = zero_or_more(p \%using\% F(x): count = count + 1; x)(x)
+#'   if count == n then
 #'     count = 0
 #'     r
 #'   else fail()(x)
@@ -478,7 +432,7 @@ eof <- function() {
 #'
 #' where `null` is the empty vector.
 #'
-#' @returns A parser
+#' @inherit satisfy return
 #' @export
 #' @examples
 #' zero_or_more(literal("A")) (c("A",LETTERS[1:5]))
@@ -487,9 +441,6 @@ eof <- function() {
 zero_or_more <- function(p) {
   (p %then% zero_or_more(p)) %or% (succeed(character(0)) %using% function(x){dec_LNR(); x})
 }
-# zero_or_more <- function(p) {
-#   (p %then% zero_or_more(p)) %or% succeed(character(0))
-# }
 
 #' @rdname zero_or_more
 #' @export
@@ -555,10 +506,10 @@ match_n <- function(n, p) {
   }
 }
 
-#' The parser that identifies a string and produces custom output.
+#' The parser that identifies a string and produces custom output
 #'
-#' @description
-#' `match_s` matches a string using a function and returns a desired object type.
+#' `match_s` matches a string using a function and returns a desired object
+#' type.
 #'
 #' @details
 #' This parser short-cuts the pattern `satisfy(b) %using% f`. With `match_s`
@@ -582,7 +533,8 @@ match_n <- function(n, p) {
 #'   else if s(x[1]) then succeed(s(x[1]))(x[-1]) else fail()(x)
 #' }
 #'
-#' @param s A string-parsing function.
+#' @param s a string-parsing function.
+#' @inherit satisfy return
 #' @export
 #' @examples
 #' expect_integers <- function(x) {

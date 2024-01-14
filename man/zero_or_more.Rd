@@ -6,7 +6,7 @@
 \alias{exactly}
 \alias{zero_or_one}
 \alias{match_n}
-\title{Parsers that repeat application of a parser.}
+\title{Parsers that repeat application of a parser}
 \usage{
 zero_or_more(p)
 
@@ -24,11 +24,11 @@ match_n(n, p)
 \item{n}{a positive integer, including 0.}
 }
 \value{
-A parser
+A parser.
 }
 \description{
-Often, a structure that can be parsed by a parser \code{p} is repeated several
-times in a file, or the parser can be applied zero or more times. The
+Often, a structure that can be parsed by a parser \code{p} occurs several times
+in row in a file, or the parser can be applied zero or more times. The
 following combinators test these conditions.
 }
 \details{
@@ -51,8 +51,8 @@ one_or_more(p):
 
 exactly(n,p):
   count = 0
-  r = zero_or_more((p %using% F(x): count = count + 1; x))(x)
-  if counter == n then
+  r = zero_or_more(p \%using\% F(x): count = count + 1; x)(x)
+  if count == n then
     count = 0
     r
   else fail()(x)
