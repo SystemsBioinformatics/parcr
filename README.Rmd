@@ -52,7 +52,7 @@ fasta files are more complex than we pretend here.
 *Please note that more background about the functions that we use here is 
 available in the package documentation. Here we only present a summary.*
 
-A fasta file with mixed sequence types could look like the example below
+A fasta file with mixed sequence types could look like the example below:
 
 ```{r, echo=FALSE, comment = NA}
 data("fastafile")
@@ -198,7 +198,7 @@ indeed at the end of the input. Please see the package documentation for more
 examples and explanation.
 
 Finally, let's present the result of the parse more concisely using the names 
-of the elements insie the `L` element:
+of the elements inside the `L` element:
 
 ```{r}
 d <- Fasta()(fastafile)[["L"]]
