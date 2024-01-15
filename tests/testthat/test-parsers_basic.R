@@ -163,21 +163,28 @@ p4 <- function(x) {(exactly(2,EmptyLine()) %then% literal("A"))(x)}
 p5 <- function(x) {(one_or_more(EmptyLine()) %then% literal("A"))(x)}
 p6 <- function(x) {(MaybeEmpty() %then% literal("A"))(x)}
 
-test_that("'reporter' works", {
+test_that("'reporter' works in successful parses", {
+  expect_equal(reporter((p1 %or% p2) %then% eof())(c("A","C","D")), c(list("A"), list("C"), list("D")))
+})
+
+test_that("'reporter()' yields error messages", {
   expect_error(reporter(literal("A"))("B"), regexp="line 1")
-  expect_equal(reporter(p1)(c("A","B")), c(list("A"), list("B")))
-  expect_equal(reporter(p2)(c("A","C","D")), c(list("A"), list("C"), list("D")))
   expect_error(reporter(p1)(c("A","C")), regexp="line 2")
   expect_error(reporter(p2)(c("A","C","E")), regexp="line 3")
-  expect_equal(reporter((literal("B") %or% literal("A")))(c("A","B")), c(list("A")))
   expect_error(reporter(literal("A") %or% literal("B"))("C"), regexp = "line 1")
-  expect_equal(reporter(p1 %or% p2)(c("A","C","D")), c(list("A"), list("C"), list("D")))
   expect_error(reporter(p2 %or% p1)(c("A","C","E")), regexp = "line 3")
   expect_error(reporter(p1 %or% p2)(c("A","C","E")), regexp = "line 3")
   expect_error(reporter(p3)(c("","","C")), regexp = "line 3")
   expect_error(reporter(p4)(c("","","C")), regexp = "line 3")
   expect_error(reporter(p5)(c("","","C")), regexp = "line 3")
   expect_error(reporter(p6)(c("","","C")), regexp = "line 3")
+})
+
+test_that("'reporter()' yields warning when not completely consuming input", {
+  expect_warning(reporter(p2)(c("A","C","D")), "did not completely consume")
+  expect_warning(reporter((literal("B") %or% literal("A")))(c("A","B")), "did not completely consume")
+  expect_warning(reporter(p1)(c("A","B")), "did not completely consume")
+  expect_warning(reporter(match_n(1,literal("A")))(c("A","B","A")), "did not completely consume")
 })
 
 test_that("All combinations of 3 alternative, exclusive parsers yield same error",{
@@ -190,8 +197,9 @@ test_that("All combinations of 3 alternative, exclusive parsers yield same error
 })
 
 test_that("'match_n' yields correct error", {
-  expect_equal(reporter(match_n(1,literal("A")))(c("A","B","A")), list("A"))
   expect_error(reporter(match_n(2,literal("A")))(c("A","B","A")), regexp = "line 2")
   expect_error(reporter(match_n(5,literal("A")))(c("A","A","A","A","B")), regexp = "line 5")
 })
+
+
 
