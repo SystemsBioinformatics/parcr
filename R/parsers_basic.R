@@ -13,11 +13,11 @@
 #' consuming any input, whereas the `fail` parser always fails.
 #'
 #' @details
-#' The `succeed` parser constructs a `list` object with a 'left' or L-part
+#' The `succeed` parser constructs a `list` object with a 'left' or `L`-element
 #' that contains the parser result of the consumed part of the input vector and
-#' the 'right' or R-part that contains the unconsumed part of the vector. Since
-#' the outcome of succeed does not depend on its input, its result value must
-#' be pre-determined, so it is included as an extra parameter.
+#' the 'right' or `R`-element that contains the unconsumed part of the vector.
+#' Since the outcome of succeed does not depend on its input, its result value
+#' must be pre-determined, so it is included as an extra parameter.
 #'
 #' While `succeed` never fails, `fail` always does, regardless of the input
 #' vector. It returns the empty list `list()` to signal this fact.

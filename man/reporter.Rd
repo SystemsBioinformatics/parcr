@@ -15,7 +15,9 @@ the line where the parser failed. A warning is thrown when the parser
 did not completely consume the input.
 }
 \description{
-Turn a parser into an error reporting parser.
+Turns a parser into an error reporting parser, and when the parser is
+successful returns only the \code{L}-element of the parser output, the
+successfully parsed part of the input (see \code{\link[=succeed]{succeed()}}).
 }
 \details{
 The error object that this function returns is a list containing the

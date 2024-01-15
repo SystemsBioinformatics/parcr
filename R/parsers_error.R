@@ -1,5 +1,9 @@
 #' Turn a parser into an error reporting parser.
 #'
+#' Turns a parser into an error reporting parser, and when the parser is
+#' successful returns only the `L`-element of the parser output, the
+#' successfully parsed part of the input (see [succeed()]).
+#'
 #' @param p a parser.
 #'
 #' @return The `L`-part of a successful parser result or an error message about
