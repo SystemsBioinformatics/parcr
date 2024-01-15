@@ -42,7 +42,8 @@ Real fasta files are more complex than we pretend here.
 is available in the package documentation. Here we only present a
 summary.*
 
-A fasta file with mixed sequence types could look like the example below
+A fasta file with mixed sequence types could look like the example
+below:
 
     >sequence_A
     GGTAAGTCCTCTAGTACAAACACCCCCAAT
@@ -70,7 +71,7 @@ file:
 
 - A **fasta** file: consists of one or more **sequence blocks** until
   the **end of the file**.
-- A **sequence block**: consist of a **header**\[^2\] and a **nucleotide
+- A **sequence block**: consist of a **header** and a **nucleotide
   sequence** or a **protein sequence**. A sequence block could be
   preceded by zero or more **empty lines**.
 - A **nucleotide sequence**: consists of one or more **nucleotide
@@ -236,7 +237,7 @@ list to signal that the parser was indeed at the end of the input.
 Please see the package documentation for more examples and explanation.
 
 Finally, let’s present the result of the parse more concisely using the
-names of the elements insie the `L` element:
+names of the elements inside the `L` element:
 
 ``` r
 d <- Fasta()(fastafile)[["L"]]

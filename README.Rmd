@@ -71,7 +71,7 @@ We can distinguish the following higher order components in a fasta file:
  
 - A **fasta** file: consists of one or more **sequence blocks** until the 
   **end of the file**.
-- A **sequence block**: consist of a **header**[^2] and a 
+- A **sequence block**: consist of a **header** and a 
   **nucleotide sequence** or a **protein sequence**. A sequence block could be
   preceded by zero or more **empty lines**.
 - A **nucleotide sequence**: consists of one or more 
