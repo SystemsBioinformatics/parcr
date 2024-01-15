@@ -54,8 +54,14 @@ reset_LNR <- function() {set_LNR(1L)}
 #'
 #' @returns The printed `marker` object is returned invisibly.
 #' @inheritParams base::print
-#' @seealso [reporter()], [failed()]
+#' @seealso [failed()]
 #' @export
+#' @examples
+#' d <- (literal("A") %then% literal("B"))(c("A","A"))
+#' # prints the icon [] for failed parsing
+#' d
+#' # Reveal the modest content of the marker object
+#' unclass(d)
 print.marker <- function(x, ...) {
   cat("[]")
   invisible(x)
@@ -73,6 +79,7 @@ print.marker <- function(x, ...) {
 #' @export
 #' @examples
 #' d <- (literal("A") %then% literal("B"))(c("A","A"))
+#' d
 #' failed(d)
 #'
 failed <- function(o) {
