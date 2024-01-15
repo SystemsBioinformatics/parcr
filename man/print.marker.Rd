@@ -26,6 +26,13 @@ failed. This number is stored in the attribute \code{n} of a marker and only
 correctly corresponds to that index number if the parser is wrapped in a
 \code{\link[=reporter]{reporter()}} call.
 }
+\examples{
+d <- (literal("A") \%then\% literal("B"))(c("A","A"))
+# prints the icon [] for failed parsing
+d
+# Reveal the modest content of the marker object
+unclass(d)
+}
 \seealso{
-\code{\link[=reporter]{reporter()}}, \code{\link[=failed]{failed()}}
+\code{\link[=failed]{failed()}}
 }

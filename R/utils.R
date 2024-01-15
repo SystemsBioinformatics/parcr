@@ -2,8 +2,8 @@
 #'
 #' @param l An object.
 #'
-#' @return TRUE or FALSE.
-#' @keywords internal
+#' @return S logical value.
+#' @noRd
 is_empty_atom <- function(l) {
   is.atomic(l) && length(l) == 0
 }
@@ -16,7 +16,7 @@ is_empty_atom <- function(l) {
 #' @param x Any R-object.
 #'
 #' @return A list.
-#' @keywords internal
+#' @noRd
 ensure.list <- function(x)  {
   if (is_empty_atom(x)) list()
   else {

@@ -18,6 +18,7 @@ unit testing of your parsers when writing a package.
 }
 \examples{
 d <- (literal("A") \%then\% literal("B"))(c("A","A"))
+d
 failed(d)
 
 }
