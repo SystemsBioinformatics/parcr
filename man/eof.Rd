@@ -10,12 +10,12 @@ eof()
 A parser.
 }
 \description{
-\code{eof} tests whether the end of the input character vector has been reached,
-which boils down to detection of \code{character(0)} as input. Since the intended
-application of this parser is parsing of text files the function has been
-called after the end of file (EOF) signal. To indicate that an end of file
-has been detected, the right hand side of the parser result will be
-converted to an empty list.
+Tests whether the end of the input character vector has been reached,
+which boils down to detection of \code{character(0)} in the \code{R}-element (see
+\code{\link[=succeed]{succeed()}}). Since the intended application of this parser is parsing of
+text files the function has been called after the end of file (EOF) signal.
+To indicate that an end of file has been detected, the \code{R}-element side of
+the parser output will be converted to an empty list.
 }
 \section{Pseudocode}{
 
