@@ -1,4 +1,4 @@
-#' Turn a parser into an error reporting parser.
+#' Turn a parser into an error reporting parser
 #'
 #' Turns a parser into an error reporting parser, and when the parser is
 #' successful returns only the `L`-element of the parser output, the

@@ -17,7 +17,7 @@
 #' that contains the parser result of the consumed part of the input vector and
 #' the 'right' or `R`-element that contains the unconsumed part of the vector.
 #' Since the outcome of succeed does not depend on its input, its result value
-#' must be pre-determined, so it is included as an extra parameter.
+#' must be pre-determined, so it is included as a parameter.
 #'
 #' While `succeed` never fails, `fail` always does, regardless of the input
 #' vector. It returns the empty list `list()` to signal this fact.
@@ -37,7 +37,10 @@
 #'
 #' @param left any R-object constructed from a parsed vector.
 #' @returns A list. `succeed()` returns a list with two elements named `L` and
-#'  `R`. `fail()` returns an empty list.
+#'  `R`. `fail()` returns a `marker` object which is basically an empty list
+#'  with a line number `n` as attribute. It is printed as the icon `[]`,
+#'  see [print.marker()]. Note that `n` will only correctly represent the line
+#'  number of failure when a parser is wrapped in the [reporter()] function.
 #'
 #' @export
 #' @examples
@@ -61,10 +64,10 @@ fail <- function(lnr=LNR()) {
   function(x) new_marker(lnr)
 }
 
-#' The parser that matches an element using a predicate function
+#' Matching input using a logical function
 #'
 #' @description
-#' `satisfy()` turns a predicate function into a parser that recognizes strings.
+#' `satisfy()` turns a logical function into a parser that recognizes strings.
 #'
 #' @details
 #' Notice (see pseudocode) that `satisfy` fails when presented with empty
@@ -106,7 +109,7 @@ satisfy <- function(b) {
   }
 }
 
-#' The parser that matches an element using a literal string
+#' Matching parser input with a literal string
 #'
 #' @description
 #' `literal` tests whether a supplied string literally equals a desired value.
@@ -119,7 +122,8 @@ satisfy <- function(b) {
 #' where `F` is equivalent to the `function` declarator in R. So, we have an
 #' anonymous function in the argument of `satisfy`.
 #'
-#' @param string string, a single-element character vector.
+#' @param string string, a single-element character vector, or an object that
+#'   can be coerced to a character vector.
 #' @inherit satisfy return
 #' @export
 #' @examples
@@ -168,7 +172,7 @@ eof <- function() {
 # Above we made the basic building blocks. We consider how they should be put
 # together to form useful parsers.
 
-#' The parser of alternative parsers
+#' Applying alternative parsers
 #'
 #' @description
 #' The `%or%` combinator `(p1 %or% p2)` returns the result of `p1` if `p1` is
@@ -210,11 +214,11 @@ eof <- function() {
   }
 }
 
-#' The parser of sequences of parsers
+#' Applying parsers in sequence
 #'
 #' @description
 #'
-#' `(p1 %then% p2)` recognizes anything that `p1` and `p2` would if placed in
+#' `(p1 %then% p2)` recognizes anything that `p1` and `p2` would if applied in
 #' succession.
 #'
 #' @section Pseudocode:
@@ -252,7 +256,7 @@ eof <- function() {
   }
 }
 
-#' Manipulate results from a parser by applying a function
+#' Applying a function to the result of a parser
 #'
 #' @description
 #' The `%using%` combinator allows us to manipulate results from a parser. The
@@ -282,15 +286,15 @@ eof <- function() {
   }
 }
 
-#' Keeping only the left or right result from a `%then%` sequence
+#' Keeping only first or second result from a `%then%` sequence
 #'
-#' @details
-#' Recall that two parsers composed in sequence produce a pair of results.
-#' Sometimes we are only interested in one component of the pair. For example,
-#' it is common to throw away reserved words such as 'begin' and 'where' during
-#' parsing. In such cases, two special versions of the `%then%` combinator are
-#' useful, which throw away either the left or right result values, as reflected
-#' by the position of the letter 'x' in their names.
+#' @description
+#' Two parsers composed in sequence produce a pair of results. Sometimes we are
+#' only interested in one component of the pair. For example in the case of
+#' reserved words such as 'begin' and 'end'. In such cases, two special
+#' versions of the `%then%` combinator are useful, which keep either the
+#' first or second result, as reflected by the position of the letter 'x' in
+#' their names.
 #'
 #' @section Pseudocode:
 #'
@@ -316,9 +320,9 @@ eof <- function() {
 #'
 #' @examples
 #' is_number <- function(x) grepl("\\d+",x[1])
-#' # Numbers are preceded by ">" symbols, but we only need the number itself
+#' # Numbers are preceded by ">" symbols, but we only want the number
 #' (literal(">") %thenx% satisfy(is_number)) (c(">", "12"))
-#' # Temperatures are followed by the unit 'C', but we only need the number
+#' # Temperatures are followed by the unit 'C', but we only want the number
 #' (satisfy(is_number) %xthen% literal("C")) (c("21", "C"))
 #'
 `%xthen%` <- function(p1, p2) {
@@ -349,7 +353,7 @@ eof <- function() {
   }
 }
 
-#' Return a fixed value upon successful parsing
+#' Return a fixed value instead of the result of a parser
 #'
 #' @description
 #' Sometimes we are not interested in the result from a parser, only that the
@@ -384,23 +388,29 @@ eof <- function() {
   }
 }
 
-## Iterated application of parsers.
+## Repeaters
 
-#' Parsers that repeat application of a parser
+#' Repeated application of a parser
 #'
 #' @description
-#' Often, a structure that can be parsed by a parser `p` occurs several times
-#' in row in a file, or the parser can be applied zero or more times. The
-#' following combinators test these conditions.
+#' Often, we want to assess whether a given structure can be successfully
+#' parsed through repetitive application of a parser `p`. This could involve
+#' testing the parser applied multiple times in succession or determining
+#' its capability to be applied zero or more times.
+#'
+#' The subsequent functions are designed to address and evaluate these
+#' scenarios.
 #'
 #' @details
-#' All these parsers except `match_n` are greedy. This means that they try to
-#' apply `p` as many times as possible. If that number of times is not equal to
-#' what was expected, for example if `p` can successfully parse more than `n`
-#' times in `exactly(n,p)`, then the parser will fail. In contrast,
-#' `match_n(n,p)` will apply `p` `n` times and no more, even if `p` could be
-#' successfully applied more often. Clearly, both functions will fail if `p`
-#' leads to failure after less than `n` repetitions.
+#' All these parsers with the excception of `match_n` exhibit greedy behavior
+#' striving to apply `p` as many times as possible. If the resulting count
+#' doesn't match the expected quantity, such as in the case of `exactly(n,p)`
+#' where `p` successfully parses more than `n` times, then the parser fails.
+#' In contrast, `match_n(n,p)` strictly applies `p` exactly `n` times,
+#' preventing any further application of `p` even if `p` could potentially be
+#' applied more often. Clearly, both functions will fail if `p` fails after
+#' less than `n` repetitions.
+#'
 #'
 #'
 #' @param p a parser.
@@ -506,7 +516,7 @@ match_n <- function(n, p) {
   }
 }
 
-#' The parser that identifies a string and produces custom output
+#' Identifying and processing a string and producing custom output
 #'
 #' `match_s` matches a string using a function and returns a desired object
 #' type.

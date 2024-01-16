@@ -2,12 +2,13 @@
 % Please edit documentation in R/parsers_basic.R
 \name{literal}
 \alias{literal}
-\title{The parser that matches an element using a literal string}
+\title{Matching parser input with a literal string}
 \usage{
 literal(string)
 }
 \arguments{
-\item{string}{string, a single-element character vector.}
+\item{string}{string, a single-element character vector, or an object that
+can be coerced to a character vector.}
 }
 \value{
 A parser.

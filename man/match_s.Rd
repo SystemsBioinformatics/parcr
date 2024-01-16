@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers_basic.R
 \name{match_s}
 \alias{match_s}
-\title{The parser that identifies a string and produces custom output}
+\title{Identifying and processing a string and producing custom output}
 \usage{
 match_s(s)
 }

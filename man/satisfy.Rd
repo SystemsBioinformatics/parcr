@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers_basic.R
 \name{satisfy}
 \alias{satisfy}
-\title{The parser that matches an element using a predicate function}
+\title{Matching input using a logical function}
 \usage{
 satisfy(b)
 }
@@ -13,7 +13,7 @@ satisfy(b)
 A parser.
 }
 \description{
-\code{satisfy()} turns a predicate function into a parser that recognizes strings.
+\code{satisfy()} turns a logical function into a parser that recognizes strings.
 }
 \details{
 Notice (see pseudocode) that \code{satisfy} fails when presented with empty

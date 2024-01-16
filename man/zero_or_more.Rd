@@ -6,7 +6,7 @@
 \alias{exactly}
 \alias{zero_or_one}
 \alias{match_n}
-\title{Parsers that repeat application of a parser}
+\title{Repeated application of a parser}
 \usage{
 zero_or_more(p)
 
@@ -27,18 +27,23 @@ match_n(n, p)
 A parser.
 }
 \description{
-Often, a structure that can be parsed by a parser \code{p} occurs several times
-in row in a file, or the parser can be applied zero or more times. The
-following combinators test these conditions.
+Often, we want to assess whether a given structure can be successfully
+parsed through repetitive application of a parser \code{p}. This could involve
+testing the parser applied multiple times in succession or determining
+its capability to be applied zero or more times.
+
+The subsequent functions are designed to address and evaluate these
+scenarios.
 }
 \details{
-All these parsers except \code{match_n} are greedy. This means that they try to
-apply \code{p} as many times as possible. If that number of times is not equal to
-what was expected, for example if \code{p} can successfully parse more than \code{n}
-times in \code{exactly(n,p)}, then the parser will fail. In contrast,
-\code{match_n(n,p)} will apply \code{p} \code{n} times and no more, even if \code{p} could be
-successfully applied more often. Clearly, both functions will fail if \code{p}
-leads to failure after less than \code{n} repetitions.
+All these parsers with the excception of \code{match_n} exhibit greedy behavior
+striving to apply \code{p} as many times as possible. If the resulting count
+doesn't match the expected quantity, such as in the case of \code{exactly(n,p)}
+where \code{p} successfully parses more than \code{n} times, then the parser fails.
+In contrast, \code{match_n(n,p)} strictly applies \code{p} exactly \code{n} times,
+preventing any further application of \code{p} even if \code{p} could potentially be
+applied more often. Clearly, both functions will fail if \code{p} fails after
+less than \code{n} repetitions.
 }
 \section{Pseudocode}{
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers_basic.R
 \name{\%then\%}
 \alias{\%then\%}
-\title{The parser of sequences of parsers}
+\title{Applying parsers in sequence}
 \usage{
 p1 \%then\% p2
 }
@@ -13,7 +13,7 @@ p1 \%then\% p2
 A parser.
 }
 \description{
-\code{(p1 \%then\% p2)} recognizes anything that \code{p1} and \code{p2} would if placed in
+\code{(p1 \%then\% p2)} recognizes anything that \code{p1} and \code{p2} would if applied in
 succession.
 }
 \section{Pseudocode}{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers_error.R
 \name{reporter}
 \alias{reporter}
-\title{Turn a parser into an error reporting parser.}
+\title{Turn a parser into an error reporting parser}
 \usage{
 reporter(p)
 }

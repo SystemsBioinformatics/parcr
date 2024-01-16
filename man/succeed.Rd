@@ -17,7 +17,10 @@ occurs}
 }
 \value{
 A list. \code{succeed()} returns a list with two elements named \code{L} and
-\code{R}. \code{fail()} returns an empty list.
+\code{R}. \code{fail()} returns a \code{marker} object which is basically an empty list
+with a line number \code{n} as attribute. It is printed as the icon \verb{[]},
+see \code{\link[=print.marker]{print.marker()}}. Note that \code{n} will only correctly represent the line
+number of failure when a parser is wrapped in the \code{\link[=reporter]{reporter()}} function.
 }
 \description{
 These are the most basic constructors of a parser, but they are important
@@ -29,7 +32,7 @@ The \code{succeed} parser constructs a \code{list} object with a 'left' or \code
 that contains the parser result of the consumed part of the input vector and
 the 'right' or \code{R}-element that contains the unconsumed part of the vector.
 Since the outcome of succeed does not depend on its input, its result value
-must be pre-determined, so it is included as an extra parameter.
+must be pre-determined, so it is included as a parameter.
 
 While \code{succeed} never fails, \code{fail} always does, regardless of the input
 vector. It returns the empty list \code{list()} to signal this fact.

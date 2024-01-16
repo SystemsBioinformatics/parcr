@@ -3,7 +3,7 @@
 \name{\%xthen\%}
 \alias{\%xthen\%}
 \alias{\%thenx\%}
-\title{Keeping only the left or right result from a \verb{\%then\%} sequence}
+\title{Keeping only first or second result from a \verb{\%then\%} sequence}
 \usage{
 p1 \%xthen\% p2
 
@@ -16,15 +16,12 @@ p1 \%thenx\% p2
 A parser.
 }
 \description{
-Keeping only the left or right result from a \verb{\%then\%} sequence
-}
-\details{
-Recall that two parsers composed in sequence produce a pair of results.
-Sometimes we are only interested in one component of the pair. For example,
-it is common to throw away reserved words such as 'begin' and 'where' during
-parsing. In such cases, two special versions of the \verb{\%then\%} combinator are
-useful, which throw away either the left or right result values, as reflected
-by the position of the letter 'x' in their names.
+Two parsers composed in sequence produce a pair of results. Sometimes we are
+only interested in one component of the pair. For example in the case of
+reserved words such as 'begin' and 'end'. In such cases, two special
+versions of the \verb{\%then\%} combinator are useful, which keep either the
+first or second result, as reflected by the position of the letter 'x' in
+their names.
 }
 \section{Pseudocode}{
 
@@ -48,9 +45,9 @@ without the first element and without the first two elements, respectively.
 
 \examples{
 is_number <- function(x) grepl("\\\\d+",x[1])
-# Numbers are preceded by ">" symbols, but we only need the number itself
+# Numbers are preceded by ">" symbols, but we only want the number
 (literal(">") \%thenx\% satisfy(is_number)) (c(">", "12"))
-# Temperatures are followed by the unit 'C', but we only need the number
+# Temperatures are followed by the unit 'C', but we only want the number
 (satisfy(is_number) \%xthen\% literal("C")) (c("21", "C"))
 
 }
