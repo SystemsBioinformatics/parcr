@@ -20,7 +20,7 @@ creates R-objects as output. The `parcr` package simplifies the task of
 creating such parsers.
 
 This package was inspired by the package
-[“Ramble”](https://github.com/chappers/Ramble) by Chapman Siu and
+[“Ramble”](https://github.com/8bit-pixies/Ramble) by Chapman Siu and
 co-workers and by the paper [“Higher-order functions for
 parsing”](https://doi.org/10.1017/S0956796800000411) by [Graham
 Hutton](https://orcid.org/0000-0001-9584-5150) (1992).
