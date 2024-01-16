@@ -52,7 +52,13 @@ reporter <- function(p) {
   }
 }
 
-# from https://adv-r.hadley.nz/conditions.html
+#' Create a customized condition object
+#'
+#' @details
+#' from https://adv-r.hadley.nz/conditions.html
+#'
+#'
+#' @return A condition object.
 #' @noRd
 stop_custom <- function(.subclass, message, call = NULL, ...) {
   err <- structure(
@@ -66,6 +72,9 @@ stop_custom <- function(.subclass, message, call = NULL, ...) {
   stop(err)
 }
 
+#' Report an error when a parser fails
+#'
+#' @return A condition object
 #' @noRd
 parser_error <- function(nr, content) {
   message = paste0("Parser failed on line ", nr, " of input.\nLine content: \"",content,"\"")

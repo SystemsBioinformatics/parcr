@@ -1,6 +1,7 @@
 #' Create a new marker object
 #'
 #' @param n An `integer`, or will be coerced to an integer.
+#' @returns A marker object.
 #' @noRd
 new_marker <- function(n) {
   structure(
@@ -11,31 +12,38 @@ new_marker <- function(n) {
 }
 
 #' Return the value of attribute `n` of a marker
+#' @returns An integer.
 #' @noRd
 marker_val <- function(marker) {attr(marker,"n")}
 
 #' The `the` environment is used for keeping track of the state variable `LNR`
+#' @returns \value{None}
 #' @noRd
 the <- list2env(list(LNR = 1L), parent = emptyenv())
 
 #' Return the value of `LNR`
+#' @returns An integer.
 #' @noRd
 LNR <- function() {the$LNR}
 
 #' Set the value of `LNR` to `n`
 #' @param n An `integer`, will be coerced to `integer`.
+#' @returns \value{None}
 #' @noRd
 set_LNR <- function(n) {the$LNR <- as.integer(n)}
 
 #' Increase the value of `LNR` by 1
+#' @returns \value{None}
 #' @noRd
 inc_LNR <- function() {the$LNR <- the$LNR + 1L}
 
 #' Decrease the value of `LNR` by 1
+#' @returns \value{None}
 #' @noRd
 dec_LNR <- function() {the$LNR <- the$LNR - 1L}
 
 #' Reset the value of `LNR` to 1
+#' @returns \value{None}
 #' @noRd
 reset_LNR <- function() {set_LNR(1L)}
 
