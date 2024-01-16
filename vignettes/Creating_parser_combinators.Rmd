@@ -1,8 +1,8 @@
 ---
-title: "Creating parsers using higher order functions"
+title: "Making parsers with higher order functions"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Creating parser combinators}
+  %\VignetteIndexEntry{Making parsers with higher order functions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: parcr.bib
@@ -426,9 +426,12 @@ cat(paste0(fastafile, collapse="\n"))
 where the first two are nucleotide sequences and the last is a protein 
 sequence[^1].
 
-[^1]: It is not clear to me whether mixing of sequence types is allowed in a 
-  fasta file, but I demonstrate here that is is easy to parse them from a single
-  file.
+[^1]: It is not clear to me whether mixing of sequence types is allowed in the 
+  fasta format. I guess not, because a protein sequence consisting entirely of
+  glutamate (G), alanine (A), threonine (T) and cysteine (C) would not be 
+  distinguishable from a nucleotide sequence. Such protein sequences would be 
+  extremely rare. Anyway I demonstrate here that apart from this ambiguous case
+  it is easy to parse them from a single file.
 
 Since fasta files are text files we could read such a file using `readLines()`.
 Below we simulate the result of reading the file above by loading the 
@@ -633,5 +636,120 @@ Let's present the result more concisely using the names of these elements:
 invisible(lapply(d, function(x) {cat(x$type, x$title, x$sequence, "\n")}))
 ```
 
+## Example application: parsers with parameters
+
+In the examples above we showed how to create parsers without parameters. It is easy and useful to sometimes create parsers with parameters. The parameters are used to change the behavior of the parsers. For example, when writing online course material I use a simple structured question template that is converted to html when the syllabus is generated. It consists mostly of markdown content. Its parser makes use of parametrized parsers. The structure of such a question template document is as follows[^3]:
+
+[^3]: I simplified the template and code for this example. In fact the content is processed differently depending on the type of element, meaning that `Content()` is a function of `type`. Furthermore, questions are automatically numbered.
+
+```{r, echo=FALSE}
+qtemp <- c(
+  "#### INTRO",
+  "## Title about a set of questions",
+  "",
+  "This is optional introductory text to a set of questions.",
+  "Titles preceded by four hashes are not allowed in a question template.",
+  "",
+  "#### QUESTION",
+  "This is the first question",
+  "",
+  "#### TIP",
+  "This would be a tip. tips are optional, and multiple tips can be given. Tips are",
+  "wrapped in hide-reveal style html elements.",
+  "",
+  "#### TIP",
+  "This would be a second tip.",
+  "",
+  "#### ANSWER",
+  "The answer to the question is optional and is wrapped in a hide-reveal html element.",
+  "",
+  "#### QUESTION",
+  "This is the second question. No tips for this one",
+  "",
+  "#### ANSWER",
+  "Answer to the second question"
+)
+```
+
+```{r, echo=FALSE, comment=NA}
+cat(paste0(c(qtemp,"","<optionally more questions>"), collapse="\n"))
+```
+
+I stored this example content in a vector `qtemp` to parse it later.
+
+You notice the recurring structure of a header with four hashes `####` and some text following it. These headers represent four types of elements: intro, question, tip and answer. Instead of writing separate parsers we could 
+create a generic parser for such elements as:
+
+```{r}
+HeaderAndContent <- function(type) {
+    (Header(type) %then% Content()) %using% 
+    function(x) list(list(type=type, content=unlist(x)))
+}
+```
+
+Then we define each of the four parsers as:
+
+```{r}
+Intro <- function() HeaderAndContent("intro")
+Question <- function() HeaderAndContent("question")
+Tip <- function() HeaderAndContent("tip")
+Answer <- function() HeaderAndContent("answer")
+```
+
+The function `Header(type)` is defined as
+
+```{r}
+Header <- function(type) satisfy(header(type)) %ret% NULL
+
+# This must also be a generic function: a function that generates a function to 
+# recognize a header of type 'type'
+header <- function(type) {
+  function(x) grepl(paste0("^####\\s+", toupper(type), "\\s*"), x)
+}
+```
+
+The content consists of one or more lines not starting with `####`, which 
+includes empty lines. We discard trailing empty lines.
+
+```{r}
+Content <- function() {
+  (one_or_more(match_s(content))) %using%
+    function(x) stringr::str_trim(paste0(x,collapse="\n"), "right")
+}
+
+content <- function(x) {
+  if (grepl("^####", x)) list()
+  else x
+}
+```
+
+The complete template is defined as follows
+
+```{r}
+Template <- function() {
+  zero_or_more(Intro()) %then%
+    one_or_more(QuestionBlock()) %then%
+    eof()
+}
+```
+
+where `QuestionBlock()` is defined using the previously defined elements as
+
+```{r}
+QuestionBlock <- function() {
+    Question() %then%
+    zero_or_more(Tip()) %then%
+    zero_or_one(Answer()) %using%
+    function(x) list(x)
+}
+```
+
+We can now parse the input. We wrap the `Template()` parser in the `reporter()` 
+function to have proper error messaging and warnings, if applicable. Furthermore
+only the `L`-element, the parsed input, is returned.
+
+```{r}
+reporter(Template())(qtemp)
+```
 
 ## Literature
