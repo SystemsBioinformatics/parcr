@@ -1,3 +1,8 @@
+# parcr 0.5.0
+
+* All function descriptions and documentation thoroughly reviewed and updated.
+* Vignettes reviewed and updated.
+
 # parcr 0.4.5
 
 * Extended the fasta file example in the vignette by showing the use of %or% 
