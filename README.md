@@ -27,9 +27,13 @@ Hutton](https://orcid.org/0000-0001-9584-5150) (1992).
 
 ## Installation
 
-To install the package including its vignette run the following command
+Install the stable version from
+[CRAN](https://cran.r-project.org/web/packages/parcr/index.html).
 
-    install_github("https://github.com/SystemsBioinformatics/parcr/releases/latest", build_vignettes=TRUE)
+To install the development version including its vignette run the
+following command
+
+    install_github("SystemsBioinformatics/parcr", build_vignettes=TRUE)
 
 ## Example application: a parser for *fasta* sequence files
 
