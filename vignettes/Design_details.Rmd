@@ -1,5 +1,5 @@
 ---
-title: "Discussion of some desing details"
+title: "Discussion of some design details"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Details}
