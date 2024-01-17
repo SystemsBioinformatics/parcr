@@ -1,7 +1,12 @@
+# parcr 0.5.0.9000
+
+* development version
+
 # parcr 0.5.0
 
 * All function descriptions and documentation thoroughly reviewed and updated.
 * Vignettes reviewed and updated.
+* Published on CRAN
 
 # parcr 0.4.5
 
