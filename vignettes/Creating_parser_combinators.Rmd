@@ -490,12 +490,14 @@ ProtSequence <- function() {
 ```
 
 Notice that these elements are functions taking no input, hence the empty 
-argument brackets `()` behind their names, although they could, when needed,
-for example to change their behavior (like `match_n()`). Now we need to define 
-the string-parsers `Header()`, `NuclSequenceString()` and `ProtSequenceString()`
-that recognize and process these elements in the character vector `fastafile`.
-We use functions from `stringr` to do this in three helper functions, and we use 
-`match_s()` to create parsers from these.
+argument brackets `()` behind their names. They can take input when needed,
+for example to change their behavior (like `match_n()`, or see the other 
+example below).
+
+Now we need to define the string-parsers `Header()`, `NuclSequenceString()` 
+and `ProtSequenceString()` that recognize and process these elements in the 
+character vector `fastafile`. We use functions from `stringr` to do this in 
+three helper functions, and we use `match_s()` to create parsers from these.
 
 ```{r}
 # returns the title after the ">" in the sequence header
@@ -572,7 +574,7 @@ SequenceBlock <- function() {
 }
 ```
 
-Now the result is a list of two lists, one for each sequence block.
+Now the result is a list of three lists, one for each sequence block.
 
 ```{r}
 Fasta()(fastafile)[["L"]]
@@ -580,17 +582,18 @@ Fasta()(fastafile)[["L"]]
 In principle, this output is easier to extract information from, but we can
 improve on it. First, we want the sequences to appear as one long string, not
 as separate character vectors corresponding to the lines in the sequence block. 
-Therefore, we extend the `Sequence` parser by collapsing its output:
+Therefore, we extend the `NuclSequence` and `ProtSequence` parsers collapsing
+their output:
 
 ```{r}
 NuclSequence <- function() {
   one_or_more(NuclSequenceString()) %using% 
-    function(x) paste(x, collapse="")
+    function(x) paste0(x, collapse = "")
 }
 
 ProtSequence <- function() {
   one_or_more(ProtSequenceString()) %using% 
-  function(x) paste(x, collapse="")
+  function(x) paste0(x, collapse="")
 }
 ```
 
@@ -614,12 +617,12 @@ Header <- function() {
 
 NuclSequence <- function() {
   one_or_more(NuclSequenceString()) %using% 
-    function(x) list(type = "Nucl", sequence = paste(x, collapse=""))
+    function(x) list(type = "Nucl", sequence = paste0(x, collapse=""))
 }
 
 ProtSequence <- function() {
   one_or_more(ProtSequenceString()) %using% 
-    function(x) list(type = "Prot", sequence = paste(x, collapse=""))
+    function(x) list(type = "Prot", sequence = paste0(x, collapse=""))
 }
 ```
 
