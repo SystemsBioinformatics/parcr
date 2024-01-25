@@ -24,7 +24,7 @@ Suggests:
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Depends: 
-    R (>= 2.10)
+    R (>= 4.1)
 LazyData: true
 URL: https://github.com/SystemsBioinformatics/parcr
 BugReports: https://github.com/SystemsBioinformatics/parcr/issues
