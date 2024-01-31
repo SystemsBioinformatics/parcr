@@ -1,3 +1,5 @@
+# parcr (development version)
+
 # parcr 0.5.1
 
 * Because of the use of base::isa() this package requires R 4.1 or higher, 
