@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Making parsers with higher order functions</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Making parsers with higher order
+functions</h1>
+
+
+
+<div id="goal-of-the-package" class="section level2">
+<h2>Goal of the package</h2>
+<p>The goal of this package is to simplify the creation of transparent
+parsers for structured text files generated by machines like laboratory
+instruments. For example, we use the package to construct parsers for
+files generated by <a href="https://en.wikipedia.org/wiki/Plate_reader">plate readers</a>. The
+data generated by these instruments can usually be exported to text or
+spreadsheet files. Such files consist of lines of text organized in
+higher-order structures like headers with metadata and blocks of
+measured values, <em>etc.</em>. It’s often convenient to analyze the
+data in a program like R. To be able to do that you have to have a
+parser that processes these files and creates R-objects as output. The
+<code>parcr</code>package simplifies the task of creating such
+parsers.</p>
+</div>
+<div id="higher-order-functions-in-r" class="section level2">
+<h2>Higher order functions in R</h2>
+<p>The parsers that are created with this package make extensive use of
+functional programming. If this topic is new to you then please read
+about <a href="https://adv-r.hadley.nz/fp.html">Functional
+Programming</a>, in particular the chapters <em>Function Factories</em>
+and <em>Function Operators</em>, in Hadley Wickham’s book <a href="https://adv-r.hadley.nz"><strong>Advanced R</strong></a>.</p>
+</div>
+<div id="creating-parser-combinators-in-r-to-parse-text-files" class="section level2">
+<h2>Creating parser combinators in R to parse text files</h2>
+<p>The <code>parcr</code> package contains a set of functions that allow
+you to create simple parsers with higher order functions, functions that
+can take functions as input and have functions as output. These are
+sometimes called combinators. The ideas behind the package are described
+in a paper by <span class="citation">Hutton (1992)</span>. A number of
+the functions described in this paper are implemented with modifications
+in the current package. The package was also heavily inspired by the <a href="https://github.com/8bit-pixies/Ramble"><code>Ramble</code></a>
+package which is written in the same vein, but without the explicit
+parsing of structured text files in mind.</p>
+<div id="the-output-of-the-parsers-a-list" class="section level3">
+<h3>The output of the parsers: a <code>list</code></h3>
+<p>The parsers constructed with the functions from this package generate
+a <code>list</code> as an output. The parsers read the input vector from
+left to right. When the parser fails the output will be the empty list
+<code>list()</code>. However, if the parser is successful then it
+produces a <code>list</code> with two elements. An element called
+<code>L</code> (the <em>left</em> part) contains the output generated by
+that part of the input vector which was successfully parsed, and the
+element called <code>R</code> (the <em>right</em> part) which contains
+the remainder that was not parsed. When an entire character vector is
+parsed the content of the <code>R</code> element equals
+<code>character(0)</code>. The content of the <code>L</code> part can be
+shaped to your desire. This is demonstrated in the example of the
+<em>fasta</em> file parser later in this document.</p>
+</div>
+</div>
+<div id="a-simple-example-of-using-parser-combinators" class="section level2">
+<h2>A simple example of using parser combinators</h2>
+<p>Please realize that every function described below is a higher order
+function: their output is a function. In its turn, this function can
+take a character vector as its input. For example,
+<code>literal(&quot;a&quot;)</code> yields a function. To use that function as a
+parser you have to provide it with a character vector, the object that
+needs to be parsed, as input:</p>
+<pre><code>literal(&quot;a&quot;)(c(&quot;a&quot;,&quot;att&quot;))</code></pre>
+<p>This parser tests whether the next element in its input is literally
+the string “a”. It will succeed in the example above, but will only
+consume the first element of its input and then stop. However, you can
+also use a higher order function like <code>literal(&quot;a&quot;)</code> as input
+to other higher order functions to create more complex parsers. For
+example, the function <code>then</code> takes two parsers
+<code>p1</code> and <code>p2</code> as arguments,
+<code>then(p1, p2)</code> and applies them in sequence to the input. In
+the <code>parcr</code> package the function is implemented in the infix
+form <code>%then%</code> which makes parser constructs better readable.
+The composite parser:</p>
+<pre><code>literal(&quot;a&quot;) %then% literal(&quot;att&quot;)</code></pre>
+<p>looks for an element with string “a” followed by an element with
+string “att”. Its application to the same vector:</p>
+<pre><code>(literal(&quot;a&quot;) %then% literal(&quot;att&quot;))(c(&quot;a&quot;,&quot;att&quot;))</code></pre>
+<p>will completely consume the input. In this way, using a number of
+standard parsers defined in the package, you can quickly construct
+flexible parsers taking complex input. Furthermore, the functions also
+allow you to construct a desired R object as output while parsing.</p>
+</div>
+<div id="the-functions-in-the-parcr-package" class="section level2">
+<h2>The functions in the <code>parcr</code> package</h2>
+<p>We will now discuss all of the parser combinator functions present in
+the package. You should also study their help pages. In particular the
+<strong>Pseudocode</strong> listed for each of them should help you to
+understand their properties.</p>
+</div>
+<div id="the-fundamental-parsers" class="section level2">
+<h2>The fundamental parsers</h2>
+<p>The six fundamental parsers allow you to construct a parser that will
+completely consume input, or to fail when the input does not satisfy the
+specifications of the parser.</p>
+<div id="succeeding-and-failing" class="section level3">
+<h3>Succeeding and failing</h3>
+<ul>
+<li><code>succeed(o)</code>: where <code>o</code> is any kind of
+R-object</li>
+<li><code>fail()</code></li>
+</ul>
+<p>The <code>succeed</code> and <code>fail</code> parsers are the nuts
+and bolts of a parser construction. The <code>succeed</code> parser
+always succeeds, without consuming any input, whereas the
+<code>fail</code> parser always fails.</p>
+<p>The <code>succeed</code> parser constructs a <code>list</code> object
+with a ‘left’ or <code>L</code>-element that contains the parsed result
+of the consumed part of the input vector and the ‘right’ or
+<code>R</code>-element that contains the unconsumed part of the vector.
+The <code>L</code>-element can contain any R-object that is constructed
+during parsing.</p>
+<p>While <code>succeed</code> never fails, <code>fail</code> always
+does, regardless of the input vector. To signal failure it returns a
+special form of the empty list <code>list()</code>, namely a
+<code>marker</code> object printed as the icon <code>[]</code>.</p>
+<p><strong>Important</strong>: It is unlikely that you will ever use
+these two functions to construct parsers.</p>
+<p><strong>Examples:</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">succeed</span>(<span class="st">&quot;A&quot;</span>)(<span class="st">&quot;abc&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;A&quot;</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; [1] &quot;abc&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="fu">succeed</span>(<span class="fu">data.frame</span>(<span class="at">title=</span><span class="st">&quot;Keisri hull&quot;</span>, <span class="at">author=</span><span class="st">&quot;Jaan Kross&quot;</span>))(<span class="fu">c</span>(<span class="st">&quot;Unconsumed&quot;</span>,<span class="st">&quot;text&quot;</span>))</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt;         title     author</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; 1 Keisri hull Jaan Kross</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Unconsumed&quot; &quot;text&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">fail</span>()(<span class="st">&quot;abc&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; []</span></span></code></pre></div>
+</div>
+<div id="parsers-for-the-current-element" class="section level3">
+<h3>Parsers for the current element</h3>
+<p>The basic functions for recognizing the content of the current
+element, the left-most element of the input vector.</p>
+<ul>
+<li><code>literal(c)</code>: tests whether the current element equals
+the string <code>c</code>.</li>
+<li><code>satisfy(b)</code>: tests whether the current element satisfies
+function <code>b()</code> where <code>b()</code> is a logical function:
+it takes a string as input and returns <code>TRUE</code> or
+<code>FALSE</code>.</li>
+<li><code>eof()</code> : tests whether the input is at its end.</li>
+</ul>
+<p><code>eof()</code> is a special function that detects the end of a
+character vector, or if that character vector represents the lines of
+text file, the end of the file (EOF). In fact, it detects
+<code>character(0)</code> in the input vector and when successful it
+turns the <code>R</code>-side of the output into an empty list
+(<code>list()</code>) to signal that the end of the vector was
+detected.</p>
+<p><strong>Examples:</strong></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">literal</span>(<span class="st">&#39;abc&#39;</span>)(<span class="fu">c</span>(<span class="st">&#39;abc&#39;</span>,<span class="st">&#39;def&#39;</span>))</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;abc&quot;</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; [1] &quot;def&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>starts_with_a <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {<span class="fu">grepl</span>(<span class="st">&quot;^a&quot;</span>, x)}</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">satisfy</span>(starts_with_a)(<span class="fu">c</span>(<span class="st">&#39;abc&#39;</span>,<span class="st">&#39;def&#39;</span>))</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; [1] &quot;abc&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; [1] &quot;def&quot;</span></span></code></pre></div>
+<p>And here is an example of an unsuccessful parser:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">literal</span>(<span class="st">&#39;a&#39;</span>)(<span class="fu">c</span>(<span class="st">&#39;ab&#39;</span>,<span class="st">&#39;a&#39;</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; []</span></span></code></pre></div>
+<p>An application of <code>eof()</code> to detect that we parsed the
+input completely.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>(<span class="fu">literal</span>(<span class="st">&quot;a&quot;</span>) <span class="sc">%then%</span> <span class="fu">literal</span>(<span class="st">&quot;att&quot;</span>) <span class="sc">%then%</span> <span class="fu">eof</span>())(<span class="fu">c</span>(<span class="st">&quot;a&quot;</span>,<span class="st">&quot;att&quot;</span>))</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;a&quot;</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; $L[[2]]</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;att&quot;</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; list()</span></span></code></pre></div>
+<p>Notice how the <code>R</code>-element differs from just</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>(<span class="fu">literal</span>(<span class="st">&quot;a&quot;</span>) <span class="sc">%then%</span> <span class="fu">literal</span>(<span class="st">&quot;att&quot;</span>))(<span class="fu">c</span>(<span class="st">&quot;a&quot;</span>,<span class="st">&quot;att&quot;</span>))</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;a&quot;</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; $L[[2]]</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;att&quot;</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; character(0)</span></span></code></pre></div>
+</div>
+<div id="the-fundamental-combinators" class="section level3">
+<h3>The fundamental combinators</h3>
+<ul>
+<li><code>p1 %or% p2</code>: applies alternative parsers <code>p1</code>
+and <code>p2</code> on the current element and returns the result of the
+first successful parser, or failure when both fail.</li>
+<li><code>p1 %then% p2</code>: applies parser <code>p1</code> on the
+current element and <code>p2</code> on the next element.</li>
+</ul>
+<p>The <code>%or%</code> combinator enables us to try alternative
+parsers on the current element, whereas the <code>%then%</code>
+combinator enables us to test sequences of elements in a character
+vector.</p>
+<p>Note that <code>%or%</code> uses lazy evaluation which means that the
+output of <code>%or%</code> depends on the order of <code>p1</code> and
+<code>p2</code>: if both would in principle succeed then only the result
+of <code>p1</code> is returned.</p>
+<p>We also have two variations of the <code>%then%</code> combinator,
+<code>%xthen%</code> and <code>%thenx%</code> which do test but then
+discard the result from the first or second argument:</p>
+<ul>
+<li><code>p1 %xthen% p2</code>: where <code>p1</code> and
+<code>p2</code> are parsers discards the result from
+<code>p2</code></li>
+<li><code>p1 %thenx% p2</code>: where <code>p1</code> and
+<code>p2</code> are parsers discards the result from
+<code>p1</code></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>(<span class="fu">literal</span>(<span class="st">&#39;A&#39;</span>) <span class="sc">%or%</span> <span class="fu">satisfy</span>(starts_with_a))(<span class="fu">c</span>(<span class="st">&#39;abc&#39;</span>,<span class="st">&#39;def&#39;</span>))</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;abc&quot;</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; [1] &quot;def&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>(<span class="fu">literal</span>(<span class="st">&#39;A&#39;</span>) <span class="sc">%then%</span> <span class="fu">satisfy</span>(starts_with_a))(<span class="fu">c</span>(<span class="st">&#39;A&#39;</span>, <span class="st">&#39;abc&#39;</span>))</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;A&quot;</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; $L[[2]]</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;abc&quot;</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt; character(0)</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>(<span class="fu">literal</span>(<span class="st">&#39;&gt;&#39;</span>) <span class="sc">%thenx%</span> <span class="fu">satisfy</span>(starts_with_a))(<span class="fu">c</span>(<span class="st">&#39;&gt;&#39;</span>, <span class="st">&#39;abc&#39;</span>))</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;abc&quot;</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt; character(0)</span></span></code></pre></div>
+</div>
+</div>
+<div id="modifying-the-output-of-a-parser" class="section level2">
+<h2>Modifying the output of a parser</h2>
+<p>As said, the six fundamental parsers allow you to construct a parser
+that will completely consume input. However, when this parser succeeds
+its output will, apart from the fact that every element is put in a
+list, be equal to the input. In general, this is not very useful if you
+want to use the output in other code. Therefore, we have two functions
+that allow you to modify the output of successful parser. The basic
+functions for modifying output of a parser are:</p>
+<ul>
+<li><code>p %ret% c</code> : when parser <code>p</code> is successful it
+returns the object <code>c</code> (a string or <code>NULL</code>).</li>
+<li><code>p %using% f</code> : when parser <code>p</code> is successful
+function <code>f()</code> is applied to the input and its output is
+stored as the result.</li>
+</ul>
+<p><strong>Examples</strong></p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>(<span class="fu">literal</span>(<span class="st">&#39;a&#39;</span>) <span class="sc">%ret%</span> <span class="st">&quot;We have an &#39;a&#39;&quot;</span>)(<span class="fu">c</span>(<span class="st">&#39;a&#39;</span>,<span class="st">&#39;b&#39;</span>))</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;We have an &#39;a&#39;&quot;</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co">#&gt; [1] &quot;b&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>(<span class="fu">satisfy</span>(starts_with_a) <span class="sc">%using%</span> toupper)(<span class="fu">c</span>(<span class="st">&#39;abc&#39;</span>,<span class="st">&#39;d&#39;</span>))</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;ABC&quot;</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co">#&gt; [1] &quot;d&quot;</span></span></code></pre></div>
+</div>
+<div id="derived-parsers" class="section level2">
+<h2>Derived parsers</h2>
+<p>Derived parsers are constructed from the six fundamental parsers.</p>
+<div id="iterators" class="section level3">
+<h3>Iterators</h3>
+<ul>
+<li><code>zero_or_one(p)</code>: where <code>p</code> is a parser.</li>
+<li><code>zero_or_more(p)</code>: where <code>p</code> is a parser.</li>
+<li><code>one_or_more(p)</code>: where <code>p</code> is a parser.</li>
+<li><code>exactly(n,p)</code>: where <code>n</code> is an integer and
+<code>p</code> is a parser.</li>
+<li><code>match_n(n,p)</code>: where <code>n</code> is an integer and
+<code>p</code> is a parser.</li>
+</ul>
+<p><code>zero_or_one</code>, <code>zero_or_more</code> and
+<code>one_or_more</code> do exactly what their names suggest. You should
+realize that these are greedy parsers: they consume as many as possible
+strings that can be successfully parsed by <code>p</code>. Similarly,
+<code>exactly</code> is a greedy parser, and it fails when there are
+less or more than <code>n</code> consecutive strings that can be
+successfully parsed by <code>p</code>. On the other hand
+<code>match_n</code> is not greedy. It consumes <code>n</code> but no
+more strings that can be successfully parsed with <code>p</code>.</p>
+<p><strong>Examples:</strong></p>
+<p>This parser will fail on its input, too many strings starting with
+“a”:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">zero_or_one</span>(<span class="fu">satisfy</span>(starts_with_a))(<span class="fu">c</span>(<span class="st">&#39;acc&#39;</span>,<span class="st">&#39;aat&#39;</span>,<span class="st">&#39;cgg&#39;</span>))</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co">#&gt; []</span></span></code></pre></div>
+<p>The following is a successful parse. Note that its result is not
+merely <code>[]</code> which would have indicated failure, but an
+<code>L,R</code>-list with an empty list in the
+<code>L</code>-element.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">zero_or_more</span>(<span class="fu">satisfy</span>(starts_with_a))(<span class="fu">c</span>(<span class="st">&#39;cat&#39;</span>,<span class="st">&#39;gac&#39;</span>,<span class="st">&#39;cct&#39;</span>))</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;cat&quot; &quot;gac&quot; &quot;cct&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">one_or_more</span>(<span class="fu">satisfy</span>(starts_with_a))(<span class="fu">c</span>(<span class="st">&#39;att&#39;</span>,<span class="st">&#39;aac&#39;</span>,<span class="st">&#39;cct&#39;</span>))</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;att&quot;</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="co">#&gt; $L[[2]]</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;aac&quot;</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a><span class="co">#&gt; [1] &quot;cct&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">exactly</span>(<span class="dv">2</span>, <span class="fu">satisfy</span>(starts_with_a))(<span class="fu">c</span>(<span class="st">&#39;att&#39;</span>,<span class="st">&#39;aac&#39;</span>,<span class="st">&#39;cct&#39;</span>))</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;att&quot;</span></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="co">#&gt; $L[[2]]</span></span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;aac&quot;</span></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a><span class="co">#&gt; [1] &quot;cct&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">match_n</span>(<span class="dv">1</span>, <span class="fu">satisfy</span>(starts_with_a))(<span class="fu">c</span>(<span class="st">&#39;att&#39;</span>,<span class="st">&#39;aac&#39;</span>,<span class="st">&#39;cct&#39;</span>))</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;att&quot;</span></span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a><span class="co">#&gt; [1] &quot;aac&quot; &quot;cct&quot;</span></span></code></pre></div>
+</div>
+<div id="recognizing-and-processing-strings-with-match_s" class="section level3">
+<h3>Recognizing and processing strings with <code>match_s</code></h3>
+<p>When constructing a parser you will often need to recognize as well
+as process strings. For example, you want to recognize multiple integers
+in a line, extract these and then return them as a numeric vector.
+You’re not interested in other elements like comments in these strings.
+This could be achieved by combining <code>satisfy()</code> and
+subsequently <code>%using%</code>, like:</p>
+<p><code>satisfy(has_integers) %using% process_integers</code></p>
+<p>where <code>has_integers</code> is a boolean function and
+<code>process_integers</code> is a function that both recognizes ,
+extracts and rearranges numbers to a numeric vector. You will often find
+that <code>has_integers</code> and <code>process_integers</code> use the
+same regular expressions. Then it may be more efficient to combine
+these, which is what the <code>match_s()</code> function does.</p>
+<p>The <code>match_s()</code> parser takes a simple (not higher-order)
+function <code>s</code> to process the string from the current element
+and returns the result from that function. The function <code>s</code>
+has to be constructed in such a way that it returns the empty
+<code>list()</code> when the string does not satisfy the criteria that
+the user sets.</p>
+<p><strong>Example:</strong></p>
+<p>Here <code>numbers</code> is a function hat recognizes and returns
+numbers (in fact, positive integers) in a string:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>numbers <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">gregexpr</span>(<span class="st">&quot;[[:digit:]]+&quot;</span>, x)</span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>  matches <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">regmatches</span>(x,m)[[<span class="dv">1</span>]])</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(matches)<span class="sc">==</span><span class="dv">0</span>) {</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>()) <span class="co"># we signal parser failure when no numbers were found</span></span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>    <span class="fu">return</span>(matches)</span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a>  }</span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a>}</span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a></span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1"></a><span class="fu">match_s</span>(numbers)(<span class="st">&quot; 101 12 187 # a comment on these numbers&quot;</span>)</span>
+<span id="cb21-12"><a href="#cb21-12" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb21-13"><a href="#cb21-13" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb21-14"><a href="#cb21-14" tabindex="-1"></a><span class="co">#&gt; [1] 101  12 187</span></span>
+<span id="cb21-15"><a href="#cb21-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-16"><a href="#cb21-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-17"><a href="#cb21-17" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb21-18"><a href="#cb21-18" tabindex="-1"></a><span class="co">#&gt; character(0)</span></span></code></pre></div>
+</div>
+<div id="functions-that-split-a-string-and-parse-the-substrings" class="section level3">
+<h3>Functions that split a string and parse the substrings</h3>
+<ul>
+<li><code>by_split(p, split, finish = TRUE, fixed = FALSE, perl = FALSE)</code>:
+where <code>p</code> is a parser</li>
+<li><code>by_symbol(p, finish = TRUE)</code>: where <code>p</code> is a
+parser</li>
+</ul>
+<p>Although you can use the string processing functions from the
+<code>base</code> or <code>stringr</code> packages to parse and process
+individual elements of a character vector it is also possible to parse
+substrings by first splitting a string. <code>by_split</code> uses a
+<code>split</code> pattern to first split the incoming string and then
+applies the parser <code>p</code> to it. <code>by_symbol</code> splits
+the incoming string to individual symbols and then applies the parser
+<code>p</code>. The <code>finish</code> boolean indicates whether the
+parser should completely consume the split string.</p>
+<p>Under the hood these functions use the function
+<code>strsplit()</code> and its <code>split</code>, <code>fixed</code>
+and <code>perl</code> arguments are passed on.</p>
+<p><strong>Examples:</strong></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>starts_with_a <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">grepl</span>(<span class="st">&quot;^a&quot;</span>,x[<span class="dv">1</span>])</span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="co"># don&#39;s forget to use satisfy(), it turns starts_with into a parser</span></span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a><span class="fu">by_split</span>(<span class="fu">one_or_more</span>(<span class="fu">satisfy</span>(starts_with_a)), <span class="st">&quot;,&quot;</span>, <span class="at">fixed =</span> <span class="cn">TRUE</span>)(<span class="st">&quot;atggc,acggg,acttg&quot;</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;atggc&quot;</span></span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a><span class="co">#&gt; $L[[2]]</span></span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a><span class="co">#&gt; [1] &quot;acggg&quot;</span></span>
+<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a><span class="co">#&gt; $L[[3]]</span></span>
+<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a><span class="co">#&gt; [1] &quot;acttg&quot;</span></span>
+<span id="cb22-13"><a href="#cb22-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-14"><a href="#cb22-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-15"><a href="#cb22-15" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb22-16"><a href="#cb22-16" tabindex="-1"></a><span class="co">#&gt; character(0)</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">by_symbol</span>(<span class="fu">literal</span>(<span class="st">&quot;&gt;&quot;</span>) <span class="sc">%thenx%</span> <span class="fu">one_or_more</span>(<span class="fu">literal</span>(<span class="st">&quot;b&quot;</span>)), <span class="at">finish =</span> <span class="cn">FALSE</span>)(<span class="st">&quot;&gt;bb&quot;</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;b&quot;</span></span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a><span class="co">#&gt; $L[[2]]</span></span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;b&quot;</span></span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb23-11"><a href="#cb23-11" tabindex="-1"></a><span class="co">#&gt; character(0)</span></span></code></pre></div>
+<p><strong>Note</strong>: Parsers become <strong>slow</strong> when
+using these two functions extensively. If that bothers you then you
+should use the <code>match_s</code> or <code>satisfy()</code>and
+<code>%using%</code> parsers together with string processing functions
+like <code>grepl</code> and <code>grep</code> or the ones from
+<code>stringr</code> to process strings. Those parsers will be much
+faster.</p>
+</div>
+<div id="derived-functions-to-recognize-and-modify-empty-lines" class="section level3">
+<h3>Derived functions to recognize and modify empty lines</h3>
+<ul>
+<li><code>EmptyLine()</code></li>
+<li><code>Spacer()</code></li>
+<li><code>MaybeEmpty()</code></li>
+</ul>
+<p>The function <code>EmptyLine()</code> detects and returns empty line.
+Empty lines are either the string <code>&quot;&quot;</code> or strings consisting
+entirely of space-like characters as identified by the regular
+expression <code>\\s</code>. <code>Spacer()</code> detects one or more
+consecutive empty lines and discards these whereas
+<code>MaybeEmpty()</code> detects zero or more empty lines and discards
+these.</p>
+<p>Note that I write these functions with capital letters. I use this
+convention here and in the example below to indicate that these
+functions parse higher-order structures (higher than the individual
+strings) in the input.</p>
+<p><strong>Examples:</strong></p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="fu">EmptyLine</span>()(<span class="st">&quot;&quot;</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;&quot;</span></span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a><span class="co">#&gt; character(0)</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="fu">Spacer</span>()(<span class="fu">c</span>(<span class="st">&quot; &quot;</span>,<span class="st">&quot;</span><span class="sc">\t\t\t</span><span class="st">&quot;</span>, <span class="st">&quot;atgcc&quot;</span>))</span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;atgcc&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="fu">MaybeEmpty</span>()(<span class="fu">c</span>(<span class="st">&quot;ggacc&quot;</span>,<span class="st">&quot;gatccg&quot;</span>, <span class="st">&quot;atgcc&quot;</span>))</span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;ggacc&quot;  &quot;gatccg&quot; &quot;atgcc&quot;</span></span></code></pre></div>
+</div>
+</div>
+<div id="example-application-a-parser-for-fasta-sequence-files" class="section level2">
+<h2>Example application: a parser for <em>fasta</em> sequence files</h2>
+<p>As an example of a somewhat realistic application let’s try to write
+a parser for fasta-formatted files for mixed nucleotide and protein
+sequences.</p>
+<p>Such a fasta file could look like the example below</p>
+<pre><code>&gt;sequence_A
+GGTAAGTCCTCTAGTACAAACACCCCCAAT
+TCTGTTGCCAGAAAAAACACTTTTAGGCTA
+&gt;sequence_B
+ATTGTGATATAATTAAAATTATATTCATAT
+TATTAGAGCCATCTTCTTTGAAGCGTTGTC
+TATGCATCGATC
+
+&gt;sequence_C
+MTEITAAMVKELRESTGAGMMDCKNALSET
+NGDFDKAVQLLREKGLGKAAKKADRLAAEG
+ENEYKALVAELEKE</code></pre>
+<p>where the first two are nucleotide sequences and the last is a
+protein sequence<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
+<p>Since fasta files are text files we could read such a file using
+<code>readLines()</code>. Below we simulate the result of reading the
+file above by loading the <code>nuclfasta</code> and
+<code>protfasta</code> data sets present in the package. The consist of
+character vectors.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;fastafile&quot;</span>)</span></code></pre></div>
+<p>We can distinguish the following higher order components in a fasta
+file:</p>
+<ul>
+<li>A <strong>fasta</strong> file: consists of one or more
+<strong>sequence blocks</strong> until the <strong>end of the
+file</strong>.</li>
+<li>A <strong>sequence block</strong>: consist of a
+<strong>header</strong><a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> and a <strong>nucleotide sequence</strong>
+or a <strong>protein sequence</strong>. A sequence block could be
+preceded by zero or more <strong>empty lines</strong>.</li>
+<li>A <strong>nucleotide sequence</strong>: consists of one or more
+<strong>nucleotide sequence strings</strong>.</li>
+<li>A <strong>protein sequence</strong>: consists of one or more
+<strong>protein sequence strings</strong>.</li>
+<li>A <strong>header</strong> is a <em>string</em> that starts with a
+“&gt;” immediately followed by a <strong>title</strong> without
+spaces.</li>
+<li>A <strong>nucleotide sequence string</strong> is a <em>string</em>
+without spaces that consists <em>entirely</em> of symbols from the set
+<code>{G,A,T,C}</code>.</li>
+<li>A <strong>protein sequence string</strong> is a <em>string</em>
+without spaces that consists <em>entirely</em> of symbols from the set
+<code>{A,R,N,D,B,C,E,Q,Z,G,H,I,L,K,M,F,P,S,T,W,Y,V}</code>.</li>
+</ul>
+<p>It now becomes clear what I mean when I say that the package allows
+us to write transparent parsers: the description above of the structure
+of fasta files can be translated straight into code for a
+<code>Fasta()</code> parser:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>Fasta <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a>  <span class="fu">one_or_more</span>(<span class="fu">SequenceBlock</span>()) <span class="sc">%then%</span></span>
+<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>    <span class="fu">eof</span>()</span>
+<span id="cb29-4"><a href="#cb29-4" tabindex="-1"></a>}</span>
+<span id="cb29-5"><a href="#cb29-5" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" tabindex="-1"></a>SequenceBlock <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb29-7"><a href="#cb29-7" tabindex="-1"></a>  <span class="fu">MaybeEmpty</span>() <span class="sc">%then%</span> </span>
+<span id="cb29-8"><a href="#cb29-8" tabindex="-1"></a>    <span class="fu">Header</span>() <span class="sc">%then%</span> </span>
+<span id="cb29-9"><a href="#cb29-9" tabindex="-1"></a>    (<span class="fu">NuclSequence</span>() <span class="sc">%or%</span> <span class="fu">ProtSequence</span>())</span>
+<span id="cb29-10"><a href="#cb29-10" tabindex="-1"></a>}</span>
+<span id="cb29-11"><a href="#cb29-11" tabindex="-1"></a></span>
+<span id="cb29-12"><a href="#cb29-12" tabindex="-1"></a>NuclSequence <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb29-13"><a href="#cb29-13" tabindex="-1"></a>  <span class="fu">one_or_more</span>(<span class="fu">NuclSequenceString</span>())</span>
+<span id="cb29-14"><a href="#cb29-14" tabindex="-1"></a>}</span>
+<span id="cb29-15"><a href="#cb29-15" tabindex="-1"></a></span>
+<span id="cb29-16"><a href="#cb29-16" tabindex="-1"></a>ProtSequence <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb29-17"><a href="#cb29-17" tabindex="-1"></a>  <span class="fu">one_or_more</span>(<span class="fu">ProtSequenceString</span>())</span>
+<span id="cb29-18"><a href="#cb29-18" tabindex="-1"></a>}</span></code></pre></div>
+<p>Notice that these elements are functions taking no input, hence the
+empty argument brackets <code>()</code> behind their names, although
+they could, when needed, for example to change their behavior (like
+<code>match_n()</code>). Now we need to define the string-parsers
+<code>Header()</code>, <code>NuclSequenceString()</code> and
+<code>ProtSequenceString()</code> that recognize and process these
+elements in the character vector <code>fastafile</code>. We use
+functions from <code>stringr</code> to do this in three helper
+functions, and we use <code>match_s()</code> to create parsers from
+these.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="co"># returns the title after the &quot;&gt;&quot; in the sequence header</span></span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>parse_header <span class="ot">&lt;-</span> <span class="cf">function</span>(line) {</span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>  <span class="co"># Study stringr::str_match() to understand what we do here</span></span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a>  m <span class="ot">&lt;-</span> stringr<span class="sc">::</span><span class="fu">str_match</span>(line, <span class="st">&quot;^&gt;(</span><span class="sc">\\</span><span class="st">w+)&quot;</span>)</span>
+<span id="cb30-5"><a href="#cb30-5" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(m[<span class="dv">1</span>])) {</span>
+<span id="cb30-6"><a href="#cb30-6" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>()) <span class="co"># signal failure: no title found</span></span>
+<span id="cb30-7"><a href="#cb30-7" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb30-8"><a href="#cb30-8" tabindex="-1"></a>    <span class="fu">return</span>(m[<span class="dv">2</span>])</span>
+<span id="cb30-9"><a href="#cb30-9" tabindex="-1"></a>  }</span>
+<span id="cb30-10"><a href="#cb30-10" tabindex="-1"></a>}</span>
+<span id="cb30-11"><a href="#cb30-11" tabindex="-1"></a></span>
+<span id="cb30-12"><a href="#cb30-12" tabindex="-1"></a><span class="co"># returns a nucleotide sequence string</span></span>
+<span id="cb30-13"><a href="#cb30-13" tabindex="-1"></a>parse_nucl_sequence_line <span class="ot">&lt;-</span> <span class="cf">function</span>(line) {</span>
+<span id="cb30-14"><a href="#cb30-14" tabindex="-1"></a>  <span class="co"># The line must consist of GATC from the start (^) until the end ($)</span></span>
+<span id="cb30-15"><a href="#cb30-15" tabindex="-1"></a>  m <span class="ot">&lt;-</span> stringr<span class="sc">::</span><span class="fu">str_match</span>(line, <span class="st">&quot;^([GATC]+)$&quot;</span>)</span>
+<span id="cb30-16"><a href="#cb30-16" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(m[<span class="dv">1</span>])) {</span>
+<span id="cb30-17"><a href="#cb30-17" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>()) <span class="co"># signal failure: not a valid nucleotide sequence string</span></span>
+<span id="cb30-18"><a href="#cb30-18" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb30-19"><a href="#cb30-19" tabindex="-1"></a>    <span class="fu">return</span>(m[<span class="dv">2</span>])</span>
+<span id="cb30-20"><a href="#cb30-20" tabindex="-1"></a>  }</span>
+<span id="cb30-21"><a href="#cb30-21" tabindex="-1"></a>}</span>
+<span id="cb30-22"><a href="#cb30-22" tabindex="-1"></a></span>
+<span id="cb30-23"><a href="#cb30-23" tabindex="-1"></a><span class="co"># returns a protein sequence string</span></span>
+<span id="cb30-24"><a href="#cb30-24" tabindex="-1"></a>parse_prot_sequence_line <span class="ot">&lt;-</span> <span class="cf">function</span>(line) {</span>
+<span id="cb30-25"><a href="#cb30-25" tabindex="-1"></a>  <span class="co"># The line must consist of ARNDBCEQZGHILKMFPSTWYV from the start (^) until the</span></span>
+<span id="cb30-26"><a href="#cb30-26" tabindex="-1"></a>  <span class="co"># end ($)</span></span>
+<span id="cb30-27"><a href="#cb30-27" tabindex="-1"></a>  m <span class="ot">&lt;-</span> stringr<span class="sc">::</span><span class="fu">str_match</span>(line, <span class="st">&quot;^([ARNDBCEQZGHILKMFPSTWYV]+)$&quot;</span>)</span>
+<span id="cb30-28"><a href="#cb30-28" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(m[<span class="dv">1</span>])) {</span>
+<span id="cb30-29"><a href="#cb30-29" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>()) <span class="co"># signal failure: not a valid protein sequence string</span></span>
+<span id="cb30-30"><a href="#cb30-30" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb30-31"><a href="#cb30-31" tabindex="-1"></a>    <span class="fu">return</span>(m[<span class="dv">2</span>])</span>
+<span id="cb30-32"><a href="#cb30-32" tabindex="-1"></a>  }</span>
+<span id="cb30-33"><a href="#cb30-33" tabindex="-1"></a>}</span></code></pre></div>
+<p>Then we define the parsers.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>Header <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>  <span class="fu">match_s</span>(parse_header)</span>
+<span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a>}</span>
+<span id="cb31-4"><a href="#cb31-4" tabindex="-1"></a></span>
+<span id="cb31-5"><a href="#cb31-5" tabindex="-1"></a>NuclSequenceString <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb31-6"><a href="#cb31-6" tabindex="-1"></a>  <span class="fu">match_s</span>(parse_nucl_sequence_line)</span>
+<span id="cb31-7"><a href="#cb31-7" tabindex="-1"></a>}</span>
+<span id="cb31-8"><a href="#cb31-8" tabindex="-1"></a></span>
+<span id="cb31-9"><a href="#cb31-9" tabindex="-1"></a>ProtSequenceString <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb31-10"><a href="#cb31-10" tabindex="-1"></a>  <span class="fu">match_s</span>(parse_prot_sequence_line)</span>
+<span id="cb31-11"><a href="#cb31-11" tabindex="-1"></a>}</span></code></pre></div>
+<p>Now we have all the elements that we need to apply the
+<code>Fasta()</code> parser.</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="fu">Fasta</span>()(fastafile)</span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a><span class="co">#&gt; $L</span></span>
+<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a><span class="co">#&gt; $L[[1]]</span></span>
+<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;sequence_A&quot;</span></span>
+<span id="cb32-5"><a href="#cb32-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb32-6"><a href="#cb32-6" tabindex="-1"></a><span class="co">#&gt; $L[[2]]</span></span>
+<span id="cb32-7"><a href="#cb32-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;GGTAAGTCCTCTAGTACAAACACCCCCAAT&quot;</span></span>
+<span id="cb32-8"><a href="#cb32-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb32-9"><a href="#cb32-9" tabindex="-1"></a><span class="co">#&gt; $L[[3]]</span></span>
+<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a><span class="co">#&gt; [1] &quot;TCTGTTGCCAGAAAAAACACTTTTAGGCTA&quot;</span></span>
+<span id="cb32-11"><a href="#cb32-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb32-12"><a href="#cb32-12" tabindex="-1"></a><span class="co">#&gt; $L[[4]]</span></span>
+<span id="cb32-13"><a href="#cb32-13" tabindex="-1"></a><span class="co">#&gt; [1] &quot;sequence_B&quot;</span></span>
+<span id="cb32-14"><a href="#cb32-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb32-15"><a href="#cb32-15" tabindex="-1"></a><span class="co">#&gt; $L[[5]]</span></span>
+<span id="cb32-16"><a href="#cb32-16" tabindex="-1"></a><span class="co">#&gt; [1] &quot;ATTGTGATATAATTAAAATTATATTCATAT&quot;</span></span>
+<span id="cb32-17"><a href="#cb32-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb32-18"><a href="#cb32-18" tabindex="-1"></a><span class="co">#&gt; $L[[6]]</span></span>
+<span id="cb32-19"><a href="#cb32-19" tabindex="-1"></a><span class="co">#&gt; [1] &quot;TATTAGAGCCATCTTCTTTGAAGCGTTGTC&quot;</span></span>
+<span id="cb32-20"><a href="#cb32-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb32-21"><a href="#cb32-21" tabindex="-1"></a><span class="co">#&gt; $L[[7]]</span></span>
+<span id="cb32-22"><a href="#cb32-22" tabindex="-1"></a><span class="co">#&gt; [1] &quot;TATGCATCGATC&quot;</span></span>
+<span id="cb32-23"><a href="#cb32-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb32-24"><a href="#cb32-24" tabindex="-1"></a><span class="co">#&gt; $L[[8]]</span></span>
+<span id="cb32-25"><a href="#cb32-25" tabindex="-1"></a><span class="co">#&gt; [1] &quot;sequence_C&quot;</span></span>
+<span id="cb32-26"><a href="#cb32-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb32-27"><a href="#cb32-27" tabindex="-1"></a><span class="co">#&gt; $L[[9]]</span></span>
+<span id="cb32-28"><a href="#cb32-28" tabindex="-1"></a><span class="co">#&gt; [1] &quot;MTEITAAMVKELRESTGAGMMDCKNALSET&quot;</span></span>
+<span id="cb32-29"><a href="#cb32-29" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb32-30"><a href="#cb32-30" tabindex="-1"></a><span class="co">#&gt; $L[[10]]</span></span>
+<span id="cb32-31"><a href="#cb32-31" tabindex="-1"></a><span class="co">#&gt; [1] &quot;NGDFDKAVQLLREKGLGKAAKKADRLAAEG&quot;</span></span>
+<span id="cb32-32"><a href="#cb32-32" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb32-33"><a href="#cb32-33" tabindex="-1"></a><span class="co">#&gt; $L[[11]]</span></span>
+<span id="cb32-34"><a href="#cb32-34" tabindex="-1"></a><span class="co">#&gt; [1] &quot;ENEYKALVAELEKE&quot;</span></span>
+<span id="cb32-35"><a href="#cb32-35" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb32-36"><a href="#cb32-36" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb32-37"><a href="#cb32-37" tabindex="-1"></a><span class="co">#&gt; $R</span></span>
+<span id="cb32-38"><a href="#cb32-38" tabindex="-1"></a><span class="co">#&gt; list()</span></span></code></pre></div>
+<p>Apart from <code>match_s()</code>, we have used only the six
+fundamental parsers. Therefore, the output is almost the same as the
+parsed input. This is not very useful because it is difficult to extract
+the individual sequences and titles from it; we would have to write sort
+of parser again to process this output. To mend this, we have to modify
+the output of the parsers. The first thing that we will do is to let
+every sequence block be returned as an element of a list. To achieve
+this we extend the <code>SequenceBlock</code> parser by changing its
+output with the <code>%using%</code> operator:</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a>SequenceBlock <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a>  <span class="fu">MaybeEmpty</span>() <span class="sc">%then%</span> </span>
+<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>    <span class="fu">Header</span>() <span class="sc">%then%</span> </span>
+<span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a>    (<span class="fu">NuclSequence</span>() <span class="sc">%or%</span> <span class="fu">ProtSequence</span>()) <span class="sc">%using%</span></span>
+<span id="cb33-5"><a href="#cb33-5" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">list</span>(x)</span>
+<span id="cb33-6"><a href="#cb33-6" tabindex="-1"></a>}</span></code></pre></div>
+<p>Now the result is a list of two lists, one for each sequence
+block.</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a><span class="fu">Fasta</span>()(fastafile)[[<span class="st">&quot;L&quot;</span>]]</span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a><span class="co">#&gt; [[1]][[1]]</span></span>
+<span id="cb34-4"><a href="#cb34-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;sequence_A&quot;</span></span>
+<span id="cb34-5"><a href="#cb34-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb34-6"><a href="#cb34-6" tabindex="-1"></a><span class="co">#&gt; [[1]][[2]]</span></span>
+<span id="cb34-7"><a href="#cb34-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;GGTAAGTCCTCTAGTACAAACACCCCCAAT&quot;</span></span>
+<span id="cb34-8"><a href="#cb34-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb34-9"><a href="#cb34-9" tabindex="-1"></a><span class="co">#&gt; [[1]][[3]]</span></span>
+<span id="cb34-10"><a href="#cb34-10" tabindex="-1"></a><span class="co">#&gt; [1] &quot;TCTGTTGCCAGAAAAAACACTTTTAGGCTA&quot;</span></span>
+<span id="cb34-11"><a href="#cb34-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb34-12"><a href="#cb34-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb34-13"><a href="#cb34-13" tabindex="-1"></a><span class="co">#&gt; [[2]]</span></span>
+<span id="cb34-14"><a href="#cb34-14" tabindex="-1"></a><span class="co">#&gt; [[2]][[1]]</span></span>
+<span id="cb34-15"><a href="#cb34-15" tabindex="-1"></a><span class="co">#&gt; [1] &quot;sequence_B&quot;</span></span>
+<span id="cb34-16"><a href="#cb34-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb34-17"><a href="#cb34-17" tabindex="-1"></a><span class="co">#&gt; [[2]][[2]]</span></span>
+<span id="cb34-18"><a href="#cb34-18" tabindex="-1"></a><span class="co">#&gt; [1] &quot;ATTGTGATATAATTAAAATTATATTCATAT&quot;</span></span>
+<span id="cb34-19"><a href="#cb34-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb34-20"><a href="#cb34-20" tabindex="-1"></a><span class="co">#&gt; [[2]][[3]]</span></span>
+<span id="cb34-21"><a href="#cb34-21" tabindex="-1"></a><span class="co">#&gt; [1] &quot;TATTAGAGCCATCTTCTTTGAAGCGTTGTC&quot;</span></span>
+<span id="cb34-22"><a href="#cb34-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb34-23"><a href="#cb34-23" tabindex="-1"></a><span class="co">#&gt; [[2]][[4]]</span></span>
+<span id="cb34-24"><a href="#cb34-24" tabindex="-1"></a><span class="co">#&gt; [1] &quot;TATGCATCGATC&quot;</span></span>
+<span id="cb34-25"><a href="#cb34-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb34-26"><a href="#cb34-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb34-27"><a href="#cb34-27" tabindex="-1"></a><span class="co">#&gt; [[3]]</span></span>
+<span id="cb34-28"><a href="#cb34-28" tabindex="-1"></a><span class="co">#&gt; [[3]][[1]]</span></span>
+<span id="cb34-29"><a href="#cb34-29" tabindex="-1"></a><span class="co">#&gt; [1] &quot;sequence_C&quot;</span></span>
+<span id="cb34-30"><a href="#cb34-30" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb34-31"><a href="#cb34-31" tabindex="-1"></a><span class="co">#&gt; [[3]][[2]]</span></span>
+<span id="cb34-32"><a href="#cb34-32" tabindex="-1"></a><span class="co">#&gt; [1] &quot;MTEITAAMVKELRESTGAGMMDCKNALSET&quot;</span></span>
+<span id="cb34-33"><a href="#cb34-33" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb34-34"><a href="#cb34-34" tabindex="-1"></a><span class="co">#&gt; [[3]][[3]]</span></span>
+<span id="cb34-35"><a href="#cb34-35" tabindex="-1"></a><span class="co">#&gt; [1] &quot;NGDFDKAVQLLREKGLGKAAKKADRLAAEG&quot;</span></span>
+<span id="cb34-36"><a href="#cb34-36" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb34-37"><a href="#cb34-37" tabindex="-1"></a><span class="co">#&gt; [[3]][[4]]</span></span>
+<span id="cb34-38"><a href="#cb34-38" tabindex="-1"></a><span class="co">#&gt; [1] &quot;ENEYKALVAELEKE&quot;</span></span></code></pre></div>
+<p>In principle, this output is easier to extract information from, but
+we can improve on it. First, we want the sequences to appear as one long
+string, not as separate character vectors corresponding to the lines in
+the sequence block. Therefore, we extend the <code>Sequence</code>
+parser by collapsing its output:</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a>NuclSequence <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a>  <span class="fu">one_or_more</span>(<span class="fu">NuclSequenceString</span>()) <span class="sc">%using%</span> </span>
+<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">paste</span>(x, <span class="at">collapse=</span><span class="st">&quot;&quot;</span>)</span>
+<span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a>}</span>
+<span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a>ProtSequence <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a>  <span class="fu">one_or_more</span>(<span class="fu">ProtSequenceString</span>()) <span class="sc">%using%</span> </span>
+<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a>  <span class="cf">function</span>(x) <span class="fu">paste</span>(x, <span class="at">collapse=</span><span class="st">&quot;&quot;</span>)</span>
+<span id="cb35-9"><a href="#cb35-9" tabindex="-1"></a>}</span></code></pre></div>
+<p>Then we get</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="fu">Fasta</span>()(fastafile)[[<span class="st">&quot;L&quot;</span>]]</span>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb36-3"><a href="#cb36-3" tabindex="-1"></a><span class="co">#&gt; [[1]][[1]]</span></span>
+<span id="cb36-4"><a href="#cb36-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;sequence_A&quot;</span></span>
+<span id="cb36-5"><a href="#cb36-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb36-6"><a href="#cb36-6" tabindex="-1"></a><span class="co">#&gt; [[1]][[2]]</span></span>
+<span id="cb36-7"><a href="#cb36-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;GGTAAGTCCTCTAGTACAAACACCCCCAATTCTGTTGCCAGAAAAAACACTTTTAGGCTA&quot;</span></span>
+<span id="cb36-8"><a href="#cb36-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb36-9"><a href="#cb36-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb36-10"><a href="#cb36-10" tabindex="-1"></a><span class="co">#&gt; [[2]]</span></span>
+<span id="cb36-11"><a href="#cb36-11" tabindex="-1"></a><span class="co">#&gt; [[2]][[1]]</span></span>
+<span id="cb36-12"><a href="#cb36-12" tabindex="-1"></a><span class="co">#&gt; [1] &quot;sequence_B&quot;</span></span>
+<span id="cb36-13"><a href="#cb36-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb36-14"><a href="#cb36-14" tabindex="-1"></a><span class="co">#&gt; [[2]][[2]]</span></span>
+<span id="cb36-15"><a href="#cb36-15" tabindex="-1"></a><span class="co">#&gt; [1] &quot;ATTGTGATATAATTAAAATTATATTCATATTATTAGAGCCATCTTCTTTGAAGCGTTGTCTATGCATCGATC&quot;</span></span>
+<span id="cb36-16"><a href="#cb36-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb36-17"><a href="#cb36-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb36-18"><a href="#cb36-18" tabindex="-1"></a><span class="co">#&gt; [[3]]</span></span>
+<span id="cb36-19"><a href="#cb36-19" tabindex="-1"></a><span class="co">#&gt; [[3]][[1]]</span></span>
+<span id="cb36-20"><a href="#cb36-20" tabindex="-1"></a><span class="co">#&gt; [1] &quot;sequence_C&quot;</span></span>
+<span id="cb36-21"><a href="#cb36-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb36-22"><a href="#cb36-22" tabindex="-1"></a><span class="co">#&gt; [[3]][[2]]</span></span>
+<span id="cb36-23"><a href="#cb36-23" tabindex="-1"></a><span class="co">#&gt; [1] &quot;MTEITAAMVKELRESTGAGMMDCKNALSETNGDFDKAVQLLREKGLGKAAKKADRLAAEGENEYKALVAELEKE&quot;</span></span></code></pre></div>
+<p>This looks much better: we know that the first element in each of
+these lists is the title and the second element is the complete
+sequence. Then why not just attach a name to these elements? This would
+make extracting the information even easier. Furthermore, we also report
+whether the sequence is a nucleotide or a protein sequence by adding a
+<code>type</code> tag.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a>Header <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a>  <span class="fu">match_s</span>(parse_header) <span class="sc">%using%</span> </span>
+<span id="cb37-3"><a href="#cb37-3" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">list</span>(<span class="at">title =</span> <span class="fu">unlist</span>(x))</span>
+<span id="cb37-4"><a href="#cb37-4" tabindex="-1"></a>}</span>
+<span id="cb37-5"><a href="#cb37-5" tabindex="-1"></a></span>
+<span id="cb37-6"><a href="#cb37-6" tabindex="-1"></a>NuclSequence <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb37-7"><a href="#cb37-7" tabindex="-1"></a>  <span class="fu">one_or_more</span>(<span class="fu">NuclSequenceString</span>()) <span class="sc">%using%</span> </span>
+<span id="cb37-8"><a href="#cb37-8" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">list</span>(<span class="at">type =</span> <span class="st">&quot;Nucl&quot;</span>, <span class="at">sequence =</span> <span class="fu">paste</span>(x, <span class="at">collapse=</span><span class="st">&quot;&quot;</span>))</span>
+<span id="cb37-9"><a href="#cb37-9" tabindex="-1"></a>}</span>
+<span id="cb37-10"><a href="#cb37-10" tabindex="-1"></a></span>
+<span id="cb37-11"><a href="#cb37-11" tabindex="-1"></a>ProtSequence <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb37-12"><a href="#cb37-12" tabindex="-1"></a>  <span class="fu">one_or_more</span>(<span class="fu">ProtSequenceString</span>()) <span class="sc">%using%</span> </span>
+<span id="cb37-13"><a href="#cb37-13" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">list</span>(<span class="at">type =</span> <span class="st">&quot;Prot&quot;</span>, <span class="at">sequence =</span> <span class="fu">paste</span>(x, <span class="at">collapse=</span><span class="st">&quot;&quot;</span>))</span>
+<span id="cb37-14"><a href="#cb37-14" tabindex="-1"></a>}</span></code></pre></div>
+<p>Finally, we have our desired output.</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">Fasta</span>()(fastafile)[[<span class="st">&quot;L&quot;</span>]]</span>
+<span id="cb38-2"><a href="#cb38-2" tabindex="-1"></a>d</span>
+<span id="cb38-3"><a href="#cb38-3" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb38-4"><a href="#cb38-4" tabindex="-1"></a><span class="co">#&gt; [[1]]$title</span></span>
+<span id="cb38-5"><a href="#cb38-5" tabindex="-1"></a><span class="co">#&gt; [1] &quot;sequence_A&quot;</span></span>
+<span id="cb38-6"><a href="#cb38-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb38-7"><a href="#cb38-7" tabindex="-1"></a><span class="co">#&gt; [[1]]$type</span></span>
+<span id="cb38-8"><a href="#cb38-8" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Nucl&quot;</span></span>
+<span id="cb38-9"><a href="#cb38-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb38-10"><a href="#cb38-10" tabindex="-1"></a><span class="co">#&gt; [[1]]$sequence</span></span>
+<span id="cb38-11"><a href="#cb38-11" tabindex="-1"></a><span class="co">#&gt; [1] &quot;GGTAAGTCCTCTAGTACAAACACCCCCAATTCTGTTGCCAGAAAAAACACTTTTAGGCTA&quot;</span></span>
+<span id="cb38-12"><a href="#cb38-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb38-13"><a href="#cb38-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb38-14"><a href="#cb38-14" tabindex="-1"></a><span class="co">#&gt; [[2]]</span></span>
+<span id="cb38-15"><a href="#cb38-15" tabindex="-1"></a><span class="co">#&gt; [[2]]$title</span></span>
+<span id="cb38-16"><a href="#cb38-16" tabindex="-1"></a><span class="co">#&gt; [1] &quot;sequence_B&quot;</span></span>
+<span id="cb38-17"><a href="#cb38-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb38-18"><a href="#cb38-18" tabindex="-1"></a><span class="co">#&gt; [[2]]$type</span></span>
+<span id="cb38-19"><a href="#cb38-19" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Nucl&quot;</span></span>
+<span id="cb38-20"><a href="#cb38-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb38-21"><a href="#cb38-21" tabindex="-1"></a><span class="co">#&gt; [[2]]$sequence</span></span>
+<span id="cb38-22"><a href="#cb38-22" tabindex="-1"></a><span class="co">#&gt; [1] &quot;ATTGTGATATAATTAAAATTATATTCATATTATTAGAGCCATCTTCTTTGAAGCGTTGTCTATGCATCGATC&quot;</span></span>
+<span id="cb38-23"><a href="#cb38-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb38-24"><a href="#cb38-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb38-25"><a href="#cb38-25" tabindex="-1"></a><span class="co">#&gt; [[3]]</span></span>
+<span id="cb38-26"><a href="#cb38-26" tabindex="-1"></a><span class="co">#&gt; [[3]]$title</span></span>
+<span id="cb38-27"><a href="#cb38-27" tabindex="-1"></a><span class="co">#&gt; [1] &quot;sequence_C&quot;</span></span>
+<span id="cb38-28"><a href="#cb38-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb38-29"><a href="#cb38-29" tabindex="-1"></a><span class="co">#&gt; [[3]]$type</span></span>
+<span id="cb38-30"><a href="#cb38-30" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Prot&quot;</span></span>
+<span id="cb38-31"><a href="#cb38-31" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb38-32"><a href="#cb38-32" tabindex="-1"></a><span class="co">#&gt; [[3]]$sequence</span></span>
+<span id="cb38-33"><a href="#cb38-33" tabindex="-1"></a><span class="co">#&gt; [1] &quot;MTEITAAMVKELRESTGAGMMDCKNALSETNGDFDKAVQLLREKGLGKAAKKADRLAAEGENEYKALVAELEKE&quot;</span></span></code></pre></div>
+<p>Let’s present the result more concisely using the names of these
+elements:</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">lapply</span>(d, <span class="cf">function</span>(x) {<span class="fu">cat</span>(x<span class="sc">$</span>type, x<span class="sc">$</span>title, x<span class="sc">$</span>sequence, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)}))</span>
+<span id="cb39-2"><a href="#cb39-2" tabindex="-1"></a><span class="co">#&gt; Nucl sequence_A GGTAAGTCCTCTAGTACAAACACCCCCAATTCTGTTGCCAGAAAAAACACTTTTAGGCTA </span></span>
+<span id="cb39-3"><a href="#cb39-3" tabindex="-1"></a><span class="co">#&gt; Nucl sequence_B ATTGTGATATAATTAAAATTATATTCATATTATTAGAGCCATCTTCTTTGAAGCGTTGTCTATGCATCGATC </span></span>
+<span id="cb39-4"><a href="#cb39-4" tabindex="-1"></a><span class="co">#&gt; Prot sequence_C MTEITAAMVKELRESTGAGMMDCKNALSETNGDFDKAVQLLREKGLGKAAKKADRLAAEGENEYKALVAELEKE</span></span></code></pre></div>
+</div>
+<div id="example-application-parsers-with-parameters" class="section level2">
+<h2>Example application: parsers with parameters</h2>
+<p>In the examples above we showed how to create parsers without
+parameters. It is easy and useful to sometimes create parsers with
+parameters. The parameters are used to change the behavior of the
+parsers. For example, when writing online course material I use a simple
+structured question template that is converted to html when the syllabus
+is generated. It consists mostly of markdown content. Its parser makes
+use of parametrized parsers. The structure of such a question template
+document is as follows<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>:</p>
+<pre><code>#### INTRO
+## Title about a set of questions
+
+This is optional introductory text to a set of questions.
+Titles preceded by four hashes are not allowed in a question template.
+
+#### QUESTION
+This is the first question
+
+#### TIP
+This would be a tip. tips are optional, and multiple tips can be given. Tips are
+wrapped in hide-reveal style html elements.
+
+#### TIP
+This would be a second tip.
+
+#### ANSWER
+The answer to the question is optional and is wrapped in a hide-reveal html element.
+
+#### QUESTION
+This is the second question. No tips for this one
+
+#### ANSWER
+Answer to the second question
+
+&lt;optionally more questions&gt;</code></pre>
+<p>I stored this example content in a vector <code>qtemp</code> to parse
+it later.</p>
+<p>You notice the recurring structure of a header with four hashes
+<code>####</code> and some text following it. These headers represent
+four types of elements: intro, question, tip and answer. Instead of
+writing separate parsers we could create a generic parser for such
+elements as:</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a>HeaderAndContent <span class="ot">&lt;-</span> <span class="cf">function</span>(type) {</span>
+<span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a>    (<span class="fu">Header</span>(type) <span class="sc">%then%</span> <span class="fu">Content</span>()) <span class="sc">%using%</span> </span>
+<span id="cb41-3"><a href="#cb41-3" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">list</span>(<span class="fu">list</span>(<span class="at">type=</span>type, <span class="at">content=</span><span class="fu">unlist</span>(x)))</span>
+<span id="cb41-4"><a href="#cb41-4" tabindex="-1"></a>}</span></code></pre></div>
+<p>Then we define each of the four parsers as:</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a>Intro <span class="ot">&lt;-</span> <span class="cf">function</span>() <span class="fu">HeaderAndContent</span>(<span class="st">&quot;intro&quot;</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a>Question <span class="ot">&lt;-</span> <span class="cf">function</span>() <span class="fu">HeaderAndContent</span>(<span class="st">&quot;question&quot;</span>)</span>
+<span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a>Tip <span class="ot">&lt;-</span> <span class="cf">function</span>() <span class="fu">HeaderAndContent</span>(<span class="st">&quot;tip&quot;</span>)</span>
+<span id="cb42-4"><a href="#cb42-4" tabindex="-1"></a>Answer <span class="ot">&lt;-</span> <span class="cf">function</span>() <span class="fu">HeaderAndContent</span>(<span class="st">&quot;answer&quot;</span>)</span></code></pre></div>
+<p>The function <code>Header(type)</code> is defined as</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a>Header <span class="ot">&lt;-</span> <span class="cf">function</span>(type) <span class="fu">satisfy</span>(<span class="fu">header</span>(type)) <span class="sc">%ret%</span> <span class="cn">NULL</span></span>
+<span id="cb43-2"><a href="#cb43-2" tabindex="-1"></a></span>
+<span id="cb43-3"><a href="#cb43-3" tabindex="-1"></a><span class="co"># This must also be a generic function: a function that generates a function to </span></span>
+<span id="cb43-4"><a href="#cb43-4" tabindex="-1"></a><span class="co"># recognize a header of type &#39;type&#39;</span></span>
+<span id="cb43-5"><a href="#cb43-5" tabindex="-1"></a>header <span class="ot">&lt;-</span> <span class="cf">function</span>(type) {</span>
+<span id="cb43-6"><a href="#cb43-6" tabindex="-1"></a>  <span class="cf">function</span>(x) <span class="fu">grepl</span>(<span class="fu">paste0</span>(<span class="st">&quot;^####</span><span class="sc">\\</span><span class="st">s+&quot;</span>, <span class="fu">toupper</span>(type), <span class="st">&quot;</span><span class="sc">\\</span><span class="st">s*&quot;</span>), x)</span>
+<span id="cb43-7"><a href="#cb43-7" tabindex="-1"></a>}</span></code></pre></div>
+<p>The content consists of one or more lines not starting with
+<code>####</code>, which includes empty lines. We discard trailing empty
+lines.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a>Content <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb44-2"><a href="#cb44-2" tabindex="-1"></a>  (<span class="fu">one_or_more</span>(<span class="fu">match_s</span>(content))) <span class="sc">%using%</span></span>
+<span id="cb44-3"><a href="#cb44-3" tabindex="-1"></a>    <span class="cf">function</span>(x) stringr<span class="sc">::</span><span class="fu">str_trim</span>(<span class="fu">paste0</span>(x,<span class="at">collapse=</span><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>), <span class="st">&quot;right&quot;</span>)</span>
+<span id="cb44-4"><a href="#cb44-4" tabindex="-1"></a>}</span>
+<span id="cb44-5"><a href="#cb44-5" tabindex="-1"></a></span>
+<span id="cb44-6"><a href="#cb44-6" tabindex="-1"></a>content <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb44-7"><a href="#cb44-7" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">grepl</span>(<span class="st">&quot;^####&quot;</span>, x)) <span class="fu">list</span>()</span>
+<span id="cb44-8"><a href="#cb44-8" tabindex="-1"></a>  <span class="cf">else</span> x</span>
+<span id="cb44-9"><a href="#cb44-9" tabindex="-1"></a>}</span></code></pre></div>
+<p>The complete template is defined as follows</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a>Template <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb45-2"><a href="#cb45-2" tabindex="-1"></a>  <span class="fu">zero_or_more</span>(<span class="fu">Intro</span>()) <span class="sc">%then%</span></span>
+<span id="cb45-3"><a href="#cb45-3" tabindex="-1"></a>    <span class="fu">one_or_more</span>(<span class="fu">QuestionBlock</span>()) <span class="sc">%then%</span></span>
+<span id="cb45-4"><a href="#cb45-4" tabindex="-1"></a>    <span class="fu">eof</span>()</span>
+<span id="cb45-5"><a href="#cb45-5" tabindex="-1"></a>}</span></code></pre></div>
+<p>where <code>QuestionBlock()</code> is defined using the previously
+defined elements as</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" tabindex="-1"></a>QuestionBlock <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb46-2"><a href="#cb46-2" tabindex="-1"></a>    <span class="fu">Question</span>() <span class="sc">%then%</span></span>
+<span id="cb46-3"><a href="#cb46-3" tabindex="-1"></a>    <span class="fu">zero_or_more</span>(<span class="fu">Tip</span>()) <span class="sc">%then%</span></span>
+<span id="cb46-4"><a href="#cb46-4" tabindex="-1"></a>    <span class="fu">zero_or_one</span>(<span class="fu">Answer</span>()) <span class="sc">%using%</span></span>
+<span id="cb46-5"><a href="#cb46-5" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">list</span>(x)</span>
+<span id="cb46-6"><a href="#cb46-6" tabindex="-1"></a>}</span></code></pre></div>
+<p>We can now parse the input. We wrap the <code>Template()</code>
+parser in the <code>reporter()</code> function to have proper error
+messaging and warnings, if applicable. Furthermore only the
+<code>L</code>-element, the parsed input, is returned.</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" tabindex="-1"></a><span class="fu">reporter</span>(<span class="fu">Template</span>())(qtemp)</span>
+<span id="cb47-2"><a href="#cb47-2" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb47-3"><a href="#cb47-3" tabindex="-1"></a><span class="co">#&gt; [[1]]$type</span></span>
+<span id="cb47-4"><a href="#cb47-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;intro&quot;</span></span>
+<span id="cb47-5"><a href="#cb47-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-6"><a href="#cb47-6" tabindex="-1"></a><span class="co">#&gt; [[1]]$content</span></span>
+<span id="cb47-7"><a href="#cb47-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;## Title about a set of questions\n\nThis is optional introductory text to a set of questions.\nTitles preceded by four hashes are not allowed in a question template.&quot;</span></span>
+<span id="cb47-8"><a href="#cb47-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-9"><a href="#cb47-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-10"><a href="#cb47-10" tabindex="-1"></a><span class="co">#&gt; [[2]]</span></span>
+<span id="cb47-11"><a href="#cb47-11" tabindex="-1"></a><span class="co">#&gt; [[2]][[1]]</span></span>
+<span id="cb47-12"><a href="#cb47-12" tabindex="-1"></a><span class="co">#&gt; [[2]][[1]]$type</span></span>
+<span id="cb47-13"><a href="#cb47-13" tabindex="-1"></a><span class="co">#&gt; [1] &quot;question&quot;</span></span>
+<span id="cb47-14"><a href="#cb47-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-15"><a href="#cb47-15" tabindex="-1"></a><span class="co">#&gt; [[2]][[1]]$content</span></span>
+<span id="cb47-16"><a href="#cb47-16" tabindex="-1"></a><span class="co">#&gt; [1] &quot;This is the first question&quot;</span></span>
+<span id="cb47-17"><a href="#cb47-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-18"><a href="#cb47-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-19"><a href="#cb47-19" tabindex="-1"></a><span class="co">#&gt; [[2]][[2]]</span></span>
+<span id="cb47-20"><a href="#cb47-20" tabindex="-1"></a><span class="co">#&gt; [[2]][[2]]$type</span></span>
+<span id="cb47-21"><a href="#cb47-21" tabindex="-1"></a><span class="co">#&gt; [1] &quot;tip&quot;</span></span>
+<span id="cb47-22"><a href="#cb47-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-23"><a href="#cb47-23" tabindex="-1"></a><span class="co">#&gt; [[2]][[2]]$content</span></span>
+<span id="cb47-24"><a href="#cb47-24" tabindex="-1"></a><span class="co">#&gt; [1] &quot;This would be a tip. tips are optional, and multiple tips can be given. Tips are\nwrapped in hide-reveal style html elements.&quot;</span></span>
+<span id="cb47-25"><a href="#cb47-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-26"><a href="#cb47-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-27"><a href="#cb47-27" tabindex="-1"></a><span class="co">#&gt; [[2]][[3]]</span></span>
+<span id="cb47-28"><a href="#cb47-28" tabindex="-1"></a><span class="co">#&gt; [[2]][[3]]$type</span></span>
+<span id="cb47-29"><a href="#cb47-29" tabindex="-1"></a><span class="co">#&gt; [1] &quot;tip&quot;</span></span>
+<span id="cb47-30"><a href="#cb47-30" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-31"><a href="#cb47-31" tabindex="-1"></a><span class="co">#&gt; [[2]][[3]]$content</span></span>
+<span id="cb47-32"><a href="#cb47-32" tabindex="-1"></a><span class="co">#&gt; [1] &quot;This would be a second tip.&quot;</span></span>
+<span id="cb47-33"><a href="#cb47-33" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-34"><a href="#cb47-34" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-35"><a href="#cb47-35" tabindex="-1"></a><span class="co">#&gt; [[2]][[4]]</span></span>
+<span id="cb47-36"><a href="#cb47-36" tabindex="-1"></a><span class="co">#&gt; [[2]][[4]]$type</span></span>
+<span id="cb47-37"><a href="#cb47-37" tabindex="-1"></a><span class="co">#&gt; [1] &quot;answer&quot;</span></span>
+<span id="cb47-38"><a href="#cb47-38" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-39"><a href="#cb47-39" tabindex="-1"></a><span class="co">#&gt; [[2]][[4]]$content</span></span>
+<span id="cb47-40"><a href="#cb47-40" tabindex="-1"></a><span class="co">#&gt; [1] &quot;The answer to the question is optional and is wrapped in a hide-reveal html element.&quot;</span></span>
+<span id="cb47-41"><a href="#cb47-41" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-42"><a href="#cb47-42" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-43"><a href="#cb47-43" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-44"><a href="#cb47-44" tabindex="-1"></a><span class="co">#&gt; [[3]]</span></span>
+<span id="cb47-45"><a href="#cb47-45" tabindex="-1"></a><span class="co">#&gt; [[3]][[1]]</span></span>
+<span id="cb47-46"><a href="#cb47-46" tabindex="-1"></a><span class="co">#&gt; [[3]][[1]]$type</span></span>
+<span id="cb47-47"><a href="#cb47-47" tabindex="-1"></a><span class="co">#&gt; [1] &quot;question&quot;</span></span>
+<span id="cb47-48"><a href="#cb47-48" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-49"><a href="#cb47-49" tabindex="-1"></a><span class="co">#&gt; [[3]][[1]]$content</span></span>
+<span id="cb47-50"><a href="#cb47-50" tabindex="-1"></a><span class="co">#&gt; [1] &quot;This is the second question. No tips for this one&quot;</span></span>
+<span id="cb47-51"><a href="#cb47-51" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-52"><a href="#cb47-52" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-53"><a href="#cb47-53" tabindex="-1"></a><span class="co">#&gt; [[3]][[2]]</span></span>
+<span id="cb47-54"><a href="#cb47-54" tabindex="-1"></a><span class="co">#&gt; [[3]][[2]]$type</span></span>
+<span id="cb47-55"><a href="#cb47-55" tabindex="-1"></a><span class="co">#&gt; [1] &quot;answer&quot;</span></span>
+<span id="cb47-56"><a href="#cb47-56" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb47-57"><a href="#cb47-57" tabindex="-1"></a><span class="co">#&gt; [[3]][[2]]$content</span></span>
+<span id="cb47-58"><a href="#cb47-58" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Answer to the second question&quot;</span></span></code></pre></div>
+</div>
+<div id="literature" class="section level2 unnumbered">
+<h2 class="unnumbered">Literature</h2>
+<div id="refs" class="references csl-bib-body">
+<div id="ref-Hutton1992" class="csl-entry">
+Hutton, G. (1992) <a href="https://doi.org/10.1017/S0956796800000411">Higher-order functions
+for parsing</a>. <em>J Funct Programming</em> <strong>2</strong>:
+323–343.
+</div>
+</div>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>It is not clear to me whether mixing of sequence types
+is allowed in the fasta format. I guess not, because a protein sequence
+consisting entirely of glutamate (G), alanine (A), threonine (T) and
+cysteine (C) would not be distinguishable from a nucleotide sequence.
+Such protein sequences would be extremely rare. Anyway I demonstrate
+here that apart from this ambiguous case it is easy to parse them from a
+single file.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>Note that real fasta headers and sequences can have more
+complicated formats than I pretend here.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>I simplified the template and code for this example. In
+fact the content is processed differently depending on the type of
+element, meaning that <code>Content()</code> is a function of
+<code>type</code>. Furthermore, questions are automatically numbered.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

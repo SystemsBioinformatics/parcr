@@ -1,0 +1,24 @@
+%or%                    Applying alternative parsers
+%ret%                   Return a fixed value instead of the result of a
+                        parser
+%then%                  Applying parsers in sequence
+%using%                 Applying a function to the result of a parser
+%xthen%                 Keeping only first or second result from a
+                        %then% sequence
+EmptyLine               Recognize empty lines
+by_split                Applying a parser to a split string
+by_symbol               Applying a parser to individual symbols of a
+                        string
+eof                     Detect end of input
+failed                  Testing for parser failure
+fastafile               Example nucleotide fasta file
+finished                Test whether the parser has completely consumed
+                        the input
+literal                 Matching parser input with a literal string
+match_s                 Identifying and processing a string and
+                        producing custom output
+print.marker            Print method for an object of class 'marker'
+reporter                Turn a parser into an error reporting parser
+satisfy                 Matching input using a logical function
+succeed                 The most basic parsers
+zero_or_more            Repeated application of a parser
