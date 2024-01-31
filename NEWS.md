@@ -1,6 +1,9 @@
-# parcr 0.5.0.9000
+# parcr 0.5.1
 
-* development version
+* Because of the use of base::isa() this package requires R 4.1 or higher, 
+  not R 2.1. This has been corrected in the DESCRIPTION. Running on 
+  ubuntu-latest and R 4.1 is checked by CI workflow on Github.
+* Minor corrections and additions to both vignettes.
 
 # parcr 0.5.0
 
