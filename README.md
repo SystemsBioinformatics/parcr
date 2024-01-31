@@ -31,7 +31,7 @@ Hutton](https://orcid.org/0000-0001-9584-5150) (1992).
 
 Install the stable version from CRAN
 
-    install.packages(parcr)
+    install.packages("parcr")
 
 To install the development version including its vignette run the
 following command
