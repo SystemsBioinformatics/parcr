@@ -53,3 +53,32 @@ MaybeEmpty <- function() {
   (zero_or_more(EmptyLine())) %ret% NULL
 }
 
+#' Ignore all until the end
+#'
+#' Sometimes, a parser has found the end of the text that needs to be parsed and
+#' all following lines can be ignored. `Ignore` will read and discard all
+#' following lines until the end of the file, empty or not. So, this parser will
+#' consume all elements until the end of the input vector.
+#'
+#' @details
+#' This parser is identical to
+#'
+#' \preformatted{
+#' zero_or_more(satisfy(function(x) TRUE)) %ret% NULL
+#' }
+#'
+#' @inherit satisfy return
+#' @export
+#' @examples
+#'
+#' starts_with_a <- function(x) grepl("^a",x)
+#' p <- function() {
+#'   one_or_more(satisfy(starts_with_a)) %then%
+#'   (literal("~End") %ret% NULL) %then%
+#'   Ignore() %then%
+#'   eof()
+#' }
+#' p()(c("ab","abc","~End","boring stuff","more stuff"))
+Ignore <- function() {
+  zero_or_more(satisfy(function(x) TRUE)) %ret% NULL
+}

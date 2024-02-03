@@ -32,3 +32,7 @@ test_that("Parsers can consume the input up to the end", {
   expect_equal(EmptyLine() (c(" ")), list(L=list(" "), R=character(0)))
   expect_equal(Spacer() (c(" "," ")), list(L=list(), R=character(0)))
 })
+
+test_that("'Ignore' works", {
+  expect_equal(Ignore()(LETTERS), list(L=list(), R=character(0)))
+})

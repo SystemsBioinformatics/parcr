@@ -393,6 +393,10 @@ as identified by the regular expression `\\s`. `Spacer()` detects one or more
 consecutive empty lines and discards these whereas `MaybeEmpty()` detects zero
 or more empty lines and discards these.
 
+An additional function `Ignore()` ignores all lines, whether empty or not, until
+the end of the file. This is sometimes useful when the interesting part of a 
+file has been parsed and all else can be ignored until the end of the file.
+
 Note that I write these functions with capital letters. I use this convention 
 here and in the example below to indicate that these functions parse 
 higher-order structures (higher than the individual strings) in the input.
@@ -409,6 +413,12 @@ Spacer()(c(" ","\t\t\t", "atgcc"))
 
 ```{r}
 MaybeEmpty()(c("ggacc","gatccg", "atgcc"))
+```
+
+```{r}
+(literal("Interesting") %then% 
+  Ignore() %then% 
+  eof())(c("Interesting", LETTERS))
 ```
 
 ## Example application: a parser for *fasta* sequence files

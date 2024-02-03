@@ -1,5 +1,8 @@
 # parcr (development version)
 
+* Added the function Ignore() which reads and discards all elements until the 
+  end of a vector.
+
 # parcr 0.5.1
 
 * Because of the use of base::isa() this package requires R 4.1 or higher, 
