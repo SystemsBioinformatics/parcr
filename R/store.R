@@ -1,6 +1,6 @@
 #' The `.parcr` environment is used for storing and retrieving variables by the
 #' user.
-#' @returns \value{None}
+#' @returns Nothing
 #' @noRd
 .parcr <- list2env(list(), parent = emptyenv())
 
@@ -13,7 +13,7 @@
 #' @param name a string used as the name of the stored object.
 #' @param value object to be stored.
 #'
-#' @returns \value{None} for `store()` and the stored object for `retrieve()`.
+#' @returns Nothing for `store()` and the stored object for `retrieve()`.
 #' @export
 #'
 #' @examples

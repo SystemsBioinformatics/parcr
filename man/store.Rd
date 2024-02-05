@@ -15,7 +15,7 @@ retrieve(name)
 \item{value}{object to be stored.}
 }
 \value{
-\value{None} for \code{store()} and the stored object for \code{retrieve()}.
+Nothing for \code{store()} and the stored object for \code{retrieve()}.
 }
 \description{
 Sometimes you want to use a parsed object to modify a later parser operation,
