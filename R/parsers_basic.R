@@ -497,7 +497,7 @@ exactly <- function(n, p) {
 #' zero_or_one(literal("A")) (c("A",LETTERS[1:5])) # failure
 #'
 zero_or_one <- function(p) {
-  exactly(0,p) %or% exactly(1,p)
+  exactly(1,p) %or% exactly(0,p)
 }
 
 #' @rdname zero_or_more
