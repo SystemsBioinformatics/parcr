@@ -8,3 +8,5 @@
 ^README.Rmd$
 ^CRAN-SUBMISSION$
 ^revdep$
+^doc$
+^Meta$
