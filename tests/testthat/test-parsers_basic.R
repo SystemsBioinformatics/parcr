@@ -96,6 +96,11 @@ test_that("'zero_or_one' works in standard cases", {
   expect_true(failed(zero_or_one(literal("A"))(c("A",LETTERS[1:5]))))
 })
 
+test_that("'zero_or_one' is greedy", {
+  ABBlock <- function() {zero_or_one(literal("A")) %then% literal("B")}
+  expect_equal(one_or_more(ABBlock())(c("A","B","B")), list(L=list("A","B","B"), R=character(0)))
+})
+
 test_that("'match_n' works in standard cases", {
   expect_equal(match_n(2,literal("A")) (c("A", LETTERS[1:5])), list(L=c(list("A"),list("A")), R=LETTERS[2:5]))
   expect_equal(match_n(2,literal("A")) (c(rep("A",2), LETTERS[1:5])), list(L=c(list("A"),list("A")), R=LETTERS[1:5]))
