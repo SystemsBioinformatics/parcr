@@ -432,7 +432,7 @@ eof <- function() {
 #'   else fail()(x)
 #'
 #' zero_or_one:
-#'   exactly(0,p) \%or\% exactly(1,p)
+#'   exactly(1,p) \%or\% exactly(0,p)
 #'
 #' match_n(n,p):
 #'   if n==0 then F(x): succeed(list())(x)
