@@ -1,6 +1,6 @@
 Package: parcr
 Title: Construct Parsers for Structured Text Files
-Version: 0.5.2
+Version: 0.5.2.9000
 Authors@R: 
     person(given = "Douwe",
            family = "Molenaar",
