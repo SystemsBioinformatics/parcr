@@ -1,5 +1,5 @@
 ---
-title: "Discussion of some desing details"
+title: "Discussion of some design details"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Details}
@@ -102,5 +102,8 @@ An now successfully parsing on arm22
 try(reporter((p() %then% eof()))(c("A","B","C","E","F","G")))
 ```
 
+## The package `rex`
+
+After making the first public version of this package I discovered that there exists a package called [`rex`](https://github.com/r-lib/rex) ("Friendly regular expressions") that uses a very similar approach and in a number of cases even the same commands as this package. The examples in the package show that it is used to construct parsers for strings, _i.e._ single-element character vectors, not multi-element character vectors. I haven't tested it, but if it is fast enough I can imagine that it can be used in `parcr`'s function `match_s()` to create parsers for strings that have a complex structure.
 
 ## Literature

@@ -183,12 +183,12 @@ Fasta()(fastafile)[["L"]]
 ## -----------------------------------------------------------------------------
 NuclSequence <- function() {
   one_or_more(NuclSequenceString()) %using% 
-    function(x) paste(x, collapse="")
+    function(x) paste0(x, collapse = "")
 }
 
 ProtSequence <- function() {
   one_or_more(ProtSequenceString()) %using% 
-  function(x) paste(x, collapse="")
+  function(x) paste0(x, collapse="")
 }
 
 ## -----------------------------------------------------------------------------
@@ -202,12 +202,12 @@ Header <- function() {
 
 NuclSequence <- function() {
   one_or_more(NuclSequenceString()) %using% 
-    function(x) list(type = "Nucl", sequence = paste(x, collapse=""))
+    function(x) list(type = "Nucl", sequence = paste0(x, collapse=""))
 }
 
 ProtSequence <- function() {
   one_or_more(ProtSequenceString()) %using% 
-    function(x) list(type = "Prot", sequence = paste(x, collapse=""))
+    function(x) list(type = "Prot", sequence = paste0(x, collapse=""))
 }
 
 ## -----------------------------------------------------------------------------

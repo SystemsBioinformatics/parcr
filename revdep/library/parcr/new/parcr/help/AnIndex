@@ -13,6 +13,7 @@ fail	succeed
 failed	failed
 fastafile	fastafile
 finished	finished
+Ignore	Ignore
 literal	literal
 match_n	zero_or_more
 match_s	match_s
@@ -20,8 +21,10 @@ MaybeEmpty	EmptyLine
 one_or_more	zero_or_more
 print.marker	print.marker
 reporter	reporter
+retrieve	store
 satisfy	satisfy
 Spacer	EmptyLine
+store	store
 succeed	succeed
 zero_or_more	zero_or_more
 zero_or_one	zero_or_more

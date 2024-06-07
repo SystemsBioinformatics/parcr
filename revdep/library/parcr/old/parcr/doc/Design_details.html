@@ -12,7 +12,7 @@
 
 
 
-<title>Discussion of some desing details</title>
+<title>Discussion of some design details</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -358,7 +358,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">Discussion of some desing details</h1>
+<h1 class="title toc-ignore">Discussion of some design details</h1>
 
 
 
@@ -496,6 +496,19 @@ alphabet by a parser that fails on the indicated positions.</p>
 <span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; [[6]]</span></span>
 <span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; [1] &quot;G&quot;</span></span></code></pre></div>
+</div>
+<div id="the-package-rex" class="section level2">
+<h2>The package <code>rex</code></h2>
+<p>After making the first public version of this package I discovered
+that there exists a package called <a href="https://github.com/r-lib/rex"><code>rex</code></a> (“Friendly
+regular expressions”) that uses a very similar approach and in a number
+of cases even the same commands as this package. The examples in the
+package show that it is used to construct parsers for strings,
+<em>i.e.</em> single-element character vectors, not multi-element
+character vectors. I haven’t tested it, but if it is fast enough I can
+imagine that it can be used in <code>parcr</code>’s function
+<code>match_s()</code> to create parsers for strings that have a complex
+structure.</p>
 </div>
 <div id="literature" class="section level2 unnumbered">
 <h2 class="unnumbered">Literature</h2>

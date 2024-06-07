@@ -940,15 +940,15 @@ of fasta files can be translated straight into code for a
 <span id="cb29-17"><a href="#cb29-17" tabindex="-1"></a>  <span class="fu">one_or_more</span>(<span class="fu">ProtSequenceString</span>())</span>
 <span id="cb29-18"><a href="#cb29-18" tabindex="-1"></a>}</span></code></pre></div>
 <p>Notice that these elements are functions taking no input, hence the
-empty argument brackets <code>()</code> behind their names, although
-they could, when needed, for example to change their behavior (like
-<code>match_n()</code>). Now we need to define the string-parsers
-<code>Header()</code>, <code>NuclSequenceString()</code> and
-<code>ProtSequenceString()</code> that recognize and process these
-elements in the character vector <code>fastafile</code>. We use
-functions from <code>stringr</code> to do this in three helper
-functions, and we use <code>match_s()</code> to create parsers from
-these.</p>
+empty argument brackets <code>()</code> behind their names. They can
+take input when needed, for example to change their behavior (like
+<code>match_n()</code>, or see the other example below).</p>
+<p>Now we need to define the string-parsers <code>Header()</code>,
+<code>NuclSequenceString()</code> and <code>ProtSequenceString()</code>
+that recognize and process these elements in the character vector
+<code>fastafile</code>. We use functions from <code>stringr</code> to do
+this in three helper functions, and we use <code>match_s()</code> to
+create parsers from these.</p>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="co"># returns the title after the &quot;&gt;&quot; in the sequence header</span></span>
 <span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>parse_header <span class="ot">&lt;-</span> <span class="cf">function</span>(line) {</span>
 <span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>  <span class="co"># Study stringr::str_match() to understand what we do here</span></span>
@@ -1049,7 +1049,7 @@ output with the <code>%using%</code> operator:</p>
 <span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a>    (<span class="fu">NuclSequence</span>() <span class="sc">%or%</span> <span class="fu">ProtSequence</span>()) <span class="sc">%using%</span></span>
 <span id="cb33-5"><a href="#cb33-5" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">list</span>(x)</span>
 <span id="cb33-6"><a href="#cb33-6" tabindex="-1"></a>}</span></code></pre></div>
-<p>Now the result is a list of two lists, one for each sequence
+<p>Now the result is a list of three lists, one for each sequence
 block.</p>
 <div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a><span class="fu">Fasta</span>()(fastafile)[[<span class="st">&quot;L&quot;</span>]]</span>
 <span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
@@ -1092,16 +1092,16 @@ block.</p>
 <p>In principle, this output is easier to extract information from, but
 we can improve on it. First, we want the sequences to appear as one long
 string, not as separate character vectors corresponding to the lines in
-the sequence block. Therefore, we extend the <code>Sequence</code>
-parser by collapsing its output:</p>
+the sequence block. Therefore, we extend the <code>NuclSequence</code>
+and <code>ProtSequence</code> parsers collapsing their output:</p>
 <div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a>NuclSequence <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
 <span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a>  <span class="fu">one_or_more</span>(<span class="fu">NuclSequenceString</span>()) <span class="sc">%using%</span> </span>
-<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">paste</span>(x, <span class="at">collapse=</span><span class="st">&quot;&quot;</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">paste0</span>(x, <span class="at">collapse =</span> <span class="st">&quot;&quot;</span>)</span>
 <span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a>}</span>
 <span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a></span>
 <span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a>ProtSequence <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
 <span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a>  <span class="fu">one_or_more</span>(<span class="fu">ProtSequenceString</span>()) <span class="sc">%using%</span> </span>
-<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a>  <span class="cf">function</span>(x) <span class="fu">paste</span>(x, <span class="at">collapse=</span><span class="st">&quot;&quot;</span>)</span>
+<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a>  <span class="cf">function</span>(x) <span class="fu">paste0</span>(x, <span class="at">collapse=</span><span class="st">&quot;&quot;</span>)</span>
 <span id="cb35-9"><a href="#cb35-9" tabindex="-1"></a>}</span></code></pre></div>
 <p>Then we get</p>
 <div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="fu">Fasta</span>()(fastafile)[[<span class="st">&quot;L&quot;</span>]]</span>
@@ -1140,12 +1140,12 @@ whether the sequence is a nucleotide or a protein sequence by adding a
 <span id="cb37-5"><a href="#cb37-5" tabindex="-1"></a></span>
 <span id="cb37-6"><a href="#cb37-6" tabindex="-1"></a>NuclSequence <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
 <span id="cb37-7"><a href="#cb37-7" tabindex="-1"></a>  <span class="fu">one_or_more</span>(<span class="fu">NuclSequenceString</span>()) <span class="sc">%using%</span> </span>
-<span id="cb37-8"><a href="#cb37-8" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">list</span>(<span class="at">type =</span> <span class="st">&quot;Nucl&quot;</span>, <span class="at">sequence =</span> <span class="fu">paste</span>(x, <span class="at">collapse=</span><span class="st">&quot;&quot;</span>))</span>
+<span id="cb37-8"><a href="#cb37-8" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">list</span>(<span class="at">type =</span> <span class="st">&quot;Nucl&quot;</span>, <span class="at">sequence =</span> <span class="fu">paste0</span>(x, <span class="at">collapse=</span><span class="st">&quot;&quot;</span>))</span>
 <span id="cb37-9"><a href="#cb37-9" tabindex="-1"></a>}</span>
 <span id="cb37-10"><a href="#cb37-10" tabindex="-1"></a></span>
 <span id="cb37-11"><a href="#cb37-11" tabindex="-1"></a>ProtSequence <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
 <span id="cb37-12"><a href="#cb37-12" tabindex="-1"></a>  <span class="fu">one_or_more</span>(<span class="fu">ProtSequenceString</span>()) <span class="sc">%using%</span> </span>
-<span id="cb37-13"><a href="#cb37-13" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">list</span>(<span class="at">type =</span> <span class="st">&quot;Prot&quot;</span>, <span class="at">sequence =</span> <span class="fu">paste</span>(x, <span class="at">collapse=</span><span class="st">&quot;&quot;</span>))</span>
+<span id="cb37-13"><a href="#cb37-13" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">list</span>(<span class="at">type =</span> <span class="st">&quot;Prot&quot;</span>, <span class="at">sequence =</span> <span class="fu">paste0</span>(x, <span class="at">collapse=</span><span class="st">&quot;&quot;</span>))</span>
 <span id="cb37-14"><a href="#cb37-14" tabindex="-1"></a>}</span></code></pre></div>
 <p>Finally, we have our desired output.</p>
 <div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">Fasta</span>()(fastafile)[[<span class="st">&quot;L&quot;</span>]]</span>

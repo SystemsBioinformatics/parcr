@@ -6,6 +6,7 @@
 %xthen%                 Keeping only first or second result from a
                         %then% sequence
 EmptyLine               Recognize empty lines
+Ignore                  Ignore all until the end
 by_split                Applying a parser to a split string
 by_symbol               Applying a parser to individual symbols of a
                         string
@@ -20,5 +21,6 @@ match_s                 Identifying and processing a string and
 print.marker            Print method for an object of class 'marker'
 reporter                Turn a parser into an error reporting parser
 satisfy                 Matching input using a logical function
+store                   Store and retrieve objects
 succeed                 The most basic parsers
 zero_or_more            Repeated application of a parser
