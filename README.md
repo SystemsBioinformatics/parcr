@@ -36,7 +36,7 @@ Install the stable version from CRAN
 To install the development version including its vignette run the
 following command
 
-    install_github("SystemsBioinformatics/parcr", build_vignettes=TRUE)
+    devtools::install_github("SystemsBioinformatics/parcr", build_vignettes=TRUE)
 
 ## Example application: a parser for *fasta* sequence files
 
