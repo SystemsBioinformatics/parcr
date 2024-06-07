@@ -1,4 +1,12 @@
-# parcr (development version)
+# parcr 0.5.2
+
+## Bug fix
+
+* Parser zero_or_one() was not greedy, meaning that it sometimes did not parse
+input that it should be able to parse (see 
+[issue #12](https://github.com/SystemsBioinformatics/parcr/issues/12)).
+
+## New feature
 
 * Added the function Ignore() which reads and discards all elements until the 
   end of a vector.
