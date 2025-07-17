@@ -137,13 +137,13 @@ functions, and we use `match_s()` to to create `parcr` parsers from these.
 
 ```{r}
 # returns the title after the ">" in the sequence header
-parse_header <- lineparser("^>(\\w+)")
+parse_header <- stringparser("^>(\\w+)")
 
 # returns a nucleotide sequence string
-parse_nucl_sequence_line <- lineparser("^([GATC]+)$")
+parse_nucl_sequence_line <- stringparser("^([GATC]+)$")
 
 # returns a protein sequence string
-parse_prot_sequence_line <- lineparser("^([ARNDBCEQZGHILKMFPSTWYV]+)$")
+parse_prot_sequence_line <- stringparser("^([ARNDBCEQZGHILKMFPSTWYV]+)$")
 ```
 
 Then we define the line-parsers.
