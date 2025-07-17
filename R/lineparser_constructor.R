@@ -10,12 +10,13 @@
 #' @param match_pattern A regular expression that matches the entire line. If
 #' the pattern contains a captured group then that group will be returned upon
 #' matching. If there are multiple capture groups only the first will be
-#' returned
+#' returned. If there is no capture group then the function will return silently
+#' upon matching the pattern.
 #'
 #' @examples
 #' parse_header <- lineparser("^>(\\w+)")
-#' parse_header(">correct_header")
-#' parse_header(">incorrect header")
+#' parse_header(">correct_header")     # returns "correct_header"
+#' parse_header("> incorrect_header")  # returns list()
 #' @export
 lineparser <- function(match_pattern) {
   function(line) {
