@@ -16,7 +16,7 @@
 #' parse_header <- lineparser("^>(\\w+)")
 #' parse_header(">correct_header")
 #' parse_header(">incorrect header")
-#'
+#' @export
 lineparser <- function(match_pattern) {
   function(line) {
     m <- stringr::str_match(line, match_pattern)
