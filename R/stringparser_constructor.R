@@ -1,22 +1,26 @@
 #' String parser constructor
 #'
 #' @description
-#' Produce a string parser based on stringr::str_match
+#' Produce a string parser based on [stringr::str_match()], to be used with
+#' [match_s()].
 #'
 #' @details
-#' This function uses stringr::str_match to produce a string parser. It returns
-#' the failure signal `list()` when a string does not match the `match_pattern`
+#' This function uses [stringr::str_match()] to produce a string parser. It
+#' returns the failure signal `list()` when a string does not match the
+#' `match_pattern`.
 #'
 #' @param match_pattern A regular expression that matches the entire string. If
 #' the pattern contains captured groups then these groups will be returned upon
 #' matching. If there is no capture group then the function will return silently
 #' upon matching the pattern.
 #'
-#' @param return A character vector of length 1 that yields an expression when
-#' parsed that defines the output. The captured groups are available as the
-#' variable `m` which is a character vector of length equal to the number of
-#' captured groups. By default, this character vector will be returned.
-#' 
+#' @param return A character vector of length 1 that yields an expression that
+#' defines the output. The captured groups are available as the variable `m`
+#' which is a character vector of length equal to the number of captured groups.
+#' By default, this character vector will be returned.
+#'
+#' @seealso [match_s()], [stringr::str_match()]
+#'
 #' @export
 #'
 #' @examples
@@ -29,7 +33,7 @@
 #' parse_keyvalue <- stringparser("(\\w+):\\s?(\\w+)")
 #' parse_keyvalue("key1: value1")      # returns c("key1", "value1")
 #'
-#' # arbitrary output
+#' # modify output
 #' parse_keyvalue_df <- stringparser("(\\w+):\\s?(\\w+)", "data.frame(key = m[1], value = m[2])")
 #' parse_keyvalue_df("key1: value1")      # returns a data frame
 #'

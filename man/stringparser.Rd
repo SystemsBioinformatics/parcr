@@ -18,10 +18,10 @@ variable \code{m} which is a character vector of length equal to the number of
 captured groups. By default, this character vector will be returned.}
 }
 \description{
-Produce a string parser based on stringr::str_match
+Produce a string parser to be used with \code{\link[=match_s]{match_s()}} based on \code{\link[stringr:str_match]{stringr::str_match()}}
 }
 \details{
-This function uses stringr::str_match to produce a string parser. It returns
+This function uses \code{\link[stringr:str_match]{stringr::str_match()}} to produce a string parser. It returns
 the failure signal \code{list()} when a string does not match the \code{match_pattern}
 }
 \examples{
@@ -38,4 +38,7 @@ parse_keyvalue("key1: value1")      # returns c("key1", "value1")
 parse_keyvalue_df <- stringparser("(\\\\w+):\\\\s?(\\\\w+)", "data.frame(key = m[1], value = m[2])")
 parse_keyvalue_df("key1: value1")      # returns a data frame
 
+}
+\seealso{
+\code{\link[=match_s]{match_s()}}, \code{\link[stringr:str_match]{stringr::str_match()}}
 }
