@@ -13,13 +13,24 @@
 #' upon matching the pattern.
 #'
 #' @param return A character vector of length 1 that yields an expression when
-#' parsed that defines the output. The captured groups are availble as the
-#' character vector `m`. By default, this character vector will be returned.
+#' parsed that defines the output. The captured groups are available as the
+#' variable `m` which is a character vector of length equal to the number of
+#' captured groups. By default, this character vector will be returned.
 #'
 #' @examples
+#' # single capture group
 #' parse_header <- lineparser("^>(\\w+)")
 #' parse_header(">correct_header")     # returns "correct_header"
 #' parse_header("> incorrect_header")  # returns list()
+#'
+#' # multiple capture groups
+#' parse_keyvalue <- lineparser("(\\w+):\\s?(\\w+)")
+#' parse_keyvalue("key1: value1")      # returns c("key1", "value1")
+#'
+#' # arbitrary output
+#' parse_keyvalue_df <- lineparser("(\\w+):\\s?(\\w+)", "data.frame(key = m[1], value = m[2])")
+#' parse_keyvalue_df("key1: value1")      # returns a data frame
+#'
 #' @export
 lineparser <- function(match_pattern, return = "m") {
   function(line) {
