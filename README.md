@@ -1,5 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Edit README.Rmd -->
+
 <!-- badges: start -->
 
 [![CRAN
@@ -36,7 +37,7 @@ Install the stable version from CRAN
 To install the development version including its vignette run the
 following command
 
-    devtools::install_github("SystemsBioinformatics/parcr", build_vignettes=TRUE)
+    install_github("SystemsBioinformatics/parcr", build_vignettes=TRUE)
 
 ## Example application: a parser for *fasta* sequence files
 
@@ -139,38 +140,13 @@ to to create `parcr` parsers from these.
 
 ``` r
 # returns the title after the ">" in the sequence header
-parse_header <- function(line) {
-  # Study stringr::str_match() to understand what we do here
-  m <- stringr::str_match(line, "^>(\\w+)")
-  if (is.na(m[1])) {
-    return(list()) # signal failure: no title found
-  } else {
-    return(m[2])
-  }
-}
+parse_header <- stringparser("^>(\\w+)")
 
 # returns a nucleotide sequence string
-parse_nucl_sequence_line <- function(line) {
-  # The line must consist of GATC from the start (^) until the end ($)
-  m <- stringr::str_match(line, "^([GATC]+)$")
-  if (is.na(m[1])) {
-    return(list()) # signal failure: not a valid nucleotide sequence string
-  } else {
-    return(m[2])
-  }
-}
+parse_nucl_sequence_line <- stringparser("^([GATC]+)$")
 
 # returns a protein sequence string
-parse_prot_sequence_line <- function(line) {
-  # The line must consist of ARNDBCEQZGHILKMFPSTWYV from the start (^) until the
-  # end ($)
-  m <- stringr::str_match(line, "^([ARNDBCEQZGHILKMFPSTWYV]+)$")
-  if (is.na(m[1])) {
-    return(list()) # signal failure: not a valid protein sequence string
-  } else {
-    return(m[2])
-  }
-}
+parse_prot_sequence_line <- stringparser("^([ARNDBCEQZGHILKMFPSTWYV]+)$")
 ```
 
 Then we define the line-parsers.
