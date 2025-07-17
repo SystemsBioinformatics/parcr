@@ -1,8 +1,11 @@
 test_that("'lineparser' creates correct line parsers", {
   parse_header <- lineparser("^>(\\w+)")
   parse_header_no_output <- lineparser("^>\\w+")
+  parse_key_value <- lineparser("(\\w+):\\s?(\\w+)", "data.frame(key = m[1], value = m[2])")
   expect_equal(parse_header(">good_header"), "good_header")
   expect_equal(parse_header("> bad_header"), list())
   expect_silent(parse_header_no_output(">good_header"))
   expect_equal(parse_header_no_output("> bad_header"), list())
+  expect_equal(parse_key_value("key1: value1"), data.frame(key = "key1", value = "value1"))
+  expect_equal(parse_key_value("key1 value1"), list())
 })
