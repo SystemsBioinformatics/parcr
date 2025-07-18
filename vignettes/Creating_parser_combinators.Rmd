@@ -45,7 +45,7 @@ and have functions as output. These are sometimes called combinators. The
 ideas behind the package are described in a paper by @Hutton1992. A number of 
 the functions described in this paper are implemented with modifications in the
 current package. The package was also heavily inspired by the 
-[`Ramble`](https://github.com/8bit-pixies/Ramble) package which is written in 
+[`Ramble`](https://github.com/NoRaincheck/Ramble) package which is written in 
 the same vein, but without the explicit parsing of structured text files in
 mind.
 
