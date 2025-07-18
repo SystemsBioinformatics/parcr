@@ -1,7 +1,5 @@
 # parcr 0.5.3
 
-# parcr 0.5.3
-
 ## New feature
 
 * Added a constructor function for string parsers using stringr::str_match() 
