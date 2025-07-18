@@ -9,7 +9,7 @@ test_that("'stringparser' creates parser with zero or one capture groups", {
 
 test_that("'stringparser' creates parser with multiple capture groups and arbitrary output", {
   parse_key_value <- stringparser("(\\w+):\\s?(\\w+)")
-  parse_key_value_df <- stringparser("(\\w+):\\s?(\\w+)", "data.frame(key = m[1], value = m[2])")
+  parse_key_value_df <- stringparser("(\\w+):\\s?(\\w+)", function(x) data.frame(key = x[1], value = x[2]))
   expect_equal(parse_key_value("key1 value1"), list())
   expect_equal(parse_key_value("key1: value1"), c("key1", "value1"))
   expect_equal(parse_key_value_df("key1: value1"), data.frame(key = 'key1', value = 'value1'))

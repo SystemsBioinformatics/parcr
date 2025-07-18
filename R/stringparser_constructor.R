@@ -4,20 +4,26 @@
 #' Produce a string parser based on [stringr::str_match()], to be used with
 #' [match_s()].
 #'
+# @usage parse_header = stringparser(match_pattern = "^>(\\w+)", reshape = function(x) {x})
+#'
 #' @details
-#' This function uses [stringr::str_match()] to produce a string parser. It
-#' returns the failure signal `list()` when a string does not match the
-#' `match_pattern`.
+#' This function uses [stringr::str_match()] to produce a string parser. Parsers
+#' created with this constructor return the failure signal `list()` when a
+#' string does not match the `match_pattern`. If the pattern contains captured
+#' groups then these groups will be returned as a character vector upon matching.
+#' If there is no capture group then the function will return silently upon
+#' matching the pattern. You can provide a function to the `reshape` argument
+#' to change the output upon matching.
 #'
-#' @param match_pattern A regular expression that matches the entire string. If
-#' the pattern contains captured groups then these groups will be returned upon
-#' matching. If there is no capture group then the function will return silently
-#' upon matching the pattern.
+#' You always have to wrap the parsers made with this constructor in
+#' `match_s()` to create a parser combinator. I decided not to include this
+#' standard pattern in the `stringparser` constructor itself because it
+#' complicates testing of these parsers.
 #'
-#' @param return A character vector of length 1 that yields an expression that
-#' defines the output. The captured groups are available as the variable `m`
-#' which is a character vector of length equal to the number of captured groups.
-#' By default, this character vector will be returned.
+#' @param match_pattern A regular expression that matches the string.
+#'
+#' @param reshape A function that takes the character vector of captured strings
+#' and modifies it to a desired output. By default this is the identity function.
 #'
 #' @seealso [match_s()], [stringr::str_match()]
 #'
@@ -34,10 +40,12 @@
 #' parse_keyvalue("key1: value1")      # returns c("key1", "value1")
 #'
 #' # modify output
-#' parse_keyvalue_df <- stringparser("(\\w+):\\s?(\\w+)", "data.frame(key = m[1], value = m[2])")
+#' parse_keyvalue_df <- stringparser("(\\w+):\\s?(\\w+)",
+#'                                    function(x) data.frame(key = x[1], value = x[2])
+#'                                  )
 #' parse_keyvalue_df("key1: value1")      # returns a data frame
 #'
-stringparser <- function(match_pattern, return = "m") {
+stringparser <- function(match_pattern, reshape = function(x) {x}) {
   function(line) {
     m <- stringr::str_match(line, match_pattern)
     if (is.na(m[1])) {
@@ -45,7 +53,7 @@ stringparser <- function(match_pattern, return = "m") {
     } else {
       m <- m[-1]
       if (length(m) > 0) {
-        return(eval(parse(text = return)))
+        return(reshape(m))
       }
     }
   }
