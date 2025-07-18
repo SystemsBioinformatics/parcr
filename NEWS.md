@@ -1,4 +1,4 @@
-# parcr (development version)
+# parcr 0.5.3
 
 # parcr 0.5.3
 
