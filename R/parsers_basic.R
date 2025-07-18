@@ -402,7 +402,7 @@ eof <- function() {
 #' scenarios.
 #'
 #' @details
-#' All these parsers with the excception of `match_n` exhibit greedy behavior
+#' All these parsers with the exception of `match_n` exhibit greedy behavior
 #' striving to apply `p` as many times as possible. If the resulting count
 #' doesn't match the expected quantity, such as in the case of `exactly(n,p)`
 #' where `p` successfully parses more than `n` times, then the parser fails.

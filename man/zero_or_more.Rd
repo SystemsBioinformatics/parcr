@@ -36,7 +36,7 @@ The subsequent functions are designed to address and evaluate these
 scenarios.
 }
 \details{
-All these parsers with the excception of \code{match_n} exhibit greedy behavior
+All these parsers with the exception of \code{match_n} exhibit greedy behavior
 striving to apply \code{p} as many times as possible. If the resulting count
 doesn't match the expected quantity, such as in the case of \code{exactly(n,p)}
 where \code{p} successfully parses more than \code{n} times, then the parser fails.
@@ -63,7 +63,7 @@ exactly(n,p):
   else fail()(x)
 
 zero_or_one:
-  exactly(0,p) \%or\% exactly(1,p)
+  exactly(1,p) \%or\% exactly(0,p)
 
 match_n(n,p):
   if n==0 then F(x): succeed(list())(x)

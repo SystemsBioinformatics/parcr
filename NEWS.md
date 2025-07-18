@@ -1,5 +1,12 @@
 # parcr (development version)
 
+# parcr 0.5.3
+
+## New feature
+
+* Added a constructor function for string parsers using stringr::str_match() 
+because the pattern occurs very often in the construction of string parsers.
+
 # parcr 0.5.2
 
 ## Bug fix
