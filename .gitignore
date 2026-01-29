@@ -5,6 +5,7 @@
 .DS_Store
 .quarto
 .develop
+.continue
 inst/doc
 /doc/
 /Meta/
