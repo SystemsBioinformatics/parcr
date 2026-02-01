@@ -20,3 +20,16 @@ test_that("'finished' works", {
   expect_false(finished((literal("A"))("A")))
   expect_false(finished((literal("A") %then% eof())(c("A","C"))))
 })
+
+test_that("failed identifies empty list markers", {
+  m <- new_marker(1)
+  expect_true(failed(m))
+  expect_true(failed(list()))
+})
+
+test_that("failed returns FALSE for non‑empty or non‑list objects", {
+  expect_false(failed(list(a = 1)))
+  expect_false(failed(NULL))
+  expect_false(failed(42))
+  expect_false(failed("text"))
+})

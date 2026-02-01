@@ -208,7 +208,9 @@ eof <- function() {
       set_LNR(init_lnr) # reset to where started
       r2 <- p2(x)
       if (!failed(r2)) r2 else {
-        return(new_marker(max(marker_val(r1), marker_val(r2)))) # perhaps new method for max?
+        line_nrs <- c(marker_val(r1), marker_val(r2))
+        furthest <- max(line_nrs)
+        return(fail(lnr = furthest)(x))
       }
     }
   }

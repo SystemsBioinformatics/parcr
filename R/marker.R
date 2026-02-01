@@ -1,9 +1,17 @@
 #' Create a new marker object
 #'
-#' @param n An `integer`, or will be coerced to an integer.
-#' @returns A marker object.
+#' @description
+#' A marker is an object for storing information about the failure of a parser.
+#' See @print.marker for a more detailed explanation of its purpose
+#'
+#' @param n An integer; will be coerced to an integer if not already.
+#' @param message An optional character string with an error message.
+#'
+#' @returns
+#' A marker object.
+#'
 #' @noRd
-new_marker <- function(n) {
+new_marker <- function(n, expected = NULL) {
   structure(
     list(),
     n = as.integer(n),
@@ -12,12 +20,15 @@ new_marker <- function(n) {
 }
 
 #' Return the value of attribute `n` of a marker
+#'
+#' @param marker A marker object.
 #' @returns An integer.
 #' @noRd
 marker_val <- function(marker) {attr(marker,"n")}
 
 #' The `the` environment is used for keeping track of the state variable `LNR`
-#' @returns \value{None}
+#'
+#' @returns An environment with the integer `LNR`. No value is returned.
 #' @noRd
 the <- list2env(list(LNR = 1L), parent = emptyenv())
 
@@ -94,9 +105,10 @@ failed <- function(o) {
   is.list(o) && length(o) == 0
 }
 
-
 #' Test whether the parser has completely consumed the input
 #'
+#' @description
+#' Checks if the parser result indicates that the entire input was consumed.
 #' A parser has completely consumed its input when the input has satisfied
 #' [eof()].
 #'

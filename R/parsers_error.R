@@ -39,7 +39,7 @@
 #'   reporter(match_n(2,at()))(atat)
 #' )
 #'
-reporter <- function(p) {
+reporter <- function(p, context_size = 5) {
   reset_LNR()
   function(x) {
     r <- p(x)
@@ -48,7 +48,9 @@ reporter <- function(p) {
         warning("The parser did not completely consume the input. Consider using eof().", call. = FALSE)
       }
       r$L
-    } else parser_error(nr=marker_val(r), content=x[marker_val(r)])
+    } else {
+      parser_error(content = x, marker = r, context_size = context_size) # nr=marker_val(r), context = parser_error_context(marker_val(r), x))
+    }
   }
 }
 
@@ -76,10 +78,32 @@ stop_custom <- function(.subclass, message, call = NULL, ...) {
 #'
 #' @return A condition object
 #' @noRd
-parser_error <- function(nr, content) {
-  message = paste0("Parser failed on line ", nr, " of input.\nLine content: \"",content,"\"")
+parser_error <- function(content, marker, context_size) {
+  nr <- marker_val(marker)
+  context <- parser_error_context(nr, content, max_lines = context_size)
+  message = paste0(
+    "Parser failed on line ", nr, " of input.\n",
+    paste(
+      sprintf("%3d | %s%s", context$linenrs, ifelse(seq_along(context$context) == context$failed_line, ">> ", "   "), context$context),
+      collapse = "\n"
+    )
+  )
   stop_custom (.subclass = "error_parser",
                message = message,
                linenr = nr,
-               linecontent = content)
+               linecontent = context$context[context$failed_line])
+}
+
+#' Create a context of the line where the parser failed
+#' 
+#' @return A list with elements `linenr` and `linecontent`.
+#' @noRd
+parser_error_context <- function(nr, x, max_lines) {
+  start_line <- max(1, nr - floor(max_lines / 2))
+  end_line <- min(length(x), start_line + max_lines - 1)
+  list(
+    linenrs = seq(start_line, end_line),
+    context = x[start_line:end_line],
+    failed_line = nr - start_line + 1
+  )
 }
