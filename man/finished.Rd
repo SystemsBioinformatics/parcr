@@ -13,6 +13,7 @@ finished(o)
 A logical value.
 }
 \description{
+Checks if the parser result indicates that the entire input was consumed.
 A parser has completely consumed its input when the input has satisfied
 \code{\link[=eof]{eof()}}.
 }

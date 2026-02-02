@@ -4,10 +4,13 @@
 \alias{reporter}
 \title{Turn a parser into an error reporting parser}
 \usage{
-reporter(p)
+reporter(p, context_size = 5)
 }
 \arguments{
 \item{p}{a parser.}
+
+\item{context_size}{number of lines of context to show around the line.
+Default is 5.}
 }
 \value{
 The \code{L}-part of a successful parser result or an error message about
