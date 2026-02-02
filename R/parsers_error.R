@@ -5,6 +5,8 @@
 #' successfully parsed part of the input (see [succeed()]).
 #'
 #' @param p a parser.
+#' @param context_size number of lines of context to show around the line. 
+#' Default is 5.
 #'
 #' @return The `L`-part of a successful parser result or an error message about
 #'         the line where the parser failed. A warning is thrown when the parser
