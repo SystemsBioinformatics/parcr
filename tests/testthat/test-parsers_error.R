@@ -1,47 +1,56 @@
+# ---- Helper utilities ---------------------------------------------------------
 
 
-# Define a parser for fasta files
+# ---- Tests -------------------------------------------------------------------
 
+p1 <- literal("a") %then% literal("b")
+p2 <- p1 %then% eof()
+p3 <- literal("l1") %then% literal("l2") %then% literal("l3") %then% literal("l4") %then% eof()
+p4 <- one_or_more(literal("l")) %then% eof()
 
-# Fastafile <- function() {
-#   one_or_more(SequenceBlock()) %then%
-#     eof()
-# }
-#
-# SequenceBlock <- function() {
-#   MaybeEmpty() %then%
-#     Header() %then%
-#     Sequence() %using% function(x) list(x)
-# }
-#
-# Sequence <- function() {
-#   one_or_more(SequenceString()) %using% function(x) list(sequence = paste(x, collapse=""))
-# }
-#
-# Header <- function() {
-#   match_s(parse_header) %using% function(x) list(title = unlist(x))
-# }
-#
-# SequenceString <- function() {
-#   match_s(parse_sequence_line)
-# }
-#
-# parse_header <- function(line) {
-#   m <- stringr::str_match(line, "^>(\\w+)")
-#   if (is.na(m[1])) list() else m[2]
-# }
-#
-# parse_sequence_line <- function(line) {
-#   m <- stringr::str_match(line, "^([GATC]+)$")
-#   if (is.na(m[1])) list() else m[2]
-# }
-#
-# data(fastafile)
-#
-# Fastafile()(fastafile)
-#
-# # # introduce error
-# fastafile2 <- fastafile
-# fastafile2[3] <- "TTGCAYTTCC"
-#
-# Reporter(Fastafile())(fastafile2)
+test_that("Reporter succeeds without error or warning", {
+  p <- reporter(p2)
+  expect_equal(p(c("a", "b")), list("a", "b"))
+})
+
+test_that("Reporter warns that input is not fully consumed", {
+  p <- reporter(p1)
+  expect_warning(
+    p(c("a", "b")),
+    "The parser did not completely consume the input"
+  )
+})
+
+test_that("reporter errors with correct line number (simple case)", {
+  p <- reporter(p3)
+  err <- tryCatch(
+    p(c("l1", "l2", "l2", "l4")),
+    error = function(e) e
+  )
+  expect_true(inherits(err, "error_parser"))
+  expect_match(err$message, "Parser failed on line 3")
+})
+
+test_that("reporter includes surrounding context in error message", {
+  p <- reporter(p3, context_size = 3)
+  err <- tryCatch(
+    p(c("l1", "l2", "l2", "l4")),
+    error = function(e) e
+  )
+  # Context should start at line 4 (5 - floor(3/2) = 4) and end at line 6
+  expect_match(err$message, "2 \\|")
+  expect_match(err$message, "3 \\| >>")
+  expect_match(err$message, "4 \\|")
+})
+
+test_that("reporter correctly prints large line numbers", {
+  p <- reporter(p4, context_size = 3)
+  err <- tryCatch(
+    p(c(rep("l", 99),"a","b","c")),
+    error = function(e) e
+  )
+  # Context should start at line 4 (5 - floor(3/2) = 4) and end at line 6
+  expect_match(err$message, " 99 \\|")
+  expect_match(err$message, "100 \\| >>")
+  expect_match(err$message, "101 \\|")
+})
