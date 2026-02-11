@@ -5,8 +5,8 @@
 #' successfully parsed part of the input (see [succeed()]).
 #'
 #' @param p a parser.
-#' @param context_size number of lines of context to show around the line. 
-#' Default is 5.
+#' @param context_size number of lines of context to show around the line where
+#' failure occurred. Default is 5.
 #'
 #' @return The `L`-part of a successful parser result or an error message about
 #'         the line where the parser failed. A warning is thrown when the parser
@@ -29,16 +29,16 @@
 #'
 #' @examples
 #' at <- function() literal("a") %then% literal("t")
-#' atat <- rep(c("a","t"),2)
+#' atat <- rep(c("a", "t"), 2)
 #' # Yields an error message about parser failing on line 5
 #' try(
-#'   reporter(match_n(3,at()) %then% eof())(c(atat,"t","t"))
+#'   reporter(match_n(3, at()) %then% eof())(c(atat, "t", "t"))
 #' )
 #' # No error, but parser result
-#' reporter(match_n(2,at()) %then% eof())(atat)
+#' reporter(match_n(2, at()) %then% eof())(atat)
 #' # warning: the input is not completely consumed
 #' try(
-#'   reporter(match_n(2,at()))(atat)
+#'   reporter(match_n(2, at()))(atat)
 #' )
 #'
 reporter <- function(p, context_size = 5) {
@@ -83,21 +83,29 @@ stop_custom <- function(.subclass, message, call = NULL, ...) {
 parser_error <- function(content, marker, context_size) {
   nr <- marker_val(marker)
   context <- parser_error_context(nr, content, max_lines = context_size)
-  message = paste0(
+  message <- paste0(
     "Parser failed on line ", nr, " of input.\n",
     paste(
-      sprintf("%3d | %s%s", context$linenrs, ifelse(seq_along(context$context) == context$failed_line, ">> ", "   "), context$context),
+      sprintf(
+        "%3d | %s%s", context$linenrs,
+        ifelse(seq_along(context$context) == context$failed_line,
+          ">> ", "   "
+        ),
+        context$context
+      ),
       collapse = "\n"
     )
   )
-  stop_custom (.subclass = "error_parser",
-               message = message,
-               linenr = nr,
-               linecontent = context$context[context$failed_line])
+  stop_custom(
+    .subclass = "error_parser",
+    message = message,
+    linenr = nr,
+    linecontent = context$context[context$failed_line]
+  )
 }
 
 #' Create a context of the line where the parser failed
-#' 
+#'
 #' @return A list with elements `linenr` and `linecontent`.
 #' @noRd
 parser_error_context <- function(nr, x, max_lines) {

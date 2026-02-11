@@ -9,8 +9,8 @@ reporter(p, context_size = 5)
 \arguments{
 \item{p}{a parser.}
 
-\item{context_size}{number of lines of context to show around the line.
-Default is 5.}
+\item{context_size}{number of lines of context to show around the line where
+failure occurred. Default is 5.}
 }
 \value{
 The \code{L}-part of a successful parser result or an error message about
@@ -37,16 +37,16 @@ with \code{\link[=eof]{eof()}}.
 }
 \examples{
 at <- function() literal("a") \%then\% literal("t")
-atat <- rep(c("a","t"),2)
+atat <- rep(c("a", "t"), 2)
 # Yields an error message about parser failing on line 5
 try(
-  reporter(match_n(3,at()) \%then\% eof())(c(atat,"t","t"))
+  reporter(match_n(3, at()) \%then\% eof())(c(atat, "t", "t"))
 )
 # No error, but parser result
-reporter(match_n(2,at()) \%then\% eof())(atat)
+reporter(match_n(2, at()) \%then\% eof())(atat)
 # warning: the input is not completely consumed
 try(
-  reporter(match_n(2,at()))(atat)
+  reporter(match_n(2, at()))(atat)
 )
 
 }
