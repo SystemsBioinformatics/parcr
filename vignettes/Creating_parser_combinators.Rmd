@@ -757,12 +757,127 @@ QuestionBlock <- function() {
 }
 ```
 
-We can now parse the input. We wrap the `Template()` parser in the `reporter()` 
-function to have proper error messaging and warnings, if applicable. Furthermore
-only the `L`-element, the parsed input, is returned.
+## Improved error messaging (since v0.6)
+
+Basic error messaging is implemented in the function `reporter()`. You can wrap 
+a parser in the `reporter()` function to obtain an error message that reports
+the line of the input in which the parser ultimately failed as well as some 
+lines around it to provide context. Here is an example:
 
 ```{r}
-reporter(Template())(qtemp)
+TenAs <- function() {
+  exactly(10, literal("A")) %then% eof()
+}
+
+TenAs()(c(rep("A",5),"B",rep("A",3)))
 ```
+
+This output is not very useful for debugging, so we wrap the parser in the 
+`reporter()` function and then apply it to the input (and, since we obtaina a 
+system error we also wrap it in a `try()` statement):
+
+```{r}
+try(reporter(TenAs())(c(rep("A",5),"B",rep("A",3))))
+```
+
+However, we might want to have more information on why there is an error on that
+line. Or, we would like the parser to report what it expected.
+
+### Automatic Expected Values
+
+A few basic parsers now automatically report such an expectation. The 
+`literal()` parser knows exactly what it should get and therefore, by 
+default reports 'literal "[x]"' where [x] is the literal value.
+
+
+```{r}
+parser <- literal("START") %then% literal("END")
+try(reporter(parser)(c("BEGIN","END")))
+```
+
+Similarly, `eof()` expects an end of file signal and reports it if it was not 
+encountered:
+
+```{r}
+parser <- literal("data") %then% eof()
+try(reporter(parser)(c("data","more data")))
+```
+
+### Custom Expected Values with satisfy()
+
+You can provide custom descriptions when using `satisfy()`:
+
+```{r}
+number <- satisfy(function(x) grepl("^\\d+$", x), expected = "number")
+try(reporter(number)("abc"))
+```
+
+### Semantic Names with `named()`
+
+The `named()` function can be used to upgrade custom parser to one with an 
+intelligible error message. Here is an example with the fasta file with a bad 
+header.
+
+```{r}
+bad_header <- c(
+  "*sequence_A",
+  "GGTAAGTCCTCTAGTACAAACACCCCCAAT",
+  ">sequence_B",
+  "ATTGTGATATAATTAAAATTATATTCATAT"
+)
+```
+
+We upgrade the `Fasta()` parser to a named parser:
+
+```{r}
+Header <- function() {
+  named(
+    match_s(stringparser("^>(\\w+)")) %using% 
+      function(x) list(title = unlist(x)),
+    "FASTA header (>sequence_name)"
+  )
+}
+```
+
+where the first argument to the `named()` function is a parser body and the 
+second argument is a brief description of the parser. Now, the reporter yields 
+a more detailed message: 
+
+```{r}
+try(reporter(Fasta())(bad_header))
+```
+
+When using `%or%`, the error message shows all valid alternatives. Here we 
+demonstrate this with the `SequenceBlock()` parser which contains the 
+expression `NuclSequence() %or% ProtSequence()`. We upgrade both alternative 
+parsers:
+
+```{r}
+NuclSequence <- function() {
+  named(
+    one_or_more(NuclSequenceString()) %using% 
+      function(x) list(type = "Nucl", sequence = paste0(x, collapse="")),
+    "Nucleotide sequence"
+  )
+}
+
+ProtSequence <- function() {
+  named(
+    one_or_more(ProtSequenceString()) %using% 
+      function(x) list(type = "Prot", sequence = paste0(x, collapse="")),
+    "Protein sequence"
+  )
+}
+
+missing_sequence <- c(
+  ">sequence_A",
+  ">sequence_B",
+  "ATTGTGATATAATTAAAATTATATTCATAT"
+)
+
+try(reporter(Fasta())(missing_sequence))
+
+```
+
 
 ## Literature

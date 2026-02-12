@@ -214,7 +214,7 @@ Header <- function() {
   named(
     match_s(stringparser("^>(\\w+)")) %using% 
       function(x) list(title = unlist(x)),
-    "Header (>sequence_name)"
+    "FASTA header (>sequence_name)"
   )
 }
 ```
