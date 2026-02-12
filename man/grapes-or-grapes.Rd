@@ -33,8 +33,8 @@ where \verb{[]} is the empty list.
 (literal("A") \%or\% literal("a"))(LETTERS[1:5]) # success on first parser
 (literal("A") \%or\% literal("a"))(letters[1:5]) # success on second parser
 (literal("A") \%or\% literal("a"))(LETTERS[2:6]) # failure
-starts_with_a <- function(x) grepl("^a",x[1])
+starts_with_a <- function(x) grepl("^a", x[1])
 # success on both parsers, but returns result of p1 only
-(literal("a") \%or\% satisfy(starts_with_a)) (letters[1:5])
+(literal("a") \%or\% satisfy(starts_with_a))(letters[1:5])
 
 }

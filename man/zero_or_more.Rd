@@ -75,20 +75,20 @@ where \code{null} is the empty vector.
 }
 
 \examples{
-zero_or_more(literal("A")) (c("A",LETTERS[1:5]))
-zero_or_more(literal("A")) (LETTERS[2:5])
+zero_or_more(literal("A"))(c("A", LETTERS[1:5]))
+zero_or_more(literal("A"))(LETTERS[2:5])
 
-one_or_more(literal("A")) (c("A",LETTERS[1:5])) # success
-one_or_more(literal("A")) (LETTERS[2:5]) # failure
+one_or_more(literal("A"))(c("A", LETTERS[1:5])) # success
+one_or_more(literal("A"))(LETTERS[2:5]) # failure
 
-exactly(2,literal("A")) (c("A", LETTERS[1:5])) # success
-exactly(2,literal("A")) (c(rep("A",2), LETTERS[1:5])) # failure: too many "A"
+exactly(2, literal("A"))(c("A", LETTERS[1:5])) # success
+exactly(2, literal("A"))(c(rep("A", 2), LETTERS[1:5])) # failure: too many "A"
 
-zero_or_one(literal("A")) (LETTERS[2:5]) # success
-zero_or_one(literal("A")) (LETTERS[1:5]) # success
-zero_or_one(literal("A")) (c("A",LETTERS[1:5])) # failure
+zero_or_one(literal("A"))(LETTERS[2:5]) # success
+zero_or_one(literal("A"))(LETTERS[1:5]) # success
+zero_or_one(literal("A"))(c("A", LETTERS[1:5])) # failure
 
-match_n(2,literal("A")) (c("A", LETTERS[1:5])) # success
-match_n(2,literal("A")) (c(rep("A",2), LETTERS[1:5])) # success
+match_n(2, literal("A"))(c("A", LETTERS[1:5])) # success
+match_n(2, literal("A"))(c(rep("A", 2), LETTERS[1:5])) # success
 
 }

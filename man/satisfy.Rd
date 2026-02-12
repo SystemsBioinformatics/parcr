@@ -4,10 +4,12 @@
 \alias{satisfy}
 \title{Matching input using a logical function}
 \usage{
-satisfy(b)
+satisfy(b, expected = "matching input")
 }
 \arguments{
 \item{b}{a boolean function to determine if the string is accepted.}
+
+\item{expected}{character string describing what is expected (for error messages).}
 }
 \value{
 A parser.
@@ -36,11 +38,13 @@ equivalent to \code{character(0)} in R.
 \examples{
 # define a predicate function that tests whether the next element starts
 # with an 'a'
-starts_with_a <- function(x) grepl("^a",x)
+starts_with_a <- function(x) grepl("^a", x)
 # Use it in the satisfy parser
-satisfy(starts_with_a)(c("abc","def")) # success
-satisfy(starts_with_a)(c("bca","def")) # failure
+satisfy(starts_with_a)(c("abc", "def")) # success
+satisfy(starts_with_a)(c("bca", "def")) # failure
 # Using an anonymous function
-satisfy(function(x) {as.numeric(x)>10})("15") # success
+satisfy(function(x) {
+  as.numeric(x) > 10
+})("15") # success
 
 }

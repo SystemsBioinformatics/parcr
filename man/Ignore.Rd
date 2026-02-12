@@ -24,12 +24,12 @@ zero_or_more(satisfy(function(x) TRUE)) %ret% NULL
 }
 \examples{
 
-starts_with_a <- function(x) grepl("^a",x)
+starts_with_a <- function(x) grepl("^a", x)
 p <- function() {
   one_or_more(satisfy(starts_with_a)) \%then\%
-  (literal("~End") \%ret\% NULL) \%then\%
-  Ignore() \%then\%
-  eof()
+    (literal("~End") \%ret\% NULL) \%then\%
+    Ignore() \%then\%
+    eof()
 }
-p()(c("ab","abc","~End","boring stuff","more stuff"))
+p()(c("ab", "abc", "~End", "boring stuff", "more stuff"))
 }

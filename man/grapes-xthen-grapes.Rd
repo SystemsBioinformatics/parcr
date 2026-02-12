@@ -44,11 +44,11 @@ without the first element and without the first two elements, respectively.
 }
 
 \examples{
-is_number <- function(x) grepl("\\\\d+",x[1])
+is_number <- function(x) grepl("\\\\d+", x[1])
 # Numbers are preceded by ">" symbols, but we only want the number
-(literal(">") \%thenx\% satisfy(is_number)) (c(">", "12"))
+(literal(">") \%thenx\% satisfy(is_number))(c(">", "12"))
 # Temperatures are followed by the unit 'C', but we only want the number
-(satisfy(is_number) \%xthen\% literal("C")) (c("21", "C"))
+(satisfy(is_number) \%xthen\% literal("C"))(c("21", "C"))
 
 }
 \seealso{

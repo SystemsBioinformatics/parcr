@@ -41,12 +41,12 @@ where \code{null} is the empty vector.
 }
 
 \examples{
-EmptyLine() (" \t  ") # success
-EmptyLine() ("    .") # failure
-EmptyLine() ("") # success
-Spacer() (c("   \t  ", "    ", "abc"))
-Spacer() (c("            ", "    ", "Important text"))
-Spacer() (c("Important text")) # failure, missing empty line
-MaybeEmpty() (c("            ", "    ", "Important text")) # success, just as Spacer()
-MaybeEmpty() (c("Important text")) # success, in contrast to Spacer()
+EmptyLine()(" \t  ") # success
+EmptyLine()("    .") # failure
+EmptyLine()("") # success
+Spacer()(c("   \t  ", "    ", "abc"))
+Spacer()(c("            ", "    ", "Important text"))
+Spacer()(c("Important text")) # failure, missing empty line
+MaybeEmpty()(c("            ", "    ", "Important text")) # success, just as Spacer()
+MaybeEmpty()(c("Important text")) # success, in contrast to Spacer()
 }

@@ -17,7 +17,7 @@ Use this function to test whether your parser failed, for example in
 unit testing of your parsers when writing a package.
 }
 \examples{
-d <- (literal("A") \%then\% literal("B"))(c("A","A"))
+d <- (literal("A") \%then\% literal("B"))(c("A", "A"))
 d
 failed(d)
 

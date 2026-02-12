@@ -7,13 +7,15 @@
 \usage{
 succeed(left)
 
-fail(lnr = LNR())
+fail(lnr = LNR(), expected = NULL)
 }
 \arguments{
 \item{left}{any R-object constructed from a parsed vector.}
 
 \item{lnr}{integer. The line number (element number) at which the fail
 occurs}
+
+\item{expected}{character vector. Optional descriptions of what was expected.}
 }
 \value{
 A list. \code{succeed()} returns a list with two elements named \code{L} and
@@ -56,7 +58,7 @@ constructing parsers.
 
 \examples{
 succeed("A")("abc")
-succeed(data.frame(title="Keisri hull", author="Jaan Kross"))(c("Unconsumed","text"))
+succeed(data.frame(title = "Keisri hull", author = "Jaan Kross"))(c("Unconsumed", "text"))
 
 fail()("abc")
 

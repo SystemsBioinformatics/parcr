@@ -43,8 +43,8 @@ match_s(s)(x):
 \examples{
 expect_integers <- function(x) {
   m <- gregexpr("[[:digit:]]+", x)
-  matches <- regmatches(x,m)[[1]]
-  if (length(matches)==0) {
+  matches <- regmatches(x, m)[[1]]
+  if (length(matches) == 0) {
     # this means failure to detect numbers where we expected them
     return(list())
   } else {
@@ -52,7 +52,7 @@ expect_integers <- function(x) {
   }
 }
 
-match_s(expect_integers) ("12 15 16 # some comment") # success
-match_s(expect_integers) ("some text") # failure
+match_s(expect_integers)("12 15 16 # some comment") # success
+match_s(expect_integers)("some text") # failure
 
 }

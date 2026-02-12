@@ -31,11 +31,11 @@ without the first element and without the first two elements, respectively.
 }
 
 \examples{
-starts_with_a <- function(x) grepl("^a",x[1])
-starts_with_b <- function(x) grepl("^b",x[1])
-(satisfy(starts_with_a) \%then\% satisfy(starts_with_b)) (c("ab", "bc", "de")) # success
-(satisfy(starts_with_a) \%then\% satisfy(starts_with_b)) (c("bb", "bc", "de")) # failure
-(satisfy(starts_with_a) \%then\% satisfy(starts_with_b)) (c("ab", "ac", "de")) # failure
+starts_with_a <- function(x) grepl("^a", x[1])
+starts_with_b <- function(x) grepl("^b", x[1])
+(satisfy(starts_with_a) \%then\% satisfy(starts_with_b))(c("ab", "bc", "de")) # success
+(satisfy(starts_with_a) \%then\% satisfy(starts_with_b))(c("bb", "bc", "de")) # failure
+(satisfy(starts_with_a) \%then\% satisfy(starts_with_b))(c("ab", "ac", "de")) # failure
 
 }
 \seealso{

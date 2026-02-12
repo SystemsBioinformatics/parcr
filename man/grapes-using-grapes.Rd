@@ -30,7 +30,7 @@ the function \code{f} is applied to its result value.
 }
 
 \examples{
-(literal('ab') \%using\% toupper) (c("ab","cdef")) # success
-(literal('ab') \%using\% toupper) (c("bb","cdef")) # failure
+(literal("ab") \%using\% toupper)(c("ab", "cdef")) # success
+(literal("ab") \%using\% toupper)(c("bb", "cdef")) # failure
 
 }

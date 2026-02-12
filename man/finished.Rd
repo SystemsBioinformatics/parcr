@@ -20,5 +20,5 @@ A parser has completely consumed its input when the input has satisfied
 \examples{
 finished((literal("A") \%then\% eof())("A")) # TRUE
 finished((literal("A"))("A")) # FALSE
-finished((literal("A") \%then\% eof())(c("A","C"))) # FALSE
+finished((literal("A") \%then\% eof())(c("A", "C"))) # FALSE
 }

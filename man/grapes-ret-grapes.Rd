@@ -33,8 +33,8 @@ except that it returns the value \code{c} if successful.
 }
 
 \examples{
-(literal("A") \%ret\% "We have an A!") (LETTERS[1:5])
-(literal("A") \%ret\% NULL) (LETTERS[1:5])
+(literal("A") \%ret\% "We have an A!")(LETTERS[1:5])
+(literal("A") \%ret\% NULL)(LETTERS[1:5])
 }
 \seealso{
 \link{\%using\%}
