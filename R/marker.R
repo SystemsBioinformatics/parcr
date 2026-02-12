@@ -5,7 +5,7 @@
 #' See @print.marker for a more detailed explanation of its purpose
 #'
 #' @param n An integer; will be coerced to an integer if not already.
-#' @param message An optional character string with an error message.
+#' @param expected An optional character vector with descriptions of expected elements.
 #'
 #' @returns
 #' A marker object.
@@ -15,6 +15,7 @@ new_marker <- function(n, expected = NULL) {
   structure(
     list(),
     n = as.integer(n),
+    expected = expected,
     class = c("marker")
   )
 }
@@ -24,7 +25,18 @@ new_marker <- function(n, expected = NULL) {
 #' @param marker A marker object.
 #' @returns An integer.
 #' @noRd
-marker_val <- function(marker) {attr(marker,"n")}
+marker_val <- function(marker) {
+  attr(marker, "n")
+}
+
+#' Return the value of attribute `expected` of a marker
+#'
+#' @param marker A marker object.
+#' @returns A character vector or NULL.
+#' @noRd
+marker_expected <- function(marker) {
+  attr(marker, "expected")
+}
 
 #' The `the` environment is used for keeping track of the state variable `LNR`
 #'
@@ -35,28 +47,38 @@ the <- list2env(list(LNR = 1L), parent = emptyenv())
 #' Return the value of `LNR`
 #' @returns An integer.
 #' @noRd
-LNR <- function() {the$LNR}
+LNR <- function() {
+  the$LNR
+}
 
 #' Set the value of `LNR` to `n`
 #' @param n An `integer`, will be coerced to `integer`.
 #' @returns \value{None}
 #' @noRd
-set_LNR <- function(n) {the$LNR <- as.integer(n)}
+set_LNR <- function(n) {
+  the$LNR <- as.integer(n)
+}
 
 #' Increase the value of `LNR` by 1
 #' @returns \value{None}
 #' @noRd
-inc_LNR <- function() {the$LNR <- the$LNR + 1L}
+inc_LNR <- function() {
+  the$LNR <- the$LNR + 1L
+}
 
 #' Decrease the value of `LNR` by 1
 #' @returns \value{None}
 #' @noRd
-dec_LNR <- function() {the$LNR <- the$LNR - 1L}
+dec_LNR <- function() {
+  the$LNR <- the$LNR - 1L
+}
 
 #' Reset the value of `LNR` to 1
 #' @returns \value{None}
 #' @noRd
-reset_LNR <- function() {set_LNR(1L)}
+reset_LNR <- function() {
+  set_LNR(1L)
+}
 
 #' Print method for an object of class `marker`
 #'
@@ -76,7 +98,7 @@ reset_LNR <- function() {set_LNR(1L)}
 #' @seealso [failed()]
 #' @export
 #' @examples
-#' d <- (literal("A") %then% literal("B"))(c("A","A"))
+#' d <- (literal("A") %then% literal("B"))(c("A", "A"))
 #' # prints the icon [] for failed parsing
 #' d
 #' # Reveal the modest content of the marker object
@@ -97,7 +119,7 @@ print.marker <- function(x, ...) {
 #' @seealso [print.marker()]
 #' @export
 #' @examples
-#' d <- (literal("A") %then% literal("B"))(c("A","A"))
+#' d <- (literal("A") %then% literal("B"))(c("A", "A"))
 #' d
 #' failed(d)
 #'
@@ -120,7 +142,7 @@ failed <- function(o) {
 #' @examples
 #' finished((literal("A") %then% eof())("A")) # TRUE
 #' finished((literal("A"))("A")) # FALSE
-#' finished((literal("A") %then% eof())(c("A","C"))) # FALSE
+#' finished((literal("A") %then% eof())(c("A", "C"))) # FALSE
 finished <- function(o) {
   is.list(o$R)
 }

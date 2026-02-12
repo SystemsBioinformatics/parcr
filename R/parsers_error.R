@@ -51,7 +51,7 @@ reporter <- function(p, context_size = 5) {
       }
       r$L
     } else {
-      parser_error(content = x, marker = r, context_size = context_size) # nr=marker_val(r), context = parser_error_context(marker_val(r), x))
+      parser_error(content = x, marker = r, context_size = context_size)
     }
   }
 }
@@ -82,9 +82,23 @@ stop_custom <- function(.subclass, message, call = NULL, ...) {
 #' @noRd
 parser_error <- function(content, marker, context_size) {
   nr <- marker_val(marker)
+  expected <- marker_expected(marker)
   context <- parser_error_context(nr, content, max_lines = context_size)
+
+  # Build expected message
+  expected_msg <- if (!is.null(expected) && length(expected) > 0) {
+    if (length(expected) == 1) {
+      paste0("\nExpected: ", expected)
+    } else {
+      paste0("\nExpected one of: ", paste(expected, collapse = ", "))
+    }
+  } else {
+    ""
+  }
+
   message <- paste0(
-    "Parser failed on line ", nr, " of input.\n",
+    "Parser failed on line ", nr, " of input.",
+    expected_msg, "\n",
     paste(
       sprintf(
         "%3d | %s%s", context$linenrs,
@@ -100,7 +114,8 @@ parser_error <- function(content, marker, context_size) {
     .subclass = "error_parser",
     message = message,
     linenr = nr,
-    linecontent = context$context[context$failed_line]
+    linecontent = context$context[context$failed_line],
+    expected = expected
   )
 }
 

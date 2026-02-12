@@ -217,3 +217,104 @@ invisible(lapply(d, function(x) {cat(x$type, x$title, x$sequence, "\n")}))
 #> Nucl sequence_B ATTGTGATATAATTAAAATTATATTCATATTATTAGAGCCATCTTCTTTGAAGCGTTGTCTATGCATCGATC 
 #> Prot sequence_C MTEITAAMVKELRESTGAGMMDCKNALSETNGDFDKAVQLLREKGLGKAAKKADRLAAEGENEYKALVAELEKE
 ```
+
+## Getting useful error messages when parsing
+
+Basic error messaging is implemented in the function `reporter()`. You
+can wrap a parser in the `reporter()` function to obtain an error
+message that reports the line of the input in which the parser
+ultimately failed as well as some lines around it to provide context.
+Suppose we have the following badly formatted fasta file:
+
+``` r
+bad_header <- c(
+  "*sequence_A",
+  "GGTAAGTCCTCTAGTACAAACACCCCCAAT",
+  ">sequence_B",
+  "ATTGTGATATAATTAAAATTATATTCATAT"
+)
+```
+
+Note that the first header starts with `*` instead of a `>`. Upgrading
+the `Fasta()` parser with the `reporter()` function to an *error
+reporting parser* yields a basic error message:
+
+``` r
+reporter(Fasta())(bad_header)
+```
+
+    #> Error : Parser failed on line 1 of input.
+    #>   1 | >> *sequence_A
+    #>   2 |    GGTAAGTCCTCTAGTACAAACACCCCCAAT
+    #>   3 |    >sequence_B
+    #>   4 |    ATTGTGATATAATTAAAATTATATTCATAT
+
+We could, however, get better error messaging by upgrading the
+`Header()` parser to a named parser:
+
+``` r
+Header <- function() {
+  named(
+    match_s(stringparser("^>(\\w+)")) %using% 
+      function(x) list(title = unlist(x)),
+    "Header (>sequence_name)"
+  )
+}
+```
+
+where the first argument to the `named()` function is a parser body and
+the second argument is a brief description of the parser. Now, the
+reporter yields a more detailed message:
+
+``` r
+reporter(Fasta())(bad_header)
+```
+
+    #> Error : Parser failed on line 1 of input.
+    #> Expected: Header (>sequence_name)
+    #>   1 | >> *sequence_A
+    #>   2 |    GGTAAGTCCTCTAGTACAAACACCCCCAAT
+    #>   3 |    >sequence_B
+    #>   4 |    ATTGTGATATAATTAAAATTATATTCATAT
+
+Suppose we have the following bad fasta file:
+
+``` r
+missing_sequence <- c(
+  ">sequence_A",
+  ">sequence_B",
+  "ATTGTGATATAATTAAAATTATATTCATAT"
+)
+```
+
+Upgrading the `NuclSequence` and `ProtSequence` to named parsers yields
+a better error message:
+
+``` r
+NuclSequence <- function() {
+  named(
+    one_or_more(NuclSequenceString()) %using% 
+      function(x) list(type = "Nucl", sequence = paste(x, collapse="")),
+    "Nucleotide_Sequence"
+  )
+}
+
+ProtSequence <- function() {
+  named(
+    one_or_more(ProtSequenceString()) %using% 
+      function(x) list(type = "Prot", sequence = paste(x, collapse="")),
+    "Protein_Sequence"
+    
+  )
+}
+```
+
+``` r
+reporter(Fasta())(missing_sequence)
+```
+
+    #> Error : Parser failed on line 2 of input.
+    #> Expected one of: Nucleotide_Sequence, Protein_Sequence
+    #>   1 |    >sequence_A
+    #>   2 | >> >sequence_B
+    #>   3 |    ATTGTGATATAATTAAAATTATATTCATAT

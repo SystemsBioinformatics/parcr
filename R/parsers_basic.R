@@ -45,10 +45,10 @@
 #' @export
 #' @examples
 #' succeed("A")("abc")
-#' succeed(data.frame(title="Keisri hull", author="Jaan Kross"))(c("Unconsumed","text"))
+#' succeed(data.frame(title = "Keisri hull", author = "Jaan Kross"))(c("Unconsumed", "text"))
 #'
 succeed <- function(left) {
-  function(right) list(L=ensure.list(left), R=right)
+  function(right) list(L = ensure.list(left), R = right)
 }
 
 # The parser that always fails
@@ -56,12 +56,13 @@ succeed <- function(left) {
 #'
 #' @param lnr integer. The line number (element number) at which the fail
 #'            occurs
+#' @param expected character vector. Optional descriptions of what was expected.
 #' @export
 #' @examples
 #' fail()("abc")
 #'
-fail <- function(lnr=LNR()) {
-  function(x) new_marker(lnr)
+fail <- function(lnr = LNR(), expected = NULL) {
+  function(x) new_marker(lnr, expected = expected)
 }
 
 #' Matching input using a logical function
@@ -86,25 +87,29 @@ fail <- function(lnr=LNR()) {
 #' equivalent to `character(0)` in R.
 #'
 #' @param b a boolean function to determine if the string is accepted.
+#' @param expected character string describing what is expected (for error messages).
 #' @returns A parser.
 #' @export
 #' @examples
 #' # define a predicate function that tests whether the next element starts
 #' # with an 'a'
-#' starts_with_a <- function(x) grepl("^a",x)
+#' starts_with_a <- function(x) grepl("^a", x)
 #' # Use it in the satisfy parser
-#' satisfy(starts_with_a)(c("abc","def")) # success
-#' satisfy(starts_with_a)(c("bca","def")) # failure
+#' satisfy(starts_with_a)(c("abc", "def")) # success
+#' satisfy(starts_with_a)(c("bca", "def")) # failure
 #' # Using an anonymous function
-#' satisfy(function(x) {as.numeric(x)>10})("15") # success
+#' satisfy(function(x) {
+#'   as.numeric(x) > 10
+#' })("15") # success
 #'
-satisfy <- function(b) {
+satisfy <- function(b, expected = "matching input") {
   function(x) {
-    if (is_empty_atom(x)) fail()(x)
-    else {
+    if (is_empty_atom(x)) {
+      fail(expected = expected)(x)
+    } else {
       l <- x[1]
       r <- x[-1]
-      if (b(l)) succeed(l)(r) else fail()(x)
+      if (b(l)) succeed(l)(r) else fail(expected = expected)(x)
     }
   }
 }
@@ -127,11 +132,12 @@ satisfy <- function(b) {
 #' @inherit satisfy return
 #' @export
 #' @examples
-#' literal("ab") (c("ab", "cdef")) # success
-#' literal("ab") (c("abc", "cdef")) # failure
+#' literal("ab")(c("ab", "cdef")) # success
+#' literal("ab")(c("abc", "cdef")) # failure
 #'
 literal <- function(string) {
-  satisfy(function(x) identical(x, as.character(string)))
+  expected_msg <- paste0("literal '", as.character(string), "'")
+  satisfy(function(x) identical(x, as.character(string)), expected = expected_msg)
 }
 
 #' Detect end of input
@@ -163,8 +169,11 @@ literal <- function(string) {
 #'
 eof <- function() {
   function(x) {
-    if (is_empty_atom(x)) succeed(x)(list())
-    else fail()(x)
+    if (is_empty_atom(x)) {
+      succeed(x)(list())
+    } else {
+      fail(expected = "end of file")(x)
+    }
   }
 }
 
@@ -196,21 +205,32 @@ eof <- function() {
 #' (literal("A") %or% literal("a"))(LETTERS[1:5]) # success on first parser
 #' (literal("A") %or% literal("a"))(letters[1:5]) # success on second parser
 #' (literal("A") %or% literal("a"))(LETTERS[2:6]) # failure
-#' starts_with_a <- function(x) grepl("^a",x[1])
+#' starts_with_a <- function(x) grepl("^a", x[1])
 #' # success on both parsers, but returns result of p1 only
-#' (literal("a") %or% satisfy(starts_with_a)) (letters[1:5])
+#' (literal("a") %or% satisfy(starts_with_a))(letters[1:5])
 #'
 `%or%` <- function(p1, p2) {
   function(x) {
     init_lnr <- LNR()
     r1 <- p1(x)
-    if (!failed(r1)) r1 else {
+    if (!failed(r1)) {
+      r1
+    } else {
       set_LNR(init_lnr) # reset to where started
       r2 <- p2(x)
-      if (!failed(r2)) r2 else {
+      if (!failed(r2)) {
+        r2
+      } else {
         line_nrs <- c(marker_val(r1), marker_val(r2))
         furthest <- max(line_nrs)
-        return(fail(lnr = furthest)(x))
+
+        # Combine expectations from parsers that reached furthest point
+        expected <- unique(c(
+          if (marker_val(r1) == furthest) marker_expected(r1) else NULL,
+          if (marker_val(r2) == furthest) marker_expected(r2) else NULL
+        ))
+
+        return(fail(lnr = furthest, expected = expected)(x))
       }
     }
   }
@@ -240,17 +260,18 @@ eof <- function() {
 #' @export
 #' @seealso The discarding versions [%xthen%] and [%thenx%]
 #' @examples
-#' starts_with_a <- function(x) grepl("^a",x[1])
-#' starts_with_b <- function(x) grepl("^b",x[1])
-#' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("ab", "bc", "de")) # success
-#' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("bb", "bc", "de")) # failure
-#' (satisfy(starts_with_a) %then% satisfy(starts_with_b)) (c("ab", "ac", "de")) # failure
+#' starts_with_a <- function(x) grepl("^a", x[1])
+#' starts_with_b <- function(x) grepl("^b", x[1])
+#' (satisfy(starts_with_a) %then% satisfy(starts_with_b))(c("ab", "bc", "de")) # success
+#' (satisfy(starts_with_a) %then% satisfy(starts_with_b))(c("bb", "bc", "de")) # failure
+#' (satisfy(starts_with_a) %then% satisfy(starts_with_b))(c("ab", "ac", "de")) # failure
 #'
 `%then%` <- function(p1, p2) {
   function(x) {
     r1 <- p1(x)
-    if (failed(r1)) r1
-    else {
+    if (failed(r1)) {
+      r1
+    } else {
       inc_LNR()
       r2 <- p2(r1$R)
       if (failed(r2)) r2 else succeed(c(r1$L, r2$L))(r2$R)
@@ -278,13 +299,13 @@ eof <- function() {
 #' @inherit satisfy return
 #' @export
 #' @examples
-#' (literal('ab') %using% toupper) (c("ab","cdef")) # success
-#' (literal('ab') %using% toupper) (c("bb","cdef")) # failure
+#' (literal("ab") %using% toupper)(c("ab", "cdef")) # success
+#' (literal("ab") %using% toupper)(c("bb", "cdef")) # failure
 #'
 `%using%` <- function(p, f) {
   function(x) {
     r <- p(x)
-    if (failed(r)) fail()(x) else succeed(f(r$L))(r$R)
+    if (failed(r)) r else succeed(f(r$L))(r$R)
   }
 }
 
@@ -321,20 +342,21 @@ eof <- function() {
 #' @export
 #'
 #' @examples
-#' is_number <- function(x) grepl("\\d+",x[1])
+#' is_number <- function(x) grepl("\\d+", x[1])
 #' # Numbers are preceded by ">" symbols, but we only want the number
-#' (literal(">") %thenx% satisfy(is_number)) (c(">", "12"))
+#' (literal(">") %thenx% satisfy(is_number))(c(">", "12"))
 #' # Temperatures are followed by the unit 'C', but we only want the number
-#' (satisfy(is_number) %xthen% literal("C")) (c("21", "C"))
+#' (satisfy(is_number) %xthen% literal("C"))(c("21", "C"))
 #'
 `%xthen%` <- function(p1, p2) {
   function(x) {
     r1 <- p1(x)
-    if (failed(r1)) r1
-    else {
+    if (failed(r1)) {
+      r1
+    } else {
       inc_LNR()
       r2 <- p2(r1$R)
-      if (failed(r2)) r2 else succeed(r1$L) (r2$R)
+      if (failed(r2)) r2 else succeed(r1$L)(r2$R)
     }
   }
 }
@@ -346,11 +368,12 @@ eof <- function() {
 `%thenx%` <- function(p1, p2) {
   function(x) {
     r1 <- p1(x)
-    if (failed(r1)) r1
-    else {
+    if (failed(r1)) {
+      r1
+    } else {
       inc_LNR()
       r2 <- p2(r1$R)
-      if (failed(r2)) r2 else succeed(r2$L) (r2$R)
+      if (failed(r2)) r2 else succeed(r2$L)(r2$R)
     }
   }
 }
@@ -381,12 +404,12 @@ eof <- function() {
 #'
 #' @seealso [%using%]
 #' @examples
-#' (literal("A") %ret% "We have an A!") (LETTERS[1:5])
-#' (literal("A") %ret% NULL) (LETTERS[1:5])
+#' (literal("A") %ret% "We have an A!")(LETTERS[1:5])
+#' (literal("A") %ret% NULL)(LETTERS[1:5])
 `%ret%` <- function(p, c) {
   function(x) {
     r <- p(x)
-    if (failed(r)) fail()(x) else succeed(as.character(c))(r$R)
+    if (failed(r)) r else succeed(as.character(c))(r$R)
   }
 }
 
@@ -447,18 +470,21 @@ eof <- function() {
 #' @inherit satisfy return
 #' @export
 #' @examples
-#' zero_or_more(literal("A")) (c("A",LETTERS[1:5]))
-#' zero_or_more(literal("A")) (LETTERS[2:5])
+#' zero_or_more(literal("A"))(c("A", LETTERS[1:5]))
+#' zero_or_more(literal("A"))(LETTERS[2:5])
 #'
 zero_or_more <- function(p) {
-  (p %then% zero_or_more(p)) %or% (succeed(character(0)) %using% function(x){dec_LNR(); x})
+  (p %then% zero_or_more(p)) %or% (succeed(character(0)) %using% function(x) {
+    dec_LNR()
+    x
+  })
 }
 
 #' @rdname zero_or_more
 #' @export
 #' @examples
-#' one_or_more(literal("A")) (c("A",LETTERS[1:5])) # success
-#' one_or_more(literal("A")) (LETTERS[2:5]) # failure
+#' one_or_more(literal("A"))(c("A", LETTERS[1:5])) # success
+#' one_or_more(literal("A"))(LETTERS[2:5]) # failure
 #'
 one_or_more <- function(p) {
   p %then% zero_or_more(p)
@@ -468,8 +494,8 @@ one_or_more <- function(p) {
 #' @param n a positive integer, including 0.
 #' @export
 #' @examples
-#' exactly(2,literal("A")) (c("A", LETTERS[1:5])) # success
-#' exactly(2,literal("A")) (c(rep("A",2), LETTERS[1:5])) # failure: too many "A"
+#' exactly(2, literal("A"))(c("A", LETTERS[1:5])) # success
+#' exactly(2, literal("A"))(c(rep("A", 2), LETTERS[1:5])) # failure: too many "A"
 #'
 exactly <- function(n, p) {
   # notice that this is a greedy parser due to zero_or_more's greediness
@@ -478,13 +504,15 @@ exactly <- function(n, p) {
   stopifnot(as.integer(n) == n)
   cnt <- 0
   function(x) {
-    r <- zero_or_more((p) %using% function(x) {cnt <<- cnt + 1; return(x)})(x)
+    r <- zero_or_more((p) %using% function(x) {
+      cnt <<- cnt + 1
+      return(x)
+    })(x)
     if (cnt == n) {
       # reset cnt
       cnt <<- 0
       return(r)
-    }
-    else {
+    } else {
       # cnt <<- 0
       return(fail()(x))
     }
@@ -494,26 +522,29 @@ exactly <- function(n, p) {
 #' @rdname zero_or_more
 #' @export
 #' @examples
-#' zero_or_one(literal("A")) (LETTERS[2:5]) # success
-#' zero_or_one(literal("A")) (LETTERS[1:5]) # success
-#' zero_or_one(literal("A")) (c("A",LETTERS[1:5])) # failure
+#' zero_or_one(literal("A"))(LETTERS[2:5]) # success
+#' zero_or_one(literal("A"))(LETTERS[1:5]) # success
+#' zero_or_one(literal("A"))(c("A", LETTERS[1:5])) # failure
 #'
 zero_or_one <- function(p) {
-  exactly(1,p) %or% exactly(0,p)
+  exactly(1, p) %or% exactly(0, p)
 }
 
 #' @rdname zero_or_more
 #' @export
 #' @examples
-#' match_n(2,literal("A")) (c("A", LETTERS[1:5])) # success
-#' match_n(2,literal("A")) (c(rep("A",2), LETTERS[1:5])) # success
+#' match_n(2, literal("A"))(c("A", LETTERS[1:5])) # success
+#' match_n(2, literal("A"))(c(rep("A", 2), LETTERS[1:5])) # success
 #'
 match_n <- function(n, p) {
   # non-greedy version of 'exactly'
   stopifnot(n >= 0)
   stopifnot(as.integer(n) == n)
-  if (n == 0) function(x) {succeed(list())(x)}
-  else {
+  if (n == 0) {
+    function(x) {
+      succeed(list())(x)
+    }
+  } else {
     if (n == 1) p else (p %then% match_n(n - 1, p))
   }
 }
@@ -551,8 +582,8 @@ match_n <- function(n, p) {
 #' @examples
 #' expect_integers <- function(x) {
 #'   m <- gregexpr("[[:digit:]]+", x)
-#'   matches <- regmatches(x,m)[[1]]
-#'   if (length(matches)==0) {
+#'   matches <- regmatches(x, m)[[1]]
+#'   if (length(matches) == 0) {
 #'     # this means failure to detect numbers where we expected them
 #'     return(list())
 #'   } else {
@@ -560,13 +591,14 @@ match_n <- function(n, p) {
 #'   }
 #' }
 #'
-#' match_s(expect_integers) ("12 15 16 # some comment") # success
-#' match_s(expect_integers) ("some text") # failure
+#' match_s(expect_integers)("12 15 16 # some comment") # success
+#' match_s(expect_integers)("some text") # failure
 #'
 match_s <- function(s) {
   function(x) {
-    if (is_empty_atom(x)) fail()(x)
-    else {
+    if (is_empty_atom(x)) {
+      fail()(x)
+    } else {
       l <- s(x[1])
       r <- x[-1]
       if (failed(l)) fail()(x) else succeed(l)(r)
