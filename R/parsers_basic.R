@@ -513,7 +513,8 @@ exactly <- function(n, p) {
       cnt <<- 0
       return(r)
     } else {
-      # cnt <<- 0
+      inc_LNR() # Increment to point to where parsing actually failed
+      cnt <<- 0
       return(fail()(x))
     }
   }
