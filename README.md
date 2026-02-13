@@ -257,7 +257,7 @@ Header <- function() {
   named(
     match_s(stringparser("^>(\\w+)")) %using% 
       function(x) list(title = unlist(x)),
-    "Header (>sequence_name)"
+    "FASTA header (>sequence_name)"
   )
 }
 ```
@@ -271,7 +271,7 @@ reporter(Fasta())(bad_header)
 ```
 
     #> Error : Parser failed on line 1 of input.
-    #> Expected: Header (>sequence_name)
+    #> Expected: FASTA header (>sequence_name)
     #>   1 | >> *sequence_A
     #>   2 |    GGTAAGTCCTCTAGTACAAACACCCCCAAT
     #>   3 |    >sequence_B
