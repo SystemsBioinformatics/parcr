@@ -132,3 +132,47 @@ parser_error_context <- function(nr, x, max_lines) {
     failed_line = nr - start_line + 1
   )
 }
+
+
+#' Add a semantic name to a parser for better error messages
+#'
+#' @description
+#' `named()` wraps a parser and provides a meaningful name that will be shown
+#' in error messages when the parser fails. This is particularly useful for
+#' user-defined parsers to make error messages more informative.
+#'
+#' @param p a parser.
+#' @param name a character string describing what the parser expects.
+#'
+#' @inherit satisfy return
+#' @export
+#' @examples
+#' # Define a parser with a semantic name
+#' Nucleotide <- function() {
+#'   named(
+#'     satisfy(function(x) grepl("^[GATC]+$", x)),
+#'     "nucleotide sequence"
+#'   )
+#' }
+#'
+#' # When this parser fails, the error will say "Expected: nucleotide sequence"
+#' try(reporter(Nucleotide() %then% eof())(c("GATCxTC")))
+#'
+#' # Combine named parsers with %or% to get helpful "Expected one of:" messages
+#' Nucleotide_or_Protein <- function() {
+#'   named(satisfy(function(x) grepl("^[GATC]+$", x)), "nucleotide") %or%
+#'     named(satisfy(function(x) grepl("^[ARNDCQEGHILKMFPSTWYV]+$", x)), "protein")
+#' }
+#'
+#' try(reporter(Nucleotide_or_Protein() %then% eof())(c("Some text")))
+#'
+named <- function(p, name) {
+  function(x) {
+    r <- p(x)
+    if (failed(r)) {
+      fail(lnr = marker_val(r), expected = name)(x)
+    } else {
+      r
+    }
+  }
+}
