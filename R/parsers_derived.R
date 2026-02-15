@@ -31,9 +31,12 @@
 #' EmptyLine()("    .") # failure
 #' EmptyLine()("") # success
 EmptyLine <- function() {
-  satisfy(function(x) {
-    gsub("\\s+", "", x) == ""
-  })
+  named(
+    satisfy(function(x) {
+      gsub("\\s+", "", x) == ""
+    }),
+    "Emptyline"
+  )
 }
 
 #' @rdname EmptyLine
@@ -43,7 +46,10 @@ EmptyLine <- function() {
 #' Spacer()(c("            ", "    ", "Important text"))
 #' Spacer()(c("Important text")) # failure, missing empty line
 Spacer <- function() {
-  one_or_more(EmptyLine()) %ret% NULL
+  named(
+    one_or_more(EmptyLine()) %ret% NULL,
+    "Spacer"
+  )
 }
 
 #' @rdname EmptyLine
