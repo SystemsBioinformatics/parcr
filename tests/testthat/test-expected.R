@@ -275,12 +275,15 @@ test_that("'zero_or_one' propagates expected information on failure", {
   # Fails because there are two A's, not zero or one
 })
 
-test_that("EmptyLine can be named for better error messages", {
+test_that("EmptyLine and Spacer return expected messages on failure", {
   reset_LNR()
-  named_empty <- named(EmptyLine(), "empty line")
-  r <- named_empty("text content")
+  r <- EmptyLine()("text content")
   expect_true(failed(r))
-  expect_identical(marker_expected(r), "empty line")
+  expect_identical(marker_expected(r), "Emptyline")
+  reset_LNR()
+  r <- Spacer()("text content")
+  expect_true(failed(r))
+  expect_identical(marker_expected(r), "Spacer")
 })
 
 test_that("complex realistic parser produces helpful error messages", {
