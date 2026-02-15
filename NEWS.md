@@ -1,6 +1,4 @@
-# parcr (development version)
-
-# parcr 0.6
+# parcr 0.6.0
 
 ## New feature
 
