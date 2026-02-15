@@ -31,6 +31,32 @@ test_that("'satisfy' works in standard cases", {
   expect_true(failed(satisfy(starts_with_a)(character(0))))
 })
 
+test_that("'satisfy' validates that 'b' argument is a function", {
+  # Test with character string instead of function
+  expect_error(
+    satisfy("not a function"),
+    "'b' must be a function"
+  )
+
+  # Test with numeric value
+  expect_error(
+    satisfy(42),
+    "'b' must be a function"
+  )
+
+  # Test with NULL
+  expect_error(
+    satisfy(NULL),
+    "'b' must be a function"
+  )
+
+  # Test with list
+  expect_error(
+    satisfy(list(a = 1)),
+    "'b' must be a function"
+  )
+})
+
 test_that("'literal' works in standard cases", {
   expect_equal(literal("ab")(c("ab", "cdef")), list(L = list("ab"), R = "cdef"))
   expect_true(failed(literal("ab")(c("abc", "cdef"))))

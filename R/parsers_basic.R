@@ -103,6 +103,9 @@ fail <- function(lnr = LNR(), expected = NULL) {
 #' })("15") # success
 #'
 satisfy <- function(b, expected = "matching input") {
+  if (!is.function(b)) {
+    stop("'b' must be a function, got ", class(b)[1])
+  }
   function(x) {
     if (is_empty_atom(x)) {
       fail(expected = expected)(x)
