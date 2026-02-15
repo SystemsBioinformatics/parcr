@@ -121,11 +121,34 @@ parser_error <- function(content, marker, context_size) {
 
 #' Create a context of the line where the parser failed
 #'
+#' @param nr the line number on which the error occurred
+#' @param x the input of te parser
+#' @param max_lines the maximal number of lines to display
+#'
+#' If possible, line number nr will be at the center
+#'
 #' @return A list with elements `linenr` and `linecontent`.
 #' @noRd
 parser_error_context <- function(nr, x, max_lines) {
-  start_line <- max(1, nr - floor(max_lines / 2))
-  end_line <- min(length(x), start_line + max_lines - 1)
+  if (length(x) <= max_lines) {
+    start_line <- 1
+    end_line <- length(x)
+  } else {
+    before <- floor(max_lines/2)
+    after <- max_lines - before - 1
+    if ((nr - before) < 1) {
+      dif <- before - nr + 1
+      after <- after + dif
+    } else {
+      if ((nr + after > length(x))) {
+        dif <- nr + after - length(x)
+        before <- before + dif
+        after <- after - dif
+      }
+    }
+    start_line <- nr - before
+    end_line <- nr + after
+  }
   list(
     linenrs = seq(start_line, end_line),
     context = x[start_line:end_line],
