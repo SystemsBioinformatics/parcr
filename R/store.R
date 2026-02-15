@@ -18,9 +18,12 @@
 #'
 #' @examples
 #' parse_nr <- function(line) {
-#'   m <- stringr::str_extract(line, "number=(\\d+)", group=1)
-#'   if (is.na(m)) list()
-#'   else store("nr", as.numeric(m))
+#'   m <- stringr::str_extract(line, "number=(\\d+)", group = 1)
+#'   if (is.na(m)) {
+#'     list()
+#'   } else {
+#'     store("nr", as.numeric(m))
+#'   }
 #' }
 #'
 #' p <- function() {
@@ -40,5 +43,37 @@ store <- function(name, value) {
 #' @rdname store
 #'
 retrieve <- function(name) {
+  if (!exists(name, envir = .parcr)) {
+    stop("Variable '", name, "' not found in store. Use store() to set it first.")
+  }
   .parcr[[name]]
+}
+
+#' Clear all stored values
+#'
+#' Removes all variables stored using \code{store()}. Use this to clean up
+#' between independent parser runs or in test teardown.
+#'
+#' @export
+clear_store <- function() {
+  rm(list = ls(.parcr), envir = .parcr)
+}
+
+#' List all stored variable names
+#'
+#' Returns the names of all variables currently stored in the parser environment.
+#'
+#' @return Character vector of variable names
+#' @export
+list_stored <- function() {
+  ls(.parcr)
+}
+
+#' Check if a variable is stored
+#'
+#' @param name Variable name to check
+#' @return Logical
+#' @export
+has_stored <- function(name) {
+  exists(name, envir = .parcr)
 }

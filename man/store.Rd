@@ -24,9 +24,12 @@ tools to create such a parser.
 }
 \examples{
 parse_nr <- function(line) {
-  m <- stringr::str_extract(line, "number=(\\\\d+)", group=1)
-  if (is.na(m)) list()
-  else store("nr", as.numeric(m))
+  m <- stringr::str_extract(line, "number=(\\\\d+)", group = 1)
+  if (is.na(m)) {
+    list()
+  } else {
+    store("nr", as.numeric(m))
+  }
 }
 
 p <- function() {
