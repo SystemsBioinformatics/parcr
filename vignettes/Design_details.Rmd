@@ -54,7 +54,7 @@ can only be distinguished when the last line is read. If two alternative parsers
 
 When you just get a fail `[]` as the output when a parser fails on a long input then it can become challenging to find out what went wrong. It would help a lot if you would know the index number ("line" number) of the input on which the parser fails. This means that the parser has to track where it is and where it fails. Since the only function that shifts to a next index is the `%then%` combinator, and since any other function that shifts to the right, like the repeater functions (`zero_or_more()`, *etc.*) is based on this function, we just have to count the number of times the `%then%` combinator was called up to the failure to know where the parser failed. A complication is that we may be testing alternative parsers implemented by the `%or%` combinator, and the parser may fail on different lines in the alternative "arms". In that case we will say that the parser fails in the element with the highest index when both arms of an `%or%` combinator fail. The package returns a `marker` object (printed as `[]`) with that element index number as an attribute. The principle is illustrated in the figure below.
 
-```{r,out.width="30%", fig.align='left', echo=FALSE, fig.cap="<i>**Illustration of marker positioning when a parser fails on an input vector of length 6**. Each filled dot represents a successful parse. A `%then%` combinator shifts to the next element whereas an `%or%` combinator applies alternative parsers to the input. The parser fails at the red crosses and the red square. A marker (red square) will be put at the parser that fails at the input element with the highest index, which is element #5 here.</i>"}
+```{r,out.width="40%", fig.align='left', echo=FALSE, fig.cap="<i>**Illustration of marker positioning when a parser fails on an input vector of length 6**. A parse tree in which the red positions differ from the input on the right. A `%then%` combinator shifts to the next element whereas an `%or%` combinator applies alternative parsers to the input. A marker (red square) will be put at the parser that fails at the input element with the highest index, which is element #5 here.</i>"}
 knitr::include_graphics("tree.png")
 ```
 
@@ -70,10 +70,10 @@ p <- function() {
 }
 
 arm1 <- function() {
-  literal("D") %then%
+  literal("C") %then%
+    literal("X") %then%
     literal("E") %then%
-    literal("F") %then%
-    literal("G")
+    literal("F")
 }
 
 arm2 <- function() {
@@ -83,23 +83,17 @@ arm2 <- function() {
 
 arm21 <- function() {
   literal("D") %then%
-    literal("F") %then%
-    literal("G")
+    literal("X") %then%
+    literal("F")
 }
 
 arm22 <- function() {
-  literal("E") %then%
-    literal("F") %then%
-    literal("G")
+  literal("X") %then%
+    literal("E") %then%
+    literal("F")
 }
 
-try(reporter((p() %then% eof()))(LETTERS[1:6]))
-```
-
-An now successfully parsing on arm22
-
-```{r}
-try(reporter((p() %then% eof()))(c("A","B","C","E","F","G")))
+try(reporter(p() %then% eof())(LETTERS[1:6]))
 ```
 
 ## The package `rex`
