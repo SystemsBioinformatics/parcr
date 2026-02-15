@@ -1,5 +1,22 @@
 # parcr (development version)
 
+# parcr 0.6
+
+## New feature
+
+* Improved error messaging.
+    + The line where the parser fails is now displayed together with its context
+    + The error message mentions expected values. Some of these are 
+      automatically inferred, whereas others can be induced by creating named 
+      parsers
+
+## Bug fix
+
+* The function `stringparser()` depended on `stringr::str_match()`. However, 
+the dependency was not listed in DESCRIPTION. This may have led to errors when 
+the `stringr` package was not installed. The function has been fixed by 
+implementing it with base functions.
+
 # parcr 0.5.3
 
 ## New feature
