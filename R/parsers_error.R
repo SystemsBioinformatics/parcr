@@ -134,11 +134,12 @@ parser_error_context <- function(nr, x, max_lines) {
     start_line <- 1
     end_line <- length(x)
   } else {
-    before <- floor(max_lines/2)
+    before <- floor(max_lines / 2)
     after <- max_lines - before - 1
     if ((nr - before) < 1) {
       dif <- before - nr + 1
       after <- after + dif
+      before <- before - dif
     } else {
       if ((nr + after > length(x))) {
         dif <- nr + after - length(x)

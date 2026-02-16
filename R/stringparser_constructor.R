@@ -1,8 +1,8 @@
 #' Helper function emulating `stringr::str_match()`
 #'
 #' @noRd
-str_match <- function(line, match_pattern, ...) {
-  regmatches(line, regexec(match_pattern, line, ...))[[1]]
+str_match <- function(line, match_pattern) {
+  regmatches(line, regexec(match_pattern, line, perl = TRUE))[[1]]
 }
 
 #' String parser constructor
@@ -14,7 +14,8 @@ str_match <- function(line, match_pattern, ...) {
 # @usage parse_header = stringparser(match_pattern = "^>(\\w+)", reshape = function(x) {x})
 #'
 #' @details
-#' This function uses [regexec()] to produce a string parser. Parsers
+#' This function uses [regexec()] with parameter `perl = TRUE` to produce a
+#' string parser for perl compatible regular expressions. Parsers
 #' created with this constructor return the failure signal `list()` when a
 #' string does not match the `match_pattern`. If the pattern contains captured
 #' groups then these groups will be returned as a character vector upon matching.
@@ -32,8 +33,6 @@ str_match <- function(line, match_pattern, ...) {
 #' @param reshape A function that takes the character vector of captured strings
 #' and modifies it to a desired output. By default this is the [identity()]
 #' function.
-#'
-#' @param ... additional parameters passed on to [regexec()]
 #'
 #' @seealso [match_s()], [regexec()]
 #'
@@ -56,9 +55,9 @@ str_match <- function(line, match_pattern, ...) {
 #' )
 #' parse_keyvalue_df("key1: value1") # returns a data frame
 #'
-stringparser <- function(match_pattern, reshape = identity, ...) {
+stringparser <- function(match_pattern, reshape = identity) {
   function(line) {
-    m <- str_match(line, match_pattern, ...)
+    m <- str_match(line, match_pattern)
     if (length(m) == 0) {
       return(list()) # signal failure
     } else {

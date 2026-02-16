@@ -46,11 +46,15 @@ test_that("reporter includes surrounding context in error message", {
 test_that("reporter correctly prints large line numbers", {
   p <- reporter(p4, context_size = 3)
   err <- tryCatch(
-    p(c(rep("l", 99),"a","b","c")),
+    p(c(rep("l", 99), "a", "b", "c")),
     error = function(e) e
   )
   # Context should start at line 4 (5 - floor(3/2) = 4) and end at line 6
   expect_match(err$message, " 99 \\|")
   expect_match(err$message, "100 \\| >>")
   expect_match(err$message, "101 \\|")
+})
+
+test_that("parser_error_context is correctly calculated", {
+  expect_equal(parser_error_context(1, LETTERS[1:6], 5), list(linenrs = seq(1, 5), context = LETTERS[1:5], failed_line = 1))
 })
