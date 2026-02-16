@@ -14,3 +14,8 @@ test_that("'stringparser' creates parser with multiple capture groups and arbitr
   expect_equal(parse_key_value("key1: value1"), c("key1", "value1"))
   expect_equal(parse_key_value_df("key1: value1"), data.frame(key = 'key1', value = 'value1'))
 })
+
+test_that("'stringparser' parses key-value pairs", {
+  parse_key <- stringparser("^\\@\\|\\s*([^\\s]+)\\s*:\\s*(.+)$")
+  expect_equal(parse_key("@| subject: it2"), c("subject", "it2"))
+})
