@@ -1,5 +1,13 @@
 # parcr (development version)
 
+## Bug fix
+
+* function `str_match()` did not emulate `stringr::str_match` exactly. The latter
+function only uses regular expressions.
+
+* function `parser_error_context()` caused an error when input had only a few 
+lines and the error occurred on the first few lines.
+
 # parcr 0.6.0
 
 ## New feature
